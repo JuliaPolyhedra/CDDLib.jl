@@ -102,4 +102,25 @@ function sredundant{S<:Real}(desc::Description{S}, i::Integer)
   sredundant(Base.convert(CDDMatrix, desc), i)
 end
 
+# Fourier Elimination
+
+function dd_fourierelimination(matrix::CDDInequalityMatrix{Cdouble})
+  err = Ref{Cint}(0)
+  newmatrix = (@cddf_ccall FourierElimination Ptr{CDDMatrixData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix.matrix err)
+  myerror(err[])
+  CDDInequalityMatrix{Cdouble}(newmatrix)
+end
+function dd_fourierelimination(matrix::CDDInequalityMatrix{GMPRational})
+  err = Ref{Cint}(0)
+  newmatrix = (@cddf_ccall FourierElimination Ptr{CDDMatrixData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix.matrix err)
+  myerror(err[])
+  CDDInequalityMatrix{GMPRational}(newmatrix)
+end
+function fourierelimination{T<:MyType}(matrix::CDDInequalityMatrix{T})
+  dd_fourierelimination(matrix)
+end
+function fourierelimination{S<:Real}(ine::InequalityDescription{S})
+  fourierelimination(Base.convert(CDDInequalityMatrix, ine))
+end
+
 export redundant, redundantrows, sredundant
