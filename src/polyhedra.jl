@@ -47,38 +47,37 @@ type CDDPolyhedraData{T<:MyType}
   #    dominant set of rows (those containing all rays).
 end
 
+function dd_matrix2poly(matrix::Ptr{CDDMatrixData{Cdouble}})
+  err = Ref{Cint}(0)
+  poly = @cddf_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix err
+  myerror(err[])
+  poly
+end
+function dd_matrix2poly(matrix::Ptr{CDDMatrixData{GMPRational}})
+  err = Ref{Cint}(0)
+  poly = @cdd_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix err
+  myerror(err[])
+  poly
+end
+
 type CDDPolyhedra{T<:MyType}
   poly::Ptr{CDDPolyhedraData{T}}
   inequality::Bool # The input type is inequality
 
-  function CDDPolyhedra(matrix::CDDMatrixData{Cdouble})
-    err = Ref{Cint}(0)
-    poly = @cddf_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{Cdouble}} (Ref{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix err
-    myerror(err[])
-    new(poly, isaninequalityrepresentation(matrix))
+  function CDDPolyhedra(matrix::CDDMatrix{T})
+    polyptr = dd_matrix2poly(matrix.matrix)
+    poly = new(polyptr, isaninequalityrepresentation(matrix))
+    finalizer(poly, myfree)
+    poly
   end
 
-  function CDDPolyhedra(matrix::CDDMatrixData{GMPRational})
-    err = Ref{Cint}(0)
-    poly = @cdd_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{GMPRational}} (Ref{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix err
-    myerror(err[])
-    new(poly, isaninequalityrepresentation(matrix))
-  end
+end
 
-  function CDDPolyhedra(matrix::CDDMatrix{Cdouble})
-    err = Ref{Cint}(0)
-    poly = (@cddf_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix.matrix err)
-    myerror(err[])
-    new(poly, isaninequalityrepresentation(matrix))
-  end
-
-  function CDDPolyhedra(matrix::CDDMatrix{GMPRational})
-    err = Ref{Cint}(0)
-    poly = (@cdd_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix.matrix err)
-    myerror(err[])
-    new(poly, isaninequalityrepresentation(matrix))
-  end
-
+function myfree(poly::CDDPolyhedra{Cdouble})
+  @cddf_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{Cdouble}},) poly.poly
+end
+function myfree(poly::CDDPolyhedra{GMPRational})
+  @cdd_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{GMPRational}},) poly.poly
 end
 
 CDDPolyhedra{T <: Real, S <: Real}(A::Array{T, 2}, c::Array{S, 1}, inequality::Bool, linset::IntSet) = CDDPolyhedra(CDDMatrixData(A, c, inequality, linset)) # TODO change this

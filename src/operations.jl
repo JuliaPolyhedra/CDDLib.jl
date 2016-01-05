@@ -44,9 +44,11 @@ function dd_redundant(matrix::CDDMatrix{Cdouble}, i::Clong)
 end
 function dd_redundant(matrix::CDDMatrix{GMPRational}, i::Clong)
   err = Ref{Cint}(0)
-  certificate = zeros(GMPRational, unsafe_load(matrix.matrix).colsize)
-  found = (@cdd_ccall Redundant Cint (Ptr{CDDMatrixData{GMPRational}}, Clong, Ptr{GMPRational}, Ref{Cint}) matrix.matrix i certificate err)
+  certificateGMPRat = zeros(GMPRational, unsafe_load(matrix.matrix).colsize)
+  found = (@cdd_ccall Redundant Cint (Ptr{CDDMatrixData{GMPRational}}, Clong, Ptr{GMPRational}, Ref{Cint}) matrix.matrix i certificateGMPRat err)
   myerror(err[])
+  certificate = Array{Rational{BigInt}}(certificateGMPRat)
+  myfree(certificateGMPRat)
   (found, certificate)
 end
 function redundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
@@ -88,14 +90,16 @@ function dd_sredundant(matrix::CDDMatrix{Cdouble}, i::Clong)
 end
 function dd_sredundant(matrix::CDDMatrix{GMPRational}, i::Clong)
   err = Ref{Cint}(0)
-  certificate = zeros(GMPRational, unsafe_load(matrix.matrix).colsize)
-  found = (@cdd_ccall SRedundant Cint (Ptr{CDDMatrixData{GMPRational}}, Clong, Ptr{GMPRational}, Ref{Cint}) matrix.matrix i certificate err)
+  certificateGMPRat = zeros(GMPRational, unsafe_load(matrix.matrix).colsize)
+  found = (@cdd_ccall SRedundant Cint (Ptr{CDDMatrixData{GMPRational}}, Clong, Ptr{GMPRational}, Ref{Cint}) matrix.matrix i certificateGMPRat err)
   myerror(err[])
+  certificate = Array{Rational{BigInt}}(certificateGMPRat)
+  myfree(certificateGMPRat)
   (found, certificate)
 end
 function sredundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
   (found, certificate) = dd_sredundant(matrix, Clong(i))
-  # FIXME what is the meaning of the first element of the certificate ?
+  # FIXME what is the meaning of the first element of the certificate ? 1 for point, 0 for ray ?
   (Bool(found), certificate)
 end
 function sredundant{S<:Real}(desc::Description{S}, i::Integer)

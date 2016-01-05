@@ -49,10 +49,10 @@ end
 
 CDDMatrixData{T<:MyType}(A::Array{T, 2}, inequality::Bool, linset::IntSet) = CDDMatrixData(A, inequality, linset, zeros(eltype(A), size(A, 2)))
 
-function creatematrix(::Type{Cdouble}, m::Clong, n::Clong)
+function dd_creatematrix(::Type{Cdouble}, m::Clong, n::Clong)
   @cddf_ccall CreateMatrix Ptr{CDDMatrixData{Cdouble}} (Clong, Clong) m n
 end
-function creatematrix(::Type{GMPRational}, m::Clong, n::Clong)
+function dd_creatematrix(::Type{GMPRational}, m::Clong, n::Clong)
   @cdd_ccall CreateMatrix Ptr{CDDMatrixData{GMPRational}} (Clong, Clong) m n
 end
 
@@ -81,7 +81,7 @@ end
 function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
   m = Clong(size(M, 1))
   n = Clong(size(M, 2))
-  matrix = creatematrix(T, m, n)
+  matrix = dd_creatematrix(T, m, n)
   mat = unsafe_load(matrix)
   copyAmatrixvectorizedbycolumn(mat.matrix, M, m, n)
   intsettosettype(mat.linset, linset)
@@ -102,15 +102,28 @@ end
 
 Base.size{T<:MyType}(matrix::CDDMatrix{T}, i::Integer) = Base.size(matrix)[i]
 
-# TODO make constructor that frees memory for CDDMatrix (or inner)
+function dd_freematrix(matrix::Ptr{CDDMatrixData{Cdouble}})
+  @cddf_ccall FreeMatrix Void (Ptr{CDDMatrixData{Cdouble}},) matrix
+end
+function dd_freematrix(matrix::Ptr{CDDMatrixData{GMPRational}})
+  @cdd_ccall FreeMatrix Void (Ptr{CDDMatrixData{GMPRational}},) matrix
+end
+function myfree{T<:MyType}(matrix::CDDMatrix{T})
+  dd_freematrix(matrix.matrix)
+end
 
 type CDDInequalityMatrix{T <: MyType} <: CDDMatrix{T}
   matrix::Ptr{CDDMatrixData{T}}
 
-# function CDDInequalityMatrix(matrix::Ptr{CDDMatrixData})
-# end
+  function CDDInequalityMatrix(matrix::Ptr{CDDMatrixData{T}})
+    m = new(matrix)
+    finalizer(m, myfree)
+    m
+  end
 
 end
+
+CDDInequalityMatrix{T<:MyType}(matrix::Ptr{CDDMatrixData{T}}) = CDDInequalityMatrix{T}(matrix)
 
 function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
   true
@@ -119,10 +132,15 @@ end
 type CDDGeneratorMatrix{T <: MyType} <: CDDMatrix{T}
   matrix::Ptr{CDDMatrixData{T}}
 
-# function CDDInequalityMatrix(matrix::Ptr{CDDMatrixData})
-# end
+  function CDDGeneratorMatrix(matrix::Ptr{CDDMatrixData{T}})
+    m = new(matrix)
+    finalizer(m, myfree)
+    m
+  end
 
 end
+
+CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{CDDMatrixData{T}}) = CDDGeneratorMatrix{T}(matrix)
 
 function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
   false

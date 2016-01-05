@@ -16,8 +16,18 @@ type InequalityDescription{T <: Real} <: Description{T}
     if ~isempty(linset) && last(linset) > length(b)
       error("The elements of linset should be between 1 and the number of rows of A/length of b")
     end
-    new(A, b, linset)
+    ine = new(A, b, linset)
+    finalizer(ine, myfree)
+    ine
   end
+end
+
+function myfree{T<:Real}(ine::InequalityDescription{T})
+  # Nothing to free
+end
+function myfree(ine::InequalityDescription{GMPRational})
+  myfree(ine.A)
+  myfree(ine.b)
 end
 
 InequalityDescription{T <: Real}(A::Array{T, 2}, b::Array{T, 1}, linset::IntSet) = InequalityDescription{T}(A, b, linset)
@@ -46,8 +56,18 @@ type GeneratorDescription{T <: Real} <: Description{T}
     if ~isempty(Rlinset) && last(Rlinset) > size(R, 1)
       error("The elements of Rlinset should be between 1 and the number of rows of R")
     end
-    new(V, R, vertex, Vlinset, Rlinset)
+    desc = new(V, R, vertex, Vlinset, Rlinset)
+    finalizer(desc, myfree)
+    desc
   end
+end
+
+function myfree{T<:Real}(desc::GeneratorDescription{T})
+  # Nothing to free
+end
+function myfree(desc::GeneratorDescription{GMPRational})
+  myfree(desc.V)
+  myfree(desc.R)
 end
 
 GeneratorDescription{T}(V::Array{T, 2}, R::Array{T, 2}, vertex::IntSet, Vlinset::IntSet, Rlinset::IntSet) = GeneratorDescription{T}(V, R, vertex, Vlinset, Rlinset)

@@ -1,4 +1,4 @@
-import Base.-, Base.promote_rule, Base.==, Base.zero
+import Base.-, Base.promote_rule, Base.==, Base.zero, Base.zeros
 
 immutable GMPInteger
   alloc::Cint
@@ -49,6 +49,12 @@ immutable GMPRational <: Real
 
 end
 
+function myfree(a::Array{GMPRational})
+  for el in a
+    ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &el)
+  end
+end
+
 Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
 
 function GMPRational()
@@ -59,6 +65,16 @@ function GMPRational(a::Int, b::Int)
   GMPRational(GMPRationalMut(a, b))
 end
 Base.zero(::Type{GMPRational}) = GMPRational(0, 1)
+# The default zeros uses the same rational for each element
+# so each element has the same data1 and data2 pointers...
+function Base.zeros(::Type{GMPRational}, dims...)
+  ret = Array(GMPRational, dims...)
+  for i in eachindex(ret)
+    #@inbounds ret[i] = Base.zero(GMPRational)
+    ret[i] = Base.zero(GMPRational)
+  end
+  ret
+end
 
 function GMPRational(a::Rational{BigInt})
   m = GMPRationalMut()

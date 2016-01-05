@@ -43,8 +43,8 @@ bcut = [cutb; b]
 inecut = InequalityDescription(Acut, bcut)
 (isredundant, certificate) = redundant(inecut, 1)
 @test !isredundant
-@test Array{Rational{Int}}(certificate) == [3//4; target]
+@test Array{Rational{Int}}(certificate) == [1//1; target]
 @test IntSet([]) == redundantrows(inecut)
 (issredundant, scertificate) = sredundant(inecut, 1)
 @test !issredundant
-@test Array{Rational{Int}}(scertificate) == [3//4; target]
+@test Array{Rational{Int}}(scertificate) == [1//1; target]
