@@ -30,7 +30,9 @@ ext  = Description{Rational{Int}}(copygenerators(poly))
 target = ones(Int, 9) * (3 // 4)
 ok = false
 for i = 1:size(ext.V, 1)
-  if ext.V[i,:] == target
+  # In julia v0.4 [i,:] returns a row matrix and in v0.5 it is
+  # a 1D vector hence this transpose trick to support both
+  if (ext.V')[:,i]' == target'
     ok = true
   end
 end
