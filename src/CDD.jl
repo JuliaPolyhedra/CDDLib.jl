@@ -47,4 +47,6 @@ include("polyhedra.jl")
 
 include("operations.jl")
 
+include("lp.jl")
+
 end # module

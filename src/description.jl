@@ -144,6 +144,9 @@ Base.convert{S<:BigFloat}(::Type{CDDMatrix}, desc::Description{S}) = error("not 
 Base.convert(::Type{CDDMatrix}, desc::Description{Float32}) = Base.convert(CDDMatrix{Cdouble}, Base.convert(Description{Cdouble}, desc))
 Base.convert(::Type{CDDMatrix}, desc::Description{Float64}) = Base.convert(CDDMatrix{Cdouble}, desc)
 
+Base.convert{T<:Real}(::Type{CDDInequalityMatrix}, ine::InequalityDescription{T}) = Base.convert(CDDMatrix, ine)
+Base.convert{T<:Real}(::Type{CDDGeneratorMatrix}, ext::GeneratorDescription{T}) = Base.convert(CDDMatrix, ext)
+
 
 # converters CDDMatrix -> Description
 

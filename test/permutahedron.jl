@@ -3,7 +3,9 @@ b = [6, 3, 3, 3, -1, -1, -1]
 linset = IntSet([1])
 V = [2 3 1; 1 3 2; 3 1 2; 3 2 1; 2 1 3; 1 2 3]
 ine = InequalityDescription(A, b, linset)
+@test !isempty(ine)
 inef = InequalityDescription(Array{Float64}(A), Array{Float64}(b), linset)
+@test !isempty(inef)
 poly = CDDPolyhedra(ine)
 polyf = CDDPolyhedra(inef)
 ineout  = Description{Int}(copyinequalities(poly))
