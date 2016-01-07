@@ -1,14 +1,3 @@
-function mat2ptrarray(mat::Array{Cdouble,2})
-  ptrs = Array{Ptr{Cdouble}}(size(mat, 1))
-  P = Ptr{Cdouble}
-  for i = 1:size(mat, 1)
-    root = Base.cconvert(P, mat[i,:])
-    # mat[i,:] may disappear :/
-    ptrs[i] = Base.unsafe_convert(P, root)::P
-  end
-  ptrs
-end
-
 type CDDMatrixData{T <: MyType}
   rowsize::Clong # dd[f]_rowrange
   linset::Ptr{Culong} #dd[f]_rowset
@@ -18,36 +7,7 @@ type CDDMatrixData{T <: MyType}
   matrix::Ptr{Ptr{T}} # dd[f]_Amatrix
   objective::Cint # dd[f]_LPObjectiveType: enum dd_LPnone, dd_LPmax, dd_LPmin
   rowvec::Ptr{T} # dd[f]_Arow
-
-
-  function CDDMatrixData(A::Array{T, 2}, inequality::Bool, linset::IntSet, c::Array{T, 1})
-    if length(c) != size(A, 2)
-      error("The length of c must be equal to the number of columns of A")
-    end
-    if ~isempty(linset) && last(linset) > size(A, 1)
-      error("The elements of linset should be between 1 and the number of rows of A")
-    end
-    matrix = new()
-    matrix.rowsize = Clong(size(A,1))
-    matrix.colsize = Clong(size(A,2))
-    matrix.representation = (inequality ? 1 : 2)
-    matrix.numbtype = 1
-    matrix.objective = 0
-    matrix.linset = CDDSet(linset, max(matrix.rowsize, 1)).s
-    matrix.matrix = Base.unsafe_convert(Ptr{Ptr{T}}, Base.cconvert(Ptr{Ptr{T}}, mat2ptrarray(A)))
-    matrix.rowvec = Base.unsafe_convert(Ptr{T}     , Base.cconvert(Ptr{T}     , c))
-    matrix
-  end
-
-  function CDDMatrixData(A::Array{T, 2}, inequality::Bool, linset::IntSet, c::Array{T, 1}, lp_maximize::Bool)
-    matrix = CDDMatrixData(A, inequality, linset, c)
-    matrix.objective = (lp_maximize ? 1 : 2)
-    matrix
-  end
-
 end
-
-CDDMatrixData{T<:MyType}(A::Array{T, 2}, inequality::Bool, linset::IntSet) = CDDMatrixData(A, inequality, linset, zeros(eltype(A), size(A, 2)))
 
 function dd_creatematrix(::Type{Cdouble}, m::Clong, n::Clong)
   @cddf_ccall CreateMatrix Ptr{CDDMatrixData{Cdouble}} (Clong, Clong) m n
@@ -189,21 +149,3 @@ end
 Base.show(io::IO, matrix::CDDMatrix) = Base.show(io, unsafe_load(matrix.matrix))
 
 export CDDMatrixData, CDDMatrix, CDDInequalityMatrix, CDDGeneratorMatrix, isaninequalityrepresentation
-
-# function CDDMatrixData(A, b, representation::Bool, linset::IntSet, boudin)
-#   Af = Array{Cdouble}(A)
-#   bf = Array{Cdouble}(b)
-#   m = Clong(size(A,1))
-#   d = Clong(size(A,2))
-#   matrix = (@cdd_ccall CreateMatrix Ptr{CDDMatrixData} (Clong, Clong) m d)
-#   M = unsafe_load(matrix)
-#   Aptr = mat2ptrarray(Af)
-#   @cdd_ccall CopyAmatrix Void (Ptr{Ptr{Cdouble}}, Ptr{Ptr{Cdouble}}, Clong, Clong) (M.matrix) Aptr m d
-#   @cdd_ccall CopyArow Void (Ptr{Cdouble}, Ptr{Cdouble}, Clong) (M.rowvec) bf m
-#   intsettosettype(M.linset, linset)
-#   #M.representation = 1
-#   #M.numbtype = 1
-#   # TODO free older matrix or do not use CreateMatrix
-#   #Base.unsafe_convert(Ref{CDDMatrixData}, M)
-#   matrix
-# end

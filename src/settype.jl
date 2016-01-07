@@ -2,18 +2,8 @@ function dd_set_addelem(st::Ptr{Culong}, el::Clong)
   @cdd0_ccall set_addelem Void (Ptr{Culong}, Clong) st convert(Clong, el)
 end
 
-function dd_set_initialize(maxel::Clong)
-  x = Ref{Ptr{Culong}}(0)
-  @cdd0_ccall set_initialize Void (Ref{Ptr{Culong}}, Clong) x maxel
-  x[]
-end
-
 function dd_set_member(st::Ptr{Culong}, el::Clong)
   1 == (@cdd0_ccall set_member Cint (Clong, Ptr{Culong}) el st)
-end
-
-function dd_set_card(st::Ptr{Culong})
-  @cdd0_ccall set_card Clong (Ptr{Culong},) st
 end
 
 function intsettosettype(st::Ptr{Culong}, s::IntSet, offset::Integer)
@@ -30,16 +20,6 @@ intsettosettype(st::Ptr{Culong}, s::IntSet) = intsettosettype(st, s, 0)
 type CDDSet
   s::Ptr{Culong}
   maxel::Clong
-end
-
-function CDDSet(s::IntSet, len::Integer)
-  if len < 1
-    error("The length of a CDDSet should be positive")
-  end
-  maxel = convert(Clong, len)
-  st = dd_set_initialize(convert(Clong, maxel))
-  intsettosettype(st, s)
-  CDDSet(st, maxel)
 end
 
 function Base.convert(::Type{IntSet}, st::CDDSet)
