@@ -21,3 +21,4 @@ As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/
 > a linear function over P.
 
 [![Build Status](https://travis-ci.org/blegat/CDD.jl.svg?branch=master)](https://travis-ci.org/blegat/CDD.jl)
+[![Coverage Status](https://coveralls.io/repos/blegat/CDD.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/blegat/CDD.jl?branch=master)
