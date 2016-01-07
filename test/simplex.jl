@@ -18,3 +18,6 @@ extf    = Description{Int}(  copygenerators(polyf))
 @test b == ineoutf.b
 @test V == ext.V
 @test V == extf.V
+
+# x_1 cannot be 2
+@test isempty(InequalityDescription([A; 1 0], [b; 2], union(linset, IntSet([4]))))

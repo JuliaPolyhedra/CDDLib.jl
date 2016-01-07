@@ -33,6 +33,8 @@ end
 
 @cdd_ccall set_global_constants Void ()
 
+include("cddtypes.jl")
+
 include("error.jl")
 
 include("mytype.jl")
