@@ -86,34 +86,6 @@ Base.convert{T, S}(::Type{InequalityDescription{T}}, ine::InequalityDescription{
 
 Base.convert{T, S}(::Type{GeneratorDescription{T}}, ext::GeneratorDescription{S}) = GeneratorDescription{T}(Array{T}(ext.V), Array{T}(ext.R), ext.vertex, ext.Vlinset, ext.Rlinset)
 
-# converters Description -> CDDMatrixData
-
-function Base.convert{T<:MyType}(::Type{CDDMatrixData}, ine::InequalityDescription{T})
-  CDDMatrixData([ine.b -ine.A], true, ine.linset)
-end
-
-function settoCdoublearray(set::IntSet, m::Integer)
-  s = zeros(Cdouble, m)
-  for el in set
-    s[el] = Cdouble(1.)
-  end
-  s
-end
-
-function Base.convert{T<:MyType}(::Type{CDDMatrixData}, ext::GeneratorDescription{T})
-  A = [ext.V; ext.R]
-  b = settoCdoublearray(ext.vertex, size(A, 1))
-  if isempty(Rlinset)
-    linset = Vlinset
-  else
-    linset = copy(Vlinset)
-    for el in Rlinset
-      push!(linset, el + size(ext.V, 1))
-    end
-  end
-  CDDMatrixData([b A], false, linset)
-end
-
 # converters Description -> CDDMatrix
 
 function Base.convert{T<:MyType}(::Type{CDDInequalityMatrix{T}}, ine::InequalityDescription{T})
@@ -124,9 +96,17 @@ end
 
 Base.convert{T<:MyType}(::Type{CDDMatrix{T}}, ine::InequalityDescription{T}) = Base.convert(CDDInequalityMatrix{T}, ine)
 
+function settoCarray{T<:MyType}(::Type{T}, set::IntSet, m::Integer)
+  s = zeros(T, m)
+  for el in set
+    s[el] = Base.convert(T, 1)
+  end
+  s
+end
+
 function Base.convert{T<:MyType}(::Type{CDDGeneratorMatrix{T}}, ext::GeneratorDescription{T})
   mA = [ext.V; ext.R]
-  b = settoCdoublearray(ext.vertex, size(mA, 1))
+  b = settoCarray(T, ext.vertex, size(mA, 1))
   matrix = initmatrix([b mA], ext.Rlinset, false)
   mat = unsafe_load(matrix)
   intsettosettype(mat.linset, ext.Vlinset, size(ext.V, 1))

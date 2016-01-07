@@ -6,6 +6,10 @@ function dd_set_member(st::Ptr{Culong}, el::Clong)
   1 == (@cdd0_ccall set_member Cint (Clong, Ptr{Culong}) el st)
 end
 
+function dd_set_card(st::Ptr{Culong})
+  @cdd0_ccall set_card Clong (Ptr{Culong},) st
+end
+
 function intsettosettype(st::Ptr{Culong}, s::IntSet, offset::Integer)
   offset = Clong(offset)
   for el in s
