@@ -7,19 +7,15 @@ immutable GMPInteger
 end
 
 type GMPRationalMut
- alloc1::Cint
- size1::Cint
- data1::Ptr{UInt32}
- alloc2::Cint
- size2::Cint
- data2::Ptr{UInt32}
+  num::GMPInteger
+  den::GMPInteger
 
- function GMPRationalMut()
-   m = new()
-   ccall((:__gmpq_init, :libgmp), Void, (Ptr{GMPRationalMut},), &m)
-   #finalizer(m, _mpq_clear_fn) # Used in immutable
-   m
- end
+  function GMPRationalMut()
+    m = new()
+    ccall((:__gmpq_init, :libgmp), Void, (Ptr{GMPRationalMut},), &m)
+    #finalizer(m, _mpq_clear_fn) # Used in immutable
+    m
+  end
 
 end
 
@@ -32,18 +28,12 @@ end
 
 Base.zero(::Type{GMPRationalMut}) = GMPRationalMut(0, 1)
 
+# I cannot have a finalizer for an immutable so you are responsibe to free it if you use it
 immutable GMPRational <: Real
- alloc1::Cint
- size1::Cint
- data1::Ptr{UInt32}
- alloc2::Cint
- size2::Cint
- data2::Ptr{UInt32}
-  #num::GMPInteger
-  #den::GMPInteger
+  num::GMPInteger
+  den::GMPInteger
   function GMPRational(m::GMPRationalMut)
-    r = new(m.alloc1, m.size1, m.data1, m.alloc2, m.size2, m.data2)
-    #finalizer(r, _mpq_clear_fn)
+    r = new(m.num, m.den)
     r
   end
 
