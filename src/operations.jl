@@ -52,6 +52,9 @@ function dd_redundant(matrix::CDDMatrix{GMPRational}, i::Clong)
   (found, certificate)
 end
 function redundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
+  if dd_set_member(unsafe_load(matrix.matrix).linset, i)
+    error("Redundancy check for equality not supported")
+  end
   (found, certificate) = dd_redundant(matrix, Clong(i))
   # FIXME what is the meaning of the first element of the certificate ?
   (Bool(found), certificate)
@@ -98,6 +101,9 @@ function dd_sredundant(matrix::CDDMatrix{GMPRational}, i::Clong)
   (found, certificate)
 end
 function sredundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
+  if dd_set_member(unsafe_load(matrix.matrix).linset, i)
+    error("Redundancy check for equality not supported")
+  end
   (found, certificate) = dd_sredundant(matrix, Clong(i))
   # FIXME what is the meaning of the first element of the certificate ? 1 for point, 0 for ray ?
   (Bool(found), certificate)
