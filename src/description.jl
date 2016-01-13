@@ -77,6 +77,30 @@ GeneratorDescription{T <: Real}(V::Array{T, 2}, vertex::IntSet) = GeneratorDescr
 
 Base.round{T<:AbstractFloat}(ext::GeneratorDescription{T}) = GeneratorDescription{T}(Base.round(ext.V), Base.round(ext.R), ext.vertex, ext.Vlinset, ext.Rlinset)
 
+function splitvertexrays!{T<:Real}(ext::GeneratorDescription{T})
+  nV = length(ext.vertex)
+  if nV != size(ext.V, 1)
+    nR = size(ext.R, 1) + size(ext.V, 1) - nV
+    newV = Array(R, nvertex, size(ext.V, 2))
+    newR = Array(R, nrays, size(ext.V, 2))
+    curV = 1
+    curR = 1
+    newR[1:size(ext.R, 1), :] = ext.R
+    for i = 1:size(ext.V, 1)
+      if i in ext.vertex
+        newV[curV, :] = ext.V[i, :]
+        curV += 1
+      else
+        newR[curR, :] = ext.R[i, :]
+        curR += 1
+      end
+    end
+    ext.V = newV
+    ext.R = newR
+    ext.vertex = IntSet(1:nV)
+  end
+end
+
 # Description -> Description
 
 Base.convert{T, S}(::Type{Description{T}}, ine::InequalityDescription{S}) = Base.convert(InequalityDescription{T}, ine)
@@ -188,4 +212,4 @@ Base.convert{T<:MyType}(::Type{Description{T}}, ine::CDDGeneratorMatrix{T}) = Ba
 Base.convert{T<:MyType, S<:Real}(::Type{Description{S}}, matrix::CDDMatrix{T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
 Base.convert{T<:MyType}(::Type{Description}, matrix::CDDMatrix{T}) = Base.convert(Description{T}, matrix)
 
-export Description, InequalityDescription, GeneratorDescription, extractAb
+export Description, InequalityDescription, GeneratorDescription, extractAb, splitvertexrays!
