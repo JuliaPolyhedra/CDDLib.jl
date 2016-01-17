@@ -64,9 +64,6 @@ function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
   matrix
 end
 
-
-isaninequalityrepresentation(matrix::CDDMatrixData) = matrix.representation == 1
-
 abstract CDDMatrix{T <: MyType}
 
 function Base.size{T<:MyType}(matrix::CDDMatrix{T})
@@ -121,7 +118,7 @@ function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
 end
 
 function Base.show{T <: MyType}(io::IO, matrix::CDDMatrixData{T})
-  if matrix.representation == 1
+  if matrix.representation == dd_Inequality
     println(io, "H-representation")
   else
     println(io, "V-representation")

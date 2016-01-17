@@ -127,9 +127,9 @@ Base.convert{T<:Integer}(::Type{T}, a::GMPRational) = Base.convert(T, Rational(a
 
 promote_rule{T<:Integer}(::Type{GMPRational}, ::Type{T}) = GMPRational
 
-function _mpq_clear_fn(a::GMPRational)
-  ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &a)
-end
+#function _mpq_clear_fn(a::GMPRational)
+#  ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &a)
+#end
 
 ==(x::GMPRational, y::GMPRational) = Rational(x) == Rational(y)
 

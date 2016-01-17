@@ -80,13 +80,13 @@ function myfree(poly::CDDPolyhedra{GMPRational})
   @cdd_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{GMPRational}},) poly.poly
 end
 
-CDDPolyhedra{T <: Real, S <: Real}(A::Array{T, 2}, c::Array{S, 1}, inequality::Bool, linset::IntSet) = CDDPolyhedra(CDDMatrixData(A, c, inequality, linset)) # TODO change this
-CDDPolyhedra{T <: Real, S <: Real}(A::Array{T, 2}, c::Array{S, 1}, inequality::Bool) = CDDPolyhedra(A, c, inequality, IntSet([]))
+CDDPolyhedra{T<:MyType}(matrix::CDDMatrix{T}) = CDDPolyhedra{T}(matrix)
+CDDPolyhedra{T<:Real}(desc::Description{T}) = CDDPolyhedra(CDDMatrix(desc))
 
-function Base.convert{T<:MyType}(::Type{CDDPolyhedra}, matrix::CDDMatrix{T})
+function Base.convert{T<:MyType}(::Type{CDDPolyhedra{T}}, matrix::CDDMatrix{T})
   CDDPolyhedra{T}(matrix)
 end
-Base.convert{T <: Real}(::Type{CDDPolyhedra}, desc::Description{T}) = CDDPolyhedra(CDDMatrix(desc))
+Base.convert{T<:Real}(::Type{CDDPolyhedra{T}}, desc::Description{T}) = CDDPolyhedra{T}(CDDMatrix(desc))
 
 function dd_copyinequalities(poly::Ptr{CDDPolyhedraData{Cdouble}})
   @cddf_ccall CopyInequalities Ptr{CDDMatrixData{Cdouble}} (Ptr{CDDPolyhedraData{Cdouble}},) poly
@@ -109,11 +109,15 @@ function copygenerators{T<:MyType}(poly::CDDPolyhedra{T})
   CDDGeneratorMatrix(dd_copygenerators(poly.poly))
 end
 
-function switchinputtype!(poly::CDDPolyhedra)
+function switchinputtype!{T<:MyType}(poly::CDDPolyhedra{T})
   if poly.inequality
-    poly.poly = convert(Ptr{CDDPolyhedraData}, copygeneratorsptr(poly))
+    ext = copygenerators(poly)
+    myfree(poly)
+    poly.poly = dd_matrix2poly(ext.matrix)
   else
-    poly.poly = convert(Ptr{CDDPolyhedraData}, copyinequalitiesptr(poly))
+    ine = copyinequalities(poly)
+    myfree(poly)
+    poly.poly = dd_matrix2poly(ine.matrix)
   end
   poly.inequality = ~poly.inequality
 end

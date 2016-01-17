@@ -1,18 +1,22 @@
-function dd_inputappend(poly::Ptr{CDDPolyhedraData{Cdouble}}, matrix::Ptr{CDDMatrixData{Cdouble}})
+function dd_inputappend(poly::CDDPolyhedra{Cdouble}, matrix::Ptr{CDDMatrixData{Cdouble}})
   err = Ref{Cdd_ErrorType}(0)
-  found = (@cddf_ccall DDInputAppend Cdd_Boolean (Ptr{CDDPolyhedraData{Cdouble}}, Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) poly matrix err)
+  polyptr = Ref{Ptr{CDDPolyhedraData{Cdouble}}}(poly.poly)
+  found = (@cddf_ccall DDInputAppend Cdd_boolean (Ref{Ptr{CDDPolyhedraData{Cdouble}}}, Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) polyptr matrix err)
+  poly.poly = polyptr[]
   myerror(err[])
-  if !found
-    warning("Double description not found")
+  if !Bool(found)
+    println("Double description not found")
   end
 end
 
-function dd_inputappend(poly::Ptr{CDDPolyhedraData{GMPRational}}, matrix::Ptr{CDDMatrixData{GMPRational}})
+function dd_inputappend(poly::CDDPolyhedra{GMPRational}, matrix::Ptr{CDDMatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
-  found = (@cdd_ccall DDInputAppend Cdd_Boolean (Ptr{CDDPolyhedraData{GMPRational}}, Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) poly matrix err)
+  polyptr = Ref{Ptr{CDDPolyhedraData{GMPRational}}}(poly.poly)
+  found = (@cdd_ccall DDInputAppend Cdd_boolean (Ref{Ptr{CDDPolyhedraData{GMPRational}}}, Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) polyptr matrix err)
+  poly.poly = polyptr[]
   myerror(err[])
-  if !found
-    warning("Double description not found")
+  if !Bool(found)
+    println("Double description not found") # FIXME
   end
 end
 
@@ -20,14 +24,14 @@ function Base.push!{T<:MyType}(poly::CDDPolyhedra{T}, ine::CDDInequalityMatrix{T
   if !poly.inequality
     switchinputtype!(poly)
   end
-  dd_inputappend(poly.poly, ine.matrix)
+  dd_inputappend(poly, ine.matrix)
 end
 
 function Base.push!{T<:MyType}(poly::CDDPolyhedra{T}, ext::CDDGeneratorMatrix{T})
   if poly.inequality
     switchinputtype!(poly)
   end
-  dd_inputappend(poly.poly, ext.matrix)
+  dd_inputappend(poly, ext.matrix)
 end
 
 function Base.push!{T<:MyType,S<:Real}(poly::CDDPolyhedra{T}, desc::Description{S})
@@ -122,7 +126,7 @@ function dd_fourierelimination(matrix::CDDInequalityMatrix{Cdouble})
 end
 function dd_fourierelimination(matrix::CDDInequalityMatrix{GMPRational})
   err = Ref{Cdd_ErrorType}(0)
-  newmatrix = (@cddf_ccall FourierElimination Ptr{CDDMatrixData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix.matrix err)
+  newmatrix = (@cdd_ccall FourierElimination Ptr{CDDMatrixData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix.matrix err)
   myerror(err[])
   CDDInequalityMatrix{GMPRational}(newmatrix)
 end
