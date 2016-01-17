@@ -3,7 +3,11 @@ function inequality_fulltest(ine, A, b, linset)
   @test b == ine.b
   @test linset == ine.linset
 end
-function generator_fulltest(ext, V, vertex)
+function generator_fulltest(ext, V, R)
+  @test V == ext.V
+  @test R == ext.R
+end
+function generator_fulltest(ext, V, vertex::IntSet)
   @test V == ext.V
   @test vertex == ext.vertex
 end
@@ -82,3 +86,32 @@ inequality_fulltest(ineout4, A, b, linsetfull)
 inequality_fulltest(ineout4f, A, b, linsetfull)
 generator_fulltest(extout4, Vfull, vertexfull)
 generator_fulltest(extout4f, Vfull, vertexfull)
+
+Vray = [1 0; 0 1]
+vertexray = IntSet([])
+extray = GeneratorDescription(Vray, vertexray)
+extrayf = GeneratorDescription(Array{Float64}(Vray), vertexray)
+splitvertexrays!(extray)
+splitvertexrays!(extrayf)
+generator_fulltest(extray, Array(Int, 0, 2), Vray)
+generator_fulltest(extrayf, Array(Int, 0, 2), Vray)
+polyray = CDDPolyhedra(extray)
+polyrayf = CDDPolyhedra(extrayf)
+Acut = [1 1]
+bcut = [1]
+linsetcut = IntSet([1])
+inecut = InequalityDescription(Acut, bcut, linsetcut)
+push!(polyray, inecut)
+push!(polyrayf, inecut)
+ineout5 = Description{Int}(copyinequalities(polyray))
+ineout5f = Description{Int}(copyinequalities(polyrayf))
+extout5 = Description{Int}(copygenerators(polyray))
+extout5f = Description{Int}(copygenerators(polyrayf))
+inequality_fulltest(ineout5, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
+inequality_fulltest(ineout5f, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
+generator_fulltest(extout5, V, vertex)
+generator_fulltest(extout5f, V, vertex)
+splitvertexrays!(extout5)
+splitvertexrays!(extout5f)
+generator_fulltest(extout5, V, vertex)
+generator_fulltest(extout5f, V, vertex)
