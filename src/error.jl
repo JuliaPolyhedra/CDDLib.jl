@@ -16,7 +16,7 @@ error_message = [
   "Col index out of range",
   "LP cycling",
   "Numerically inconsistent"]
-function myerror(err::Integer)
+function myerror(err::Cdd_ErrorType)
   if err < 0 || err > 17
     error("This should not happen, please report this bug")
   elseif err < 17 # 17 means no error

@@ -1,66 +1,66 @@
 type CDDMatrixData{T <: MyType}
-  rowsize::Clong # dd[f]_rowrange
-  linset::Ptr{Culong} #dd[f]_rowset
-  colsize::Clong # dd[f]_colrange
-  representation::Cint # dd[f]_RepresentationType: enum dd_Unspecified, dd_Inequality, dd_Generator
-  numbtype::Cint # dd[f]_NumberType: enum dd_Unknown, dd_Real, dd_Rational, dd_Integer
-  matrix::Ptr{Ptr{T}} # dd[f]_Amatrix
-  objective::Cint # dd[f]_LPObjectiveType: enum dd_LPnone, dd_LPmax, dd_LPmin
-  rowvec::Ptr{T} # dd[f]_Arow
+  rowsize::Cdd_rowrange
+  linset::Cdd_rowset
+  colsize::Cdd_colrange
+  representation::Cdd_RepresentationType
+  numbtype::Cdd_NumberType
+  matrix::Cdd_Amatrix{T}
+  objective::Cdd_LPObjectiveType
+  rowvec::Cdd_Arow{T}
 end
 
-function dd_creatematrix(::Type{Cdouble}, m::Clong, n::Clong)
-  @cddf_ccall CreateMatrix Ptr{CDDMatrixData{Cdouble}} (Clong, Clong) m n
+function dd_creatematrix(::Type{Cdouble}, m::Cdd_rowrange, n::Cdd_colrange)
+  @cddf_ccall CreateMatrix Ptr{CDDMatrixData{Cdouble}} (Cdd_rowrange, Cdd_colrange) m n
 end
-function dd_creatematrix(::Type{GMPRational}, m::Clong, n::Clong)
-  @cdd_ccall CreateMatrix Ptr{CDDMatrixData{GMPRational}} (Clong, Clong) m n
-end
-
-function dd_copyAmatrixvectorizedbycolumn(mat::Ptr{Ptr{Cdouble}}, M::Array{Cdouble, 2}, m::Clong, n::Clong)
-  @cddf_ccall CopyAmatrixVectorizedByColumn Void (Ptr{Ptr{Cdouble}}, Ptr{Cdouble}, Clong, Clong) mat M m n
-end
-function dd_copyAmatrixvectorizedbycolumn(mat::Ptr{Ptr{GMPRational}}, M::Array{GMPRational, 2}, m::Clong, n::Clong)
-  @cdd_ccall CopyAmatrixVectorizedByColumn Void (Ptr{Ptr{GMPRational}}, Ptr{GMPRational}, Clong, Clong) mat M m n
+function dd_creatematrix(::Type{GMPRational}, m::Cdd_rowrange, n::Cdd_colrange)
+  @cdd_ccall CreateMatrix Ptr{CDDMatrixData{GMPRational}} (Cdd_rowrange, Cdd_colrange) m n
 end
 
-function dd_copyArow(acopy::Ptr{Cdouble}, a::Array{Cdouble, 1}, d::Cdd_colrange)
-  @cddf_ccall CopyArow Void (Ptr{Cdouble}, Ptr{Cdouble}, Cdd_colrange) acopy a d
+function dd_copyAmatrixvectorizedbycolumn(mat::Cdd_Amatrix{Cdouble}, M::Array{Cdouble, 2}, m::Cdd_rowrange, n::Cdd_colrange)
+  @cddf_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{Cdouble}, Ptr{Cdouble}, Cdd_rowrange, Cdd_colrange) mat M m n
 end
-function dd_copyArow(acopy::Ptr{GMPRational}, a::Array{GMPRational, 1}, d::Cdd_colrange)
-  @cdd_ccall CopyArow Void (Ptr{GMPRational}, Ptr{GMPRational}, Cdd_colrange) acopy a d
+function dd_copyAmatrixvectorizedbycolumn(mat::Cdd_Amatrix{GMPRational}, M::Array{GMPRational, 2}, m::Cdd_rowrange, n::Cdd_colrange)
+  @cdd_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{GMPRational}, Ptr{GMPRational}, Cdd_rowrange, Cdd_colrange) mat M m n
+end
+
+function dd_copyArow(acopy::Cdd_Arow{Cdouble}, a::Array{Cdouble, 1}, d::Cdd_colrange)
+  @cddf_ccall CopyArow Void (Cdd_Arow{Cdouble}, Cdd_Arow{Cdouble}, Cdd_colrange) acopy a d
+end
+function dd_copyArow(acopy::Cdd_Arow{GMPRational}, a::Array{GMPRational, 1}, d::Cdd_colrange)
+  @cdd_ccall CopyArow Void (Cdd_Arow{GMPRational}, Cdd_Arow{GMPRational}, Cdd_colrange) acopy a d
 end
 
 function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
   @cddf_ccall SetMatrixObjective Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
 end
-function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
+function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
   @cdd_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
 end
 
-function setmatrixnumbertype(matrix::Ptr{CDDMatrixData{Cdouble}})
-  @cddf_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{Cdouble}}, Cint) matrix 1
+function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{Cdouble}})
+  @cddf_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_NumberType) matrix dd_Real
 end
-function setmatrixnumbertype(matrix::Ptr{CDDMatrixData{GMPRational}})
-  @cdd_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{GMPRational}}, Cint) matrix 2
+function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{GMPRational}})
+  @cdd_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_NumberType) matrix dd_Rational
 end
 
-function setmatrixrepresentationtype(matrix::Ptr{CDDMatrixData{Cdouble}}, inequality::Bool)
-  @cddf_ccall SetMatrixRepresentationType Void (Ptr{CDDMatrixData{Cdouble}}, Cint) matrix (inequality ? 1 : 2)
+function dd_setmatrixrepresentationtype(matrix::Ptr{CDDMatrixData{Cdouble}}, inequality::Bool)
+  @cddf_ccall SetMatrixRepresentationType Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
 end
-function setmatrixrepresentationtype(matrix::Ptr{CDDMatrixData{GMPRational}}, inequality::Bool)
-  @cdd_ccall SetMatrixRepresentationType Void (Ptr{CDDMatrixData{GMPRational}}, Cint) matrix (inequality ? 1 : 2)
+function dd_setmatrixrepresentationtype(matrix::Ptr{CDDMatrixData{GMPRational}}, inequality::Bool)
+  @cdd_ccall SetMatrixRepresentationType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
 end
 
 
 function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
-  m = Clong(size(M, 1))
-  n = Clong(size(M, 2))
+  m = Cdd_rowrange(size(M, 1))
+  n = Cdd_colrange(size(M, 2))
   matrix = dd_creatematrix(T, m, n)
   mat = unsafe_load(matrix)
   dd_copyAmatrixvectorizedbycolumn(mat.matrix, M, m, n)
   intsettosettype(mat.linset, linset)
-  setmatrixnumbertype(matrix)
-  setmatrixrepresentationtype(matrix, inequality)
+  dd_setmatrixnumbertype(matrix)
+  dd_setmatrixrepresentationtype(matrix, inequality)
   matrix
 end
 

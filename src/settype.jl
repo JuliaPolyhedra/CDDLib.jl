@@ -1,28 +1,28 @@
-function dd_set_addelem(st::Ptr{Culong}, el::Clong)
-  @cdd0_ccall set_addelem Void (Ptr{Culong}, Clong) st convert(Clong, el)
+function dd_set_addelem(st::Cset_type, el::Clong)
+  @cdd0_ccall set_addelem Void (Cset_type, Clong) st convert(Clong, el)
 end
 
-function dd_set_member(st::Ptr{Culong}, el::Clong)
-  1 == (@cdd0_ccall set_member Cint (Clong, Ptr{Culong}) el st)
+function dd_set_member(st::Cset_type, el::Clong)
+  1 == (@cdd0_ccall set_member Cint (Clong, Cset_type) el st)
 end
 
-function dd_set_card(st::Ptr{Culong})
-  @cdd0_ccall set_card Clong (Ptr{Culong},) st
+function dd_set_card(st::Cset_type)
+  @cdd0_ccall set_card Clong (Cset_type,) st
 end
 
-function intsettosettype(st::Ptr{Culong}, s::IntSet, offset::Integer)
+function intsettosettype(st::Cset_type, s::IntSet, offset::Integer)
   offset = Clong(offset)
   for el in s
     dd_set_addelem(st, convert(Clong, offset+el))
   end
 end
 
-intsettosettype(st::Ptr{Culong}, s::IntSet) = intsettosettype(st, s, 0)
+intsettosettype(st::Cset_type, s::IntSet) = intsettosettype(st, s, 0)
 
 # CDDSet
 
 type CDDSet
-  s::Ptr{Culong}
+  s::Cset_type
   maxel::Clong
 end
 

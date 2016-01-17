@@ -1,61 +1,61 @@
 type CDDPolyhedraData{T<:MyType}
-  representation::Cint # dd_RepresentationType: enum dd_Unspecified, dd_Inequality, dd_Generator
+  representation::Cdd_RepresentationType
   # given representation
-  homogeneous::Cint # dd_boolean
-  d::Clong # dd_colrange
-  m::Clong # dd_rowrange
-  A::Ptr{Ptr{T}} # dd_Amatrix
+  homogeneous::Cdd_boolean
+  d::Cdd_colrange
+  m::Cdd_rowrange
+  A::Cdd_Amatrix{T}
   # Inequality System:  m times d matrix
-  numbtype::Cint # dd_NumberType: enum dd_Unknown, dd_Real, dd_Rational, dd_Integer
+  numbtype::Cdd_NumberType
   child::Ptr{Void} # dd_ConePtr
-  # pointing to the homogenized cone data */
-  m_alloc::Clong # dd_rowrange
+  # pointing to the homogenized cone data
+  m_alloc::Cdd_rowrange
   # allocated row size of matrix A
-  d_alloc::Clong # dd_colrange
+  d_alloc::Cdd_colrange
   # allocated col size of matrix A
-  c::Ptr{T} # dd_Arow
+  c::Cdd_Arow{T}
   # cost vector
 
-  EqualityIndex::Ptr{Cint} # dd_rowflag
+  EqualityIndex::Cdd_rowflag
   # ith component is 1 if it is equality, -1 if it is strict inequality, 0 otherwise.
 
-  IsEmpty::Cint # dd_boolean
+  IsEmpty::Cdd_boolean
   # This is to tell whether the set is empty or not
 
-  NondegAssumed::Cint # dd_boolean
-  InitBasisAtBottom::Cint # dd_boolean
-  RestrictedEnumeration::Cint # dd_boolean
-  RelaxedEnumeration::Cint # dd_boolean
+  NondegAssumed::Cdd_boolean
+  InitBasisAtBottom::Cdd_boolean
+  RestrictedEnumeration::Cdd_boolean
+  RelaxedEnumeration::Cdd_boolean
 
-  m1::Clong # dd_rowrange
+  m1::Cdd_rowrange
   #    = m or m+1 (when representation=Inequality && !homogeneous)
   #    This data is written after dd_ConeDataLoad is called.  This
   #    determines the size of Ainc.
-  AincGenerated::Cint # dd_boolean
+  AincGenerated::Cdd_boolean
   #    Indicates whether Ainc, Ared, Adom are all computed.
   #    All the variables below are valid only when this is TRUE
-  ldim::Clong # dd_colrange
+  ldim::Cdd_colrange
   # linearity dimension
-  n::Clong # dd_bigrange
+  n::Cdd_bigrange
   #    the size of output = total number of rays
   #    in the computed cone + linearity dimension
-  Ainc::Ptr{Ptr{Culong}} # dd_Aincidence
+  Ainc::Cdd_Aincidence
   #    incidence of input and output
-  Ared::Ptr{Culong} # dd_rowset
+  Ared::Cdd_rowset
   #    redundant set of rows whose removal results in a minimal system
-  Adom::Ptr{Culong} # dd_rowset
+  Adom::Cdd_rowset
   #    dominant set of rows (those containing all rays).
 end
 
 function dd_matrix2poly(matrix::Ptr{CDDMatrixData{Cdouble}})
-  err = Ref{Cint}(0)
-  poly = @cddf_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix err
+  err = Ref{Cdd_ErrorType}(0)
+  poly = @cddf_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err
   myerror(err[])
   poly
 end
 function dd_matrix2poly(matrix::Ptr{CDDMatrixData{GMPRational}})
-  err = Ref{Cint}(0)
-  poly = @cdd_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix err
+  err = Ref{Cdd_ErrorType}(0)
+  poly = @cdd_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err
   myerror(err[])
   poly
 end

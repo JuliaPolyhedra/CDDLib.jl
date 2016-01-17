@@ -9,7 +9,7 @@ typealias Cdd_rowset Cset_type
 typealias Cdd_colset Cset_type
 
 typealias Cdd_rowindex Ptr{Clong}
-typealias Cdd_rowflat Ptr{Cint}
+typealias Cdd_rowflag Ptr{Cint}
 typealias Cdd_colindex Ptr{Clong}
 
 typealias Cdd_Amatrix{T} Ptr{Ptr{T}}
@@ -23,8 +23,17 @@ bitstype 2040 Cdd_DataFileType # char[255]
 
 typealias Cdd_NumberType Cint
 # dd_Unknown=0, dd_Real, dd_Rational, dd_Integer
+const dd_Unknown  = 0
+const dd_Real     = 1
+const dd_Rational = 2
+const dd_Integer  = 3
+
 typealias Cdd_RepresentationType Cint
 # dd_Unspecified=0, dd_Inequality, dd_Generator
+const dd_Unspecified = 0
+const dd_Inequality  = 1
+const dd_Generator   = 2
+
 typealias Cdd_ConversionType Cint
 # dd_IneToGen, dd_GenToIne, dd_LPMax, dd_LPMin, dd_InteriorFind
 

@@ -99,40 +99,40 @@ type CDDLPData{T<:MyType}
 end
 
 function dd_lpsolve(lp::Ptr{CDDLPData{Cdouble}}, solver::Cdd_LPSolverType)
-  err = Ref{Cint}(0)
-  found = (@cddf_ccall LPSolve Cint (Ptr{CDDLPData{Cdouble}}, Cdd_LPSolverType, Ref{Cint}) lp solver err)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@cddf_ccall LPSolve Cdd_ErrorType (Ptr{CDDLPData{Cdouble}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
   myerror(err[])
   found
 end
 function dd_lpsolve(lp::Ptr{CDDLPData{GMPRational}}, solver::Cdd_LPSolverType)
-  err = Ref{Cint}(0)
-  found = (@cdd_ccall LPSolve Cint (Ptr{CDDLPData{GMPRational}}, Cdd_LPSolverType, Ref{Cint}) lp solver err)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@cdd_ccall LPSolve Cdd_ErrorType (Ptr{CDDLPData{GMPRational}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
   myerror(err[])
   found
 end
 
 function dd_matrix2feasibility(matrix::Ptr{CDDMatrixData{Cdouble}})
-  err = Ref{Cint}(0)
-  lp = (@cddf_ccall Matrix2Feasibility Ptr{CDDLPData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix err)
+  err = Ref{Cdd_ErrorType}(0)
+  lp = (@cddf_ccall Matrix2Feasibility Ptr{CDDLPData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   lp
 end
 function dd_matrix2feasibility(matrix::Ptr{CDDMatrixData{GMPRational}})
-  err = Ref{Cint}(0)
-  lp = (@cdd_ccall Matrix2Feasibility Ptr{CDDLPData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix err)
+  err = Ref{Cdd_ErrorType}(0)
+  lp = (@cdd_ccall Matrix2Feasibility Ptr{CDDLPData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   lp
 end
 
 function dd_matrix2lp(matrix::Ptr{CDDMatrixData{Cdouble}})
-  err = Ref{Cint}(0)
-  lp = (@cddf_ccall Matrix2LP Ptr{CDDLPData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cint}) matrix err)
+  err = Ref{Cdd_ErrorType}(0)
+  lp = (@cddf_ccall Matrix2LP Ptr{CDDLPData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   lp
 end
 function dd_matrix2lp(matrix::Ptr{CDDMatrixData{GMPRational}})
-  err = Ref{Cint}(0)
-  lp = (@cdd_ccall Matrix2LP Ptr{CDDLPData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cint}) matrix err)
+  err = Ref{Cdd_ErrorType}(0)
+  lp = (@cdd_ccall Matrix2LP Ptr{CDDLPData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   lp
 end

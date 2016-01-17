@@ -13,7 +13,7 @@ type GMPRationalMut
   function GMPRationalMut()
     m = new()
     ccall((:__gmpq_init, :libgmp), Void, (Ptr{GMPRationalMut},), &m)
-    #finalizer(m, _mpq_clear_fn) # Used in immutable
+    #finalizer(m, _mpq_clear_fn) # Unused in immutable
     m
   end
 
@@ -60,7 +60,6 @@ Base.zero(::Type{GMPRational}) = GMPRational(0, 1)
 function Base.zeros(::Type{GMPRational}, dims...)
   ret = Array(GMPRational, dims...)
   for i in eachindex(ret)
-    #@inbounds ret[i] = Base.zero(GMPRational)
     ret[i] = Base.zero(GMPRational)
   end
   ret
@@ -87,10 +86,6 @@ function Base.show(io::IO, x::GMPInteger)
   Base.show(io, (x.alloc, x.size, unsafe_load(x.data)))
 end
 
-# function Base.show(io::IO, x::GMPRational)
-#   Base.show(io, ((x.size1, x.alloc1, unsafe_load(x.data1)), (x.size2, x.alloc2, unsafe_load(x.data2, 1))))
-#   #Base.show(io, (x.num, x.den))
-# end
 function Base.show(io::IO, x::GMPRational)
   Base.show(io, Rational(x))
 end
@@ -122,27 +117,7 @@ end
 
 typealias MyType Union{GMPRational, Cdouble}
 
-# Default type mapping
-# Base.convert(::Type{MyType}, x::BigInt) = error("not implemented yet")
-#
-# Base.convert{T<:Integer}(::Type{GMPRational}, x::T) = GMPRational(Int(x), 1)
-# Base.convert{T<:Integer}(::Type{MyType}, x::T) = GMPRational(x)
-# Base.convert{T<:Integer,n}(::Type{Array{MyType,n}}, x::Array{T,n}) = Array{GMPRational}(x)
-#
-# Base.convert(::Type{MyType}, x::Rational{BigInt}) = error("not implemented yet")
-# Base.convert{T<:Integer}(::Type{MyType}, x::Rational{T}) = GMPRational(Int(x.num), Int(x.den))
-# Base.convert{T<:BigFloat}(::Type{MyType}, x::T) = error("not implemented yet")
-# Base.convert(::Type{MyType}, x::Float32) = Cdouble(x)
-
-#Base.convert(::Type{MyType}, x::BigInt) = error("not implemented yet")
-#Base.convert(::Type{MyType}, x::Rational{BigInt}) = error("not implemented yet")
-#Base.convert{T<:Integer}(::Type{MyType}, x::Rational{T}) = GMPRational(Int(x.num), Int(x.den))
-#Base.convert{T<:BigFloat}(::Type{MyType}, x::T) = error("not implemented yet")
-#Base.convert(::Type{MyType}, x::Float32) = Cdouble(x)
-
-#mytypeid(::Type{Cdouble}) = 1
-#mytypeid(::Type{GMPRational}) = 2
-
+# Used by mathprogbase.jl
 function myconvert(::Type{Array}, x::Ptr{Cdouble}, n)
   y = Array{Cdouble, 1}(n)
   for i = 1:n
