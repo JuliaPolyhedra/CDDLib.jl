@@ -51,4 +51,6 @@ include("operations.jl")
 
 include("lp.jl")
 
+include("mathprogbase.jl")
+
 end # module

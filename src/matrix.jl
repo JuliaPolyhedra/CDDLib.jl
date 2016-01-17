@@ -16,11 +16,25 @@ function dd_creatematrix(::Type{GMPRational}, m::Clong, n::Clong)
   @cdd_ccall CreateMatrix Ptr{CDDMatrixData{GMPRational}} (Clong, Clong) m n
 end
 
-function copyAmatrixvectorizedbycolumn(mat::Ptr{Ptr{Cdouble}}, M::Array{Cdouble, 2}, m::Clong, n::Clong)
+function dd_copyAmatrixvectorizedbycolumn(mat::Ptr{Ptr{Cdouble}}, M::Array{Cdouble, 2}, m::Clong, n::Clong)
   @cddf_ccall CopyAmatrixVectorizedByColumn Void (Ptr{Ptr{Cdouble}}, Ptr{Cdouble}, Clong, Clong) mat M m n
 end
-function copyAmatrixvectorizedbycolumn(mat::Ptr{Ptr{GMPRational}}, M::Array{GMPRational, 2}, m::Clong, n::Clong)
+function dd_copyAmatrixvectorizedbycolumn(mat::Ptr{Ptr{GMPRational}}, M::Array{GMPRational, 2}, m::Clong, n::Clong)
   @cdd_ccall CopyAmatrixVectorizedByColumn Void (Ptr{Ptr{GMPRational}}, Ptr{GMPRational}, Clong, Clong) mat M m n
+end
+
+function dd_copyArow(acopy::Ptr{Cdouble}, a::Array{Cdouble, 1}, d::Cdd_colrange)
+  @cddf_ccall CopyArow Void (Ptr{Cdouble}, Ptr{Cdouble}, Cdd_colrange) acopy a d
+end
+function dd_copyArow(acopy::Ptr{GMPRational}, a::Array{GMPRational, 1}, d::Cdd_colrange)
+  @cdd_ccall CopyArow Void (Ptr{GMPRational}, Ptr{GMPRational}, Cdd_colrange) acopy a d
+end
+
+function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
+  @cddf_ccall SetMatrixObjective Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
+end
+function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
+  @cdd_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
 end
 
 function setmatrixnumbertype(matrix::Ptr{CDDMatrixData{Cdouble}})
@@ -43,7 +57,7 @@ function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
   n = Clong(size(M, 2))
   matrix = dd_creatematrix(T, m, n)
   mat = unsafe_load(matrix)
-  copyAmatrixvectorizedbycolumn(mat.matrix, M, m, n)
+  dd_copyAmatrixvectorizedbycolumn(mat.matrix, M, m, n)
   intsettosettype(mat.linset, linset)
   setmatrixnumbertype(matrix)
   setmatrixrepresentationtype(matrix, inequality)

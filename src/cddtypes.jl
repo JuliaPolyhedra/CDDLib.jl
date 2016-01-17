@@ -54,13 +54,26 @@ typealias Cdd_CompStatusType Cint
 
 typealias Cdd_LPObjectiveType Cint
 # dd_LPnone=0, dd_LPmax, dd_LPmin
+const dd_LPnone = Cint(0)
+const dd_LPmax  = Cint(1)
+const dd_LPmin  = Cint(2)
 
 typealias Cdd_LPSolverType Cint
 # dd_CrissCross, dd_DualSimplex
+const dd_CrissCross  = Cint(0)
+const dd_DualSimplex = Cint(1)
 
 typealias Cdd_LPStatusType Cint
 # dd_LPSundecided, dd_Optimal, dd_Inconsistent, dd_DualInconsistent,
 # dd_StrucInconsistent, dd_StrucDualInconsistent,
 # dd_Unbounded, dd_DualUnbounded
+const dd_LPSundecided          = Cint(0)
+const dd_Optimal               = Cint(1)
+const dd_Inconsistent          = Cint(2)
+const dd_DualInconsistent      = Cint(3)
+const dd_StrucInconsistent     = Cint(4)
+const dd_StrucDualInconsistent = Cint(5)
+const dd_Unbounded             = Cint(6)
+const dd_DualUnbounded         = Cint(7)
 
 typealias Ctime_t Clong # FIXME Cint in some systems ?

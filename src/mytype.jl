@@ -143,4 +143,20 @@ typealias MyType Union{GMPRational, Cdouble}
 #mytypeid(::Type{Cdouble}) = 1
 #mytypeid(::Type{GMPRational}) = 2
 
+function myconvert(::Type{Array}, x::Ptr{Cdouble}, n)
+  y = Array{Cdouble, 1}(n)
+  for i = 1:n
+    y[i] = unsafe_load(x, i)
+  end
+  y
+end
+function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
+  y = Array{GMPRationalMut, 1}(n)
+  for i = 1:n
+    y[i] = GMPRationalMut()
+    ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+(i*sizeof(GMPRational)))
+  end
+  Array{GMPRational}(y)
+end
+
 export MyType, GMPRational
