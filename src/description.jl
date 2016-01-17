@@ -81,8 +81,8 @@ function splitvertexrays!{T<:Real}(ext::GeneratorDescription{T})
   nV = length(ext.vertex)
   if nV != size(ext.V, 1)
     nR = size(ext.R, 1) + size(ext.V, 1) - nV
-    newV = Array(R, nvertex, size(ext.V, 2))
-    newR = Array(R, nrays, size(ext.V, 2))
+    newV = Array(T, nV, size(ext.V, 2))
+    newR = Array(T, nR, size(ext.V, 2))
     curV = 1
     curR = 1
     newR[1:size(ext.R, 1), :] = ext.R
@@ -91,7 +91,7 @@ function splitvertexrays!{T<:Real}(ext::GeneratorDescription{T})
         newV[curV, :] = ext.V[i, :]
         curV += 1
       else
-        newR[curR, :] = ext.R[i, :]
+        newR[curR, :] = ext.V[i, :]
         curR += 1
       end
     end
