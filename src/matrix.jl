@@ -4,9 +4,9 @@ type CDDMatrixData{T <: MyType}
   colsize::Cdd_colrange
   representation::Cdd_RepresentationType
   numbtype::Cdd_NumberType
-  matrix::Cdd_Amatrix{T}
+  matrix::Ptr{Ptr{T}}
   objective::Cdd_LPObjectiveType
-  rowvec::Cdd_Arow{T}
+  rowvec::Ptr{T}
 end
 
 function dd_creatematrix(::Type{Cdouble}, m::Cdd_rowrange, n::Cdd_colrange)
@@ -34,7 +34,7 @@ function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{Cdouble}}, objective::C
   @cddf_ccall SetMatrixObjective Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
 end
 function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
-  @cdd_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
+  @cdd_ccall SetMatrixObjective Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
 end
 
 function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{Cdouble}})

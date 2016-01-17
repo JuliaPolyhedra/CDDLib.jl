@@ -1,4 +1,4 @@
-import Base.-, Base.promote_rule, Base.==, Base.zero, Base.zeros
+import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero, Base.zeros
 
 immutable GMPInteger
   alloc::Cint
@@ -19,14 +19,32 @@ type GMPRationalMut
 
 end
 
-function GMPRationalMut(a::Int, b::Int)
+function Base.convert(::Type{GMPRationalMut}, a::Rational{BigInt})
   m = GMPRationalMut()
-  ccall((:__gmpq_set_ui, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Int, Int), &m, a, b)
+  ccall((:__gmpq_set_num, :libgmp), Void,
+  (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.num)
+  ccall((:__gmpq_set_den, :libgmp), Void,
+  (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.den)
   m
 end
+Base.convert(::Type{GMPRationalMut}, a::Rational) = GMPRationalMut(Rational{BigInt}(a))
+Base.convert(::Type{GMPRationalMut}, a::AbstractFloat) = GMPRationalMut(Rational(a))
 
-Base.zero(::Type{GMPRationalMut}) = GMPRationalMut(0, 1)
+# Can do it faster for Int
+function GMPRationalMut(a::Int, b::Int)
+  if b < 0
+    a = -a
+    b = -b
+  end
+  m = GMPRationalMut()
+  ccall((:__gmpq_set_si, :libgmp), Void,
+  (Ptr{GMPRationalMut}, Clong, Culong), &m, a, b)
+  m
+end
+Base.convert(::Type{GMPRationalMut}, a::Int) = GMPRationalMut(a, 1)
+Base.convert(::Type{GMPRationalMut}, a::Rational{Int}) = GMPRationalMut(a.num, a.den)
+
+Base.zero(::Type{GMPRationalMut}) = GMPRationalMut(0)
 
 # I cannot have a finalizer for an immutable so you are responsibe to free it if you use it
 immutable GMPRational <: Real
@@ -36,7 +54,6 @@ immutable GMPRational <: Real
     r = new(m.num, m.den)
     r
   end
-
 end
 
 function myfree(a::Array{GMPRational})
@@ -47,14 +64,13 @@ end
 
 Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
 
-function GMPRational()
-  GMPRational(GMPRationalMut())
-end
+GMPRational() = GMPRational(GMPRationalMut())
 
-function GMPRational(a::Int, b::Int)
-  GMPRational(GMPRationalMut(a, b))
-end
-Base.zero(::Type{GMPRational}) = GMPRational(0, 1)
+GMPRational{T<:Integer,S<:Integer}(a::S, b::T) = GMPRational(GMPRationalMut(a, b))
+Base.convert{T<:Real}(::Type{GMPRational}, a::T) = GMPRational(GMPRationalMut(a))
+Base.convert(::Type{GMPRational}, a::GMPRational) = a
+
+Base.zero(::Type{GMPRational}) = GMPRational(0)
 # The default zeros uses the same rational for each element
 # so each element has the same data1 and data2 pointers...
 function Base.zeros(::Type{GMPRational}, dims...)
@@ -65,21 +81,25 @@ function Base.zeros(::Type{GMPRational}, dims...)
   ret
 end
 
-function GMPRational(a::Rational{BigInt})
-  m = GMPRationalMut()
-  ccall((:__gmpq_set_num, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.num)
-  ccall((:__gmpq_set_den, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.den)
-  GMPRational(m)
-end
-
 function -(a::GMPRational)
   m = GMPRationalMut()
   ccall((:__gmpq_neg, :libgmp), Void,
   (Ptr{GMPRationalMut}, Ptr{GMPRational}), &m, &a)
   GMPRational(m)
 end
+function *(a::GMPRational, b::GMPRational)
+  m = GMPRationalMut()
+  ccall((:__gmpq_mul, :libgmp), Void,
+  (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), &m, &a, &b)
+  GMPRational(m)
+end
+function +(a::GMPRational, b::GMPRational)
+  m = GMPRationalMut()
+  ccall((:__gmpq_add, :libgmp), Void,
+  (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), &m, &a, &b)
+  GMPRational(m)
+end
+
 
 
 function Base.show(io::IO, x::GMPInteger)
@@ -90,8 +110,6 @@ function Base.show(io::IO, x::GMPRational)
   Base.show(io, Rational(x))
 end
 
-Base.convert(::Type{GMPRational}, a::Rational) = GMPRational(Rational{BigInt}(a))
-Base.convert{T<:Integer}(::Type{GMPRational}, a::T) = GMPRational(a//BigInt(1))
 function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
   a = BigInt()
   ccall((:__gmpq_get_num, :libgmp), Void,
@@ -129,7 +147,7 @@ function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
   y = Array{GMPRationalMut, 1}(n)
   for i = 1:n
     y[i] = GMPRationalMut()
-    ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+(i*sizeof(GMPRational)))
+    ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
   end
   Array{GMPRational}(y)
 end

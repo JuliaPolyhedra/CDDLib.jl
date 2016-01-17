@@ -25,15 +25,13 @@ type CDDSolver <: AbstractMathProgSolver
   solver_type::Symbol
   exact::Bool
 
-  function CDDSolver(solver_type::Symbol, exact::Bool)
+  function CDDSolver(;solver_type::Symbol=:DualSimplex, exact::Bool=false)
     if !(solver_type in [:CrissCross, :DualSimplex])
       error("Invalid solver type, it should be :CrissCross or :DualSimplex")
     end
     new(solver_type, exact)
   end
 end
-
-CDDSolver() = CDDSolver(:DualSimplex, false)
 
 function LinearQuadraticModel(s::CDDSolver)
   CDDMathProgModel(s.solver_type, s.exact, Array(Float64,0,0), [], [], [], [], [], [], :Undefined, 0, [], [], [], [], [])
@@ -137,11 +135,33 @@ function optimize!(lpm::CDDMathProgModel)
   else
     lpm.status = :Error
   end
-  lpm.objval = soldata.optvalue
-  lpm.solution = myconvert(Array, soldata.sol, size(A, 2)+1)[2:end]
+  if lpm.exact
+    lpm.objval = Rational{Int}(soldata.optvalue)
+  else
+    lpm.objval = soldata.optvalue
+  end
+  solutiontmp = myconvert(Array, soldata.sol, size(A, 2)+1)
+  if lpm.exact
+    lpm.solution = Array{Rational{BigInt}}(solutiontmp)[2:end]
+    myfree(solutiontmp)
+  else
+    lpm.solution = solutiontmp[2:end]
+  end
   lpm.constrsolution = lpm.A * lpm.solution
-  lpm.reducedcosts = myconvert(Array, soldata.dsol, size(A, 1))
-  lpm.constrduals = A' * lpm.reducedcosts
+  reducedcoststmp = myconvert(Array, soldata.dsol, size(A, 1))
+  if lpm.exact
+    lpm.reducedcosts = Array{Rational{BigInt}}(reducedcoststmp)
+  else
+    lpm.reducedcosts = reducedcoststmp
+  end
+  constrdualstmp = A' * reducedcoststmp
+  if lpm.exact
+    lpm.constrduals = Array{Rational{BigInt}}(constrdualstmp)
+    myfree(constrdualstmp)
+    myfree(reducedcoststmp)
+  else
+    lpm.constrduals = constrdualstmp
+  end
   dd_freelpsolution(sol)
 
   lpm.infeasibilityray = zeros(size(lpm.A, 1))
@@ -159,6 +179,7 @@ function optimize!(lpm::CDDMathProgModel)
     end
   end
 
+  # A and b free'd by ine
 end
 
 function status(lpm::CDDMathProgModel)
