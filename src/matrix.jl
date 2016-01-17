@@ -126,7 +126,7 @@ function Base.show{T <: MyType}(io::IO, matrix::CDDMatrixData{T})
 
   linsize = dd_set_card(matrix.linset)
   if linsize > 0
-    print(io, "linearity $linsize ");
+    print(io, "linearity $linsize");
     for i in 1:matrix.rowsize
       if dd_set_member(matrix.linset, i)
         print(io, " $i")
