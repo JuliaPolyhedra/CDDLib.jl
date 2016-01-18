@@ -1,3 +1,6 @@
+using CDD
+using Base.Test
+
 A = [1 1 1; 1 0 0; 0 1 0; 0 0 1; -1 0 0; 0 -1 0; 0 0 -1]
 b = [6, 3, 3, 3, -1, -1, -1]
 linset = IntSet([1])
@@ -60,9 +63,47 @@ ineout  = Description{Int}(ineoutm)
 ineoutf = Description{Int}(ineoutmf)
 ext     = Description{Int}(extm)
 extf    = Description{Int}(round(Description{Float64}(extmf)))
-@test A == ineout.A
-@test b == ineout.b
-@test A == ineoutf.A
-@test b == ineoutf.b
-@test V == ext.V
-@test V == extf.V
+inequality_fulltest(ineout, A, b, linset)
+inequality_fulltest(ineoutf, A, b, linset)
+generator_fulltest(ext, V, Array(Int, 0, 3))
+generator_fulltest(extf, V, Array(Int, 0, 3))
+
+
+# x1___x4____________1
+#      |         |
+#      V         V
+# x2___x5___x6_______2
+#           |
+#           V
+# x3_________________3
+Alift = [-1  0  0  1  0  0;
+          0 -1  0  1  0  0;
+         -1 -1  0  1  1  0;
+          1  1  0 -1 -1  0;
+          0  0 -1  0  0  1;
+          0  0  0  0 -1  1;
+          0  0 -1  0 -1  1;
+          0  0  1  0  1 -1;
+          0  0  0 -1  0  0;
+          0  0  0  0  0 -1;
+          0  0  0 -1  0 -1;
+          0  0  0  1  0  1]
+blift = [0; 0; 0; 0; 0; 0; -3; 3; -1; -1; -(1+2); (1+2)]
+linsetlift = IntSet([])
+inelift3 = InequalityDescription(Alift, blift, linsetlift)
+inelift2 = fourierelimination(inelift3)
+inelift1 = fourierelimination(inelift2)
+inelift0 = fourierelimination(inelift1)
+canonicalize!(inelift0)
+inelift0d = InequalityDescription{Int}(Description(inelift0))
+inequality_fulltest(inelift0d,
+[1 1 1
+ 0 0 1
+ -1 0 0
+ 0 -1 0
+ 1 0 0
+ -1 0 -1
+ -1 -1 -2],[6,3,-1,-1,3,-3,-7],IntSet([1]))
+polylift = CDDPolyhedra(inelift0)
+extunlift = GeneratorDescription{Int}(Description(copygenerators(polylift)))
+generator_fulltest(extunlift, V, Array(Int, 0, 3))

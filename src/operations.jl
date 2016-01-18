@@ -116,6 +116,63 @@ function sredundant{S<:Real}(desc::Description{S}, i::Integer)
   sredundant(Base.convert(CDDMatrix, desc), i)
 end
 
+function dd_matrixcanonicalize(matrix::Ptr{CDDMatrixData{Cdouble}})
+  matptr = Ref{Ptr{CDDMatrixData{Cdouble}}}(matrix)
+  impl_linset = Ref{Cdd_rowset}(0)
+  redset = Ref{Cdd_rowset}(0)
+  newpos = Ref{Cdd_rowindex}(0)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@cddf_ccall MatrixCanonicalize Cdd_boolean (Ref{Ptr{CDDMatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset redset newpos err)
+  myerror(err[])
+  (found, matptr[], impl_linset[], redset[], newpos[])
+end
+function dd_matrixcanonicalize(matrix::Ptr{CDDMatrixData{GMPRational}})
+  matptr = Ref{Ptr{CDDMatrixData{GMPRational}}}(matrix)
+  impl_linset = Ref{Cdd_rowset}(0)
+  redset = Ref{Cdd_rowset}(0)
+  newpos = Ref{Cdd_rowindex}(0)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@cdd_ccall MatrixCanonicalize Cdd_boolean (Ref{Ptr{CDDMatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset redset newpos err)
+  myerror(err[])
+  (found, matptr[], impl_linset[], redset[], newpos[])
+end
+function canonicalize!{T<:MyType}(matrix::CDDMatrix{T})
+  (found, matrix.matrix, impl_linset, redset, newpos) = dd_matrixcanonicalize(matrix.matrix)
+  if !Bool(found)
+    error("Redundancy removal not found")
+  end
+  (impl_linset, redset, newpos) # TODO transform and free
+end
+
+function dd_matrixredundancyremove(matrix::Ptr{CDDMatrixData{Cdouble}})
+  matptr = Ref{Ptr{CDDMatrixData{Cdouble}}}(matrix)
+  redset = Ref{Cdd_rowset}(0)
+  newpos = Ref{Cdd_rowindex}(0)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@cddf_ccall MatrixRedundancyRemove Cdd_boolean (Ref{Ptr{CDDMatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr redset newpos err)
+  myerror(err[])
+  (found, matptr[], redset[], newpos[])
+end
+function dd_matrixredundancyremove(matrix::Ptr{CDDMatrixData{GMPRational}})
+  matptr = Ref{Ptr{CDDMatrixData{GMPRational}}}(matrix)
+  redset = Ref{Cdd_rowset}(0)
+  newpos = Ref{Cdd_rowindex}(0)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@cdd_ccall MatrixRedundancyRemove Cdd_boolean (Ref{Ptr{CDDMatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr redset newpos err)
+  myerror(err[])
+  println(matptr[])
+  (found, matptr[], redset[], newpos[])
+end
+function redundancyremove!{T<:MyType}(matrix::CDDMatrix{T})
+  println("before $(matrix.matrix)")
+  (found, matrix.matrix, redset, newpos) = dd_matrixredundancyremove(matrix.matrix)
+  println("after $(matrix.matrix)")
+  if !Bool(found)
+    error("Redundancy removal not found")
+  end
+  (redset, newpos) # TODO transform and free
+end
+
 # Fourier Elimination
 
 function dd_fourierelimination(matrix::CDDInequalityMatrix{Cdouble})
@@ -137,4 +194,4 @@ function fourierelimination{S<:Real}(ine::InequalityDescription{S})
   fourierelimination(Base.convert(CDDInequalityMatrix, ine))
 end
 
-export redundant, redundantrows, sredundant
+export redundant, redundantrows, sredundant, fourierelimination, canonicalize!, redundancyremove!

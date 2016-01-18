@@ -4,8 +4,9 @@ function inequality_fulltest(ine, A, b, linset)
   @test linset == ine.linset
 end
 function generator_fulltest(ext, V, R)
-  @test V == ext.V
-  @test R == ext.R
+  splitvertexrays!(ext)
+  @test sortrows(V) == sortrows(ext.V)
+  @test sortrows(R) == sortrows(ext.R)
 end
 function generator_fulltest(ext, V, vertex::IntSet)
   @test V == ext.V
@@ -91,8 +92,6 @@ Vray = [1 0; 0 1]
 vertexray = IntSet([])
 extray = GeneratorDescription(Vray, vertexray)
 extrayf = GeneratorDescription(Array{Float64}(Vray), vertexray)
-splitvertexrays!(extray)
-splitvertexrays!(extrayf)
 generator_fulltest(extray, Array(Int, 0, 2), Vray)
 generator_fulltest(extrayf, Array(Int, 0, 2), Vray)
 polyray = CDDPolyhedra(extray)
@@ -111,7 +110,5 @@ inequality_fulltest(ineout5, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
 inequality_fulltest(ineout5f, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
 generator_fulltest(extout5, V, vertex)
 generator_fulltest(extout5f, V, vertex)
-splitvertexrays!(extout5)
-splitvertexrays!(extout5f)
-generator_fulltest(extout5, V, vertex)
-generator_fulltest(extout5f, V, vertex)
+generator_fulltest(extout5, V, Array(Int, 0, 2))
+generator_fulltest(extout5f, V, Array(Int, 0, 2))
