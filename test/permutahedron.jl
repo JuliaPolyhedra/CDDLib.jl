@@ -96,14 +96,10 @@ inelift1 = fourierelimination(inelift2)
 inelift0 = fourierelimination(inelift1)
 canonicalize!(inelift0)
 inelift0d = InequalityDescription{Int}(Description(inelift0))
-inequality_fulltest(inelift0d,
-[1 1 1
- 0 0 1
- -1 0 0
- 0 -1 0
- 1 0 0
- -1 0 -1
- -1 -1 -2],[6,3,-1,-1,3,-3,-7],IntSet([1]))
+@test inelift0d.linset == IntSet([1])
+@test length(inelift0d.b) == 7
+@test inelift0d.b[1] / sign(inelift0d.b[1]) == 6
+@test inelift0d.A[1,:] / sign(inelift0d.b[1]) == [1; 1; 1]
 polylift = CDDPolyhedra(inelift0)
 extunlift = GeneratorDescription{Int}(Description(copygenerators(polylift)))
 generator_fulltest(extunlift, V, Array(Int, 0, 3))
