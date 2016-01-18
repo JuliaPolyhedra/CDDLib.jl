@@ -98,8 +98,8 @@ canonicalize!(inelift0)
 inelift0d = InequalityDescription{Int}(Description(inelift0))
 @test inelift0d.linset == IntSet([1])
 @test length(inelift0d.b) == 7
-@test inelift0d.b[1] / Int(sign(inelift0d.b[1])) == 6 # sign is Float64 for julia 0.4
-@test inelift0d.A[1,:] / Int(sign(inelift0d.b[1])) == [1; 1; 1]
+@test inelift0d.b[1] / sign(inelift0d.b[1]) == 6
+@test Array{Int}(inelift0d.A[1,:] / sign(inelift0d.b[1])) == [1; 1; 1] # Array{Int} cast is for julia 0.4
 polylift = CDDPolyhedra(inelift0)
 extunlift = GeneratorDescription{Int}(Description(copygenerators(polylift)))
 generator_fulltest(extunlift, V, Array(Int, 0, 3))
