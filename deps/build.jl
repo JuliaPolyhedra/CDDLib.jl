@@ -2,8 +2,9 @@ using BinDeps
 
 @BinDeps.setup
 
+cddlib_commit = "ab2d79215f42493b64f0ab115faaefb3b502a26e"
 #cddname = "cddlib-094h"
-cddname = "cddlib-master"
+cddname = "cddlib-$cddlib_commit"
 
 # julia installs libgmp10 but not libgmp-dev since it
 # does not have to compile C program with GMP,
@@ -12,10 +13,10 @@ cddname = "cddlib-master"
 #       It sees libgmp.so (installed by libgmp10 as a julia dependency) and thinks that it's ok but
 #       it does not have the headers
 #libgmpdev = library_dependency("libgmp-dev", aliases=["libgmp"])
-libcdd = library_dependency("libcddgmp", aliases=["libcdd-master"])#, depends=[libgmpdev])
+libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit"])#, depends=[libgmpdev])
 
 official_repo = "ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/$cddname.tar.gz"
-forked_repo = "https://github.com/blegat/cddlib/archive/master.zip"
+forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
 
 #GMP
 @linux_only begin
