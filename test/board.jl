@@ -24,10 +24,10 @@ for a = 1:3
 end
 A = [A1; A2; A3]
 b = [b1; b2; b3]
-ine = InequalityDescription(A, b)
+ine = Polyhedra.InequalityDescription(A, b)
 @test !isempty(ine)
 poly = CDDPolyhedra(ine)
-ext  = Description{Rational{Int}}(copygenerators(poly))
+ext  = Polyhedra.Description{Rational{Int}}(copygenerators(poly))
 target = ones(Int, 9) * (3 // 4)
 ok = false
 for i = 1:size(ext.V, 1)
@@ -43,7 +43,7 @@ cutA = ones(Int, 1, 9)
 cutb = 6
 Acut = [cutA; A]
 bcut = [cutb; b]
-inecut = InequalityDescription(Acut, bcut)
+inecut = Polyhedra.InequalityDescription(Acut, bcut)
 @test !isempty(inecut)
 (isredundant, certificate) = redundant(inecut, 1)
 @test !isredundant

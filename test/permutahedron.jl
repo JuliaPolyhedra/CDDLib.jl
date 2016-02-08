@@ -5,9 +5,9 @@ A = [1 1 1; 1 0 0; 0 1 0; 0 0 1; -1 0 0; 0 -1 0; 0 0 -1]
 b = [6, 3, 3, 3, -1, -1, -1]
 linset = IntSet([1])
 V = [2 3 1; 1 3 2; 3 1 2; 3 2 1; 2 1 3; 1 2 3]
-ine = InequalityDescription(A, b, linset)
+ine = Polyhedra.InequalityDescription(A, b, linset)
 @test !isempty(ine)
-inef = InequalityDescription(Array{Float64}(A), Array{Float64}(b), linset)
+inef = Polyhedra.InequalityDescription(Array{Float64}(A), Array{Float64}(b), linset)
 @test !isempty(inef)
 poly = CDDPolyhedra(ine)
 polyf = CDDPolyhedra(inef)
@@ -59,10 +59,10 @@ begin
  1.0 1.9999999999999991 1.0 2.9999999999999996
  1.0 0.9999999999999996 2.0 3.0
 end"
-ineout  = Description{Int}(ineoutm)
-ineoutf = Description{Int}(ineoutmf)
-ext     = Description{Int}(extm)
-extf    = Description{Int}(round(Description{Float64}(extmf)))
+ineout  = Polyhedra.Description{Int}(ineoutm)
+ineoutf = Polyhedra.Description{Int}(ineoutmf)
+ext     = Polyhedra.Description{Int}(extm)
+extf    = Polyhedra.Description{Int}(round(Polyhedra.Description{Float64}(extmf)))
 inequality_fulltest(ineout, A, b, linset)
 inequality_fulltest(ineoutf, A, b, linset)
 generator_fulltest(ext, V, Array(Int, 0, 3))
@@ -90,8 +90,8 @@ Alift = [-1  0  0  1  0  0;
           0  0  0  1  0  1]
 blift = [0; 0; 0; 0; 0; 0; -3; 3; -1; -1; -(1+2); (1+2)]
 linsetlift = IntSet([])
-inelift3 = InequalityDescription(Alift, blift, linsetlift)
-inelift3f = Description{Float64}(InequalityDescription(Alift, blift, linsetlift))
+inelift3 = Polyhedra.InequalityDescription(Alift, blift, linsetlift)
+inelift3f = Polyhedra.Description{Float64}(Polyhedra.InequalityDescription(Alift, blift, linsetlift))
 inelift2 = fourierelimination(inelift3)
 inelift2f = fourierelimination(inelift3f)
 inelift1 = fourierelimination(inelift2)
@@ -100,8 +100,8 @@ inelift0 = fourierelimination(inelift1)
 inelift0f = fourierelimination(inelift1f)
 canonicalize!(inelift0)
 canonicalize!(inelift0f)
-inelift0d = InequalityDescription{Int}(Description(inelift0))
-inelift0df = InequalityDescription{Int}(Description(inelift0f))
+inelift0d = Polyhedra.InequalityDescription{Int}(Polyhedra.Description(inelift0))
+inelift0df = Polyhedra.InequalityDescription{Int}(Polyhedra.Description(inelift0f))
 @test inelift0d.linset == IntSet([1])
 @test length(inelift0d.b) == 7
 @test inelift0d.b[1] / sign(inelift0d.b[1]) == 6
@@ -112,7 +112,7 @@ inelift0df = InequalityDescription{Int}(Description(inelift0f))
 @test vec(Array{Int}(inelift0df.A[1,:] / sign(inelift0df.b[1]))) == [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
 polylift = CDDPolyhedra(inelift0)
 polyliftf = CDDPolyhedra(inelift0f)
-extunlift = GeneratorDescription{Int}(Description(copygenerators(polylift)))
-extunliftf = GeneratorDescription{Int}(round(Description(copygenerators(polyliftf))))
+extunlift = Polyhedra.GeneratorDescription{Int}(Polyhedra.Description(copygenerators(polylift)))
+extunliftf = Polyhedra.GeneratorDescription{Int}(round(Polyhedra.Description(copygenerators(polyliftf))))
 generator_fulltest(extunlift, V, Array(Int, 0, 3))
 generator_fulltest(extunliftf, V, Array(Int, 0, 3))

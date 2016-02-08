@@ -2,6 +2,7 @@ module CDD
 
 using BinDeps
 import Base.show, Base.convert, Base.push!
+using Polyhedra
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
   include("../deps/deps.jl")
