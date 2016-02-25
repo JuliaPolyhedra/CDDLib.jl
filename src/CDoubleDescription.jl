@@ -1,8 +1,7 @@
 module CDoubleDescription
 
 using BinDeps
-import Base.show, Base.convert, Base.push!
-using Polyhedra
+importall Polyhedra
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
   include("../deps/deps.jl")
@@ -10,14 +9,14 @@ else
   error("CDoubleDescription not properly installed. Please run Pkg.build(\"CDoubleDescription\")")
 end
 
-macro cdd_ccall(f, args...)
+macro dd_ccall(f, args...)
   quote
     ret = ccall(($"dd_$f", libcdd), $(map(esc,args)...))
     ret
   end
 end
 
-macro cddf_ccall(f, args...)
+macro ddf_ccall(f, args...)
   quote
     ret = ccall(($"ddf_$f", libcdd), $(map(esc,args)...))
     ret
@@ -25,14 +24,16 @@ macro cddf_ccall(f, args...)
 end
 
 
-macro cdd0_ccall(f, args...)
+macro cdd_ccall(f, args...)
   quote
     ret = ccall(($"$f", libcdd), $(map(esc,args)...))
     ret
   end
 end
 
-@cdd_ccall set_global_constants Void ()
+@dd_ccall set_global_constants Void ()
+
+import Base.show, Base.convert, Base.push!
 
 include("cddtypes.jl")
 

@@ -1,6 +1,6 @@
 import Base.isempty
 
-type CDDLPSolutionData{T<:MyType}
+type Cdd_LPSolutionData{T<:MyType}
   filename::Cdd_DataFileType
   objective::Cdd_LPObjectiveType
   solver::Cdd_LPSolverType
@@ -33,7 +33,7 @@ type CDDLPSolutionData{T<:MyType}
 end
 
 
-type CDDLPData{T<:MyType}
+type Cdd_LPData{T<:MyType}
   filename::Cdd_DataFileType
   objective::Cdd_LPObjectiveType
   solver::Cdd_LPSolverType
@@ -98,64 +98,64 @@ type CDDLPData{T<:MyType}
   endtime::Ctime_t
 end
 
-function dd_lpsolve(lp::Ptr{CDDLPData{Cdouble}}, solver::Cdd_LPSolverType)
+function dd_lpsolve(lp::Ptr{Cdd_LPData{Cdouble}}, solver::Cdd_LPSolverType)
   err = Ref{Cdd_ErrorType}(0)
-  found = (@cddf_ccall LPSolve Cdd_ErrorType (Ptr{CDDLPData{Cdouble}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
+  found = (@ddf_ccall LPSolve Cdd_ErrorType (Ptr{Cdd_LPData{Cdouble}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
   myerror(err[])
   found
 end
-function dd_lpsolve(lp::Ptr{CDDLPData{GMPRational}}, solver::Cdd_LPSolverType)
+function dd_lpsolve(lp::Ptr{Cdd_LPData{GMPRational}}, solver::Cdd_LPSolverType)
   err = Ref{Cdd_ErrorType}(0)
-  found = (@cdd_ccall LPSolve Cdd_ErrorType (Ptr{CDDLPData{GMPRational}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
+  found = (@dd_ccall LPSolve Cdd_ErrorType (Ptr{Cdd_LPData{GMPRational}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
   myerror(err[])
   found
 end
 
-function dd_matrix2feasibility(matrix::Ptr{CDDMatrixData{Cdouble}})
+function dd_matrix2feasibility(matrix::Ptr{Cdd_MatrixData{Cdouble}})
   err = Ref{Cdd_ErrorType}(0)
-  lp = (@cddf_ccall Matrix2Feasibility Ptr{CDDLPData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
+  lp = (@ddf_ccall Matrix2Feasibility Ptr{Cdd_LPData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   lp
 end
-function dd_matrix2feasibility(matrix::Ptr{CDDMatrixData{GMPRational}})
+function dd_matrix2feasibility(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
-  lp = (@cdd_ccall Matrix2Feasibility Ptr{CDDLPData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
-  myerror(err[])
-  lp
-end
-
-function dd_matrix2lp(matrix::Ptr{CDDMatrixData{Cdouble}})
-  err = Ref{Cdd_ErrorType}(0)
-  lp = (@cddf_ccall Matrix2LP Ptr{CDDLPData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
-  myerror(err[])
-  lp
-end
-function dd_matrix2lp(matrix::Ptr{CDDMatrixData{GMPRational}})
-  err = Ref{Cdd_ErrorType}(0)
-  lp = (@cdd_ccall Matrix2LP Ptr{CDDLPData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
+  lp = (@dd_ccall Matrix2Feasibility Ptr{Cdd_LPData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   lp
 end
 
-function dd_copylpsolution(lp::Ptr{CDDLPData{Cdouble}})
-  @cddf_ccall CopyLPSolution Ptr{CDDLPSolutionData{Cdouble}} (Ptr{CDDLPData{Cdouble}},) lp
+function dd_matrix2lp(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+  err = Ref{Cdd_ErrorType}(0)
+  lp = (@ddf_ccall Matrix2LP Ptr{Cdd_LPData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
+  myerror(err[])
+  lp
 end
-function dd_copylpsolution(lp::Ptr{CDDLPData{GMPRational}})
-  @cdd_ccall CopyLPSolution Ptr{CDDLPSolutionData{GMPRational}} (Ptr{CDDLPData{GMPRational}},) lp
+function dd_matrix2lp(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+  err = Ref{Cdd_ErrorType}(0)
+  lp = (@dd_ccall Matrix2LP Ptr{Cdd_LPData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
+  myerror(err[])
+  lp
 end
 
-function dd_freelpdata(lp::Ptr{CDDLPData{Cdouble}})
-  @cddf_ccall FreeLPData Void (Ptr{CDDLPData{Cdouble}},) lp
+function dd_copylpsolution(lp::Ptr{Cdd_LPData{Cdouble}})
+  @ddf_ccall CopyLPSolution Ptr{Cdd_LPSolutionData{Cdouble}} (Ptr{Cdd_LPData{Cdouble}},) lp
 end
-function dd_freelpdata(lp::Ptr{CDDLPData{GMPRational}})
-  @cdd_ccall FreeLPData Void (Ptr{CDDLPData{GMPRational}},) lp
+function dd_copylpsolution(lp::Ptr{Cdd_LPData{GMPRational}})
+  @dd_ccall CopyLPSolution Ptr{Cdd_LPSolutionData{GMPRational}} (Ptr{Cdd_LPData{GMPRational}},) lp
 end
 
-function dd_freelpsolution(lp::Ptr{CDDLPSolutionData{Cdouble}})
-  @cddf_ccall FreeLPSolution Void (Ptr{CDDLPSolutionData{Cdouble}},) lp
+function dd_freelpdata(lp::Ptr{Cdd_LPData{Cdouble}})
+  @ddf_ccall FreeLPData Void (Ptr{Cdd_LPData{Cdouble}},) lp
 end
-function dd_freelpsolution(lp::Ptr{CDDLPSolutionData{GMPRational}})
-  @cdd_ccall FreeLPSolution Void (Ptr{CDDLPSolutionData{GMPRational}},) lp
+function dd_freelpdata(lp::Ptr{Cdd_LPData{GMPRational}})
+  @dd_ccall FreeLPData Void (Ptr{Cdd_LPData{GMPRational}},) lp
+end
+
+function dd_freelpsolution(lp::Ptr{Cdd_LPSolutionData{Cdouble}})
+  @ddf_ccall FreeLPSolution Void (Ptr{Cdd_LPSolutionData{Cdouble}},) lp
+end
+function dd_freelpsolution(lp::Ptr{Cdd_LPSolutionData{GMPRational}})
+  @dd_ccall FreeLPSolution Void (Ptr{Cdd_LPSolutionData{GMPRational}},) lp
 end
 
 function Base.isempty{T<:MyType}(matrix::CDDInequalityMatrix{T})

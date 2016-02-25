@@ -1,4 +1,4 @@
-type CDDMatrixData{T <: MyType}
+type Cdd_MatrixData{T <: MyType}
   rowsize::Cdd_rowrange
   linset::Cdd_rowset
   colsize::Cdd_colrange
@@ -10,45 +10,45 @@ type CDDMatrixData{T <: MyType}
 end
 
 function dd_creatematrix(::Type{Cdouble}, m::Cdd_rowrange, n::Cdd_colrange)
-  @cddf_ccall CreateMatrix Ptr{CDDMatrixData{Cdouble}} (Cdd_rowrange, Cdd_colrange) m n
+  @ddf_ccall CreateMatrix Ptr{Cdd_MatrixData{Cdouble}} (Cdd_rowrange, Cdd_colrange) m n
 end
 function dd_creatematrix(::Type{GMPRational}, m::Cdd_rowrange, n::Cdd_colrange)
-  @cdd_ccall CreateMatrix Ptr{CDDMatrixData{GMPRational}} (Cdd_rowrange, Cdd_colrange) m n
+  @dd_ccall CreateMatrix Ptr{Cdd_MatrixData{GMPRational}} (Cdd_rowrange, Cdd_colrange) m n
 end
 
 function dd_copyAmatrixvectorizedbycolumn(mat::Cdd_Amatrix{Cdouble}, M::Array{Cdouble, 2}, m::Cdd_rowrange, n::Cdd_colrange)
-  @cddf_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{Cdouble}, Ptr{Cdouble}, Cdd_rowrange, Cdd_colrange) mat M m n
+  @ddf_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{Cdouble}, Ptr{Cdouble}, Cdd_rowrange, Cdd_colrange) mat M m n
 end
 function dd_copyAmatrixvectorizedbycolumn(mat::Cdd_Amatrix{GMPRational}, M::Array{GMPRational, 2}, m::Cdd_rowrange, n::Cdd_colrange)
-  @cdd_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{GMPRational}, Ptr{GMPRational}, Cdd_rowrange, Cdd_colrange) mat M m n
+  @dd_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{GMPRational}, Ptr{GMPRational}, Cdd_rowrange, Cdd_colrange) mat M m n
 end
 
 function dd_copyArow(acopy::Cdd_Arow{Cdouble}, a::Array{Cdouble, 1}, d::Cdd_colrange)
-  @cddf_ccall CopyArow Void (Cdd_Arow{Cdouble}, Cdd_Arow{Cdouble}, Cdd_colrange) acopy a d
+  @ddf_ccall CopyArow Void (Cdd_Arow{Cdouble}, Cdd_Arow{Cdouble}, Cdd_colrange) acopy a d
 end
 function dd_copyArow(acopy::Cdd_Arow{GMPRational}, a::Array{GMPRational, 1}, d::Cdd_colrange)
-  @cdd_ccall CopyArow Void (Cdd_Arow{GMPRational}, Cdd_Arow{GMPRational}, Cdd_colrange) acopy a d
+  @dd_ccall CopyArow Void (Cdd_Arow{GMPRational}, Cdd_Arow{GMPRational}, Cdd_colrange) acopy a d
 end
 
-function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
-  @cddf_ccall SetMatrixObjective Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
+function dd_setmatrixobjective(matrix::Ptr{Cdd_MatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
+  @ddf_ccall SetMatrixObjective Void (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
 end
-function dd_setmatrixobjective(matrix::Ptr{CDDMatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
-  @cdd_ccall SetMatrixObjective Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
-end
-
-function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{Cdouble}})
-  @cddf_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_NumberType) matrix dd_Real
-end
-function dd_setmatrixnumbertype(matrix::Ptr{CDDMatrixData{GMPRational}})
-  @cdd_ccall SetMatrixNumberType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_NumberType) matrix dd_Rational
+function dd_setmatrixobjective(matrix::Ptr{Cdd_MatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
+  @dd_ccall SetMatrixObjective Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
 end
 
-function dd_setmatrixrepresentationtype(matrix::Ptr{CDDMatrixData{Cdouble}}, inequality::Bool)
-  @cddf_ccall SetMatrixRepresentationType Void (Ptr{CDDMatrixData{Cdouble}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
+function dd_setmatrixnumbertype(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+  @ddf_ccall SetMatrixNumberType Void (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_NumberType) matrix dd_Real
 end
-function dd_setmatrixrepresentationtype(matrix::Ptr{CDDMatrixData{GMPRational}}, inequality::Bool)
-  @cdd_ccall SetMatrixRepresentationType Void (Ptr{CDDMatrixData{GMPRational}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
+function dd_setmatrixnumbertype(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+  @dd_ccall SetMatrixNumberType Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_NumberType) matrix dd_Rational
+end
+
+function dd_setmatrixrepresentationtype(matrix::Ptr{Cdd_MatrixData{Cdouble}}, inequality::Bool)
+  @ddf_ccall SetMatrixRepresentationType Void (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
+end
+function dd_setmatrixrepresentationtype(matrix::Ptr{Cdd_MatrixData{GMPRational}}, inequality::Bool)
+  @dd_ccall SetMatrixRepresentationType Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
 end
 
 
@@ -58,7 +58,7 @@ function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
   matrix = dd_creatematrix(T, m, n)
   mat = unsafe_load(matrix)
   dd_copyAmatrixvectorizedbycolumn(mat.matrix, M, m, n)
-  intsettosettype(mat.linset, linset)
+  dd_settype(mat.linset, linset)
   dd_setmatrixnumbertype(matrix)
   dd_setmatrixrepresentationtype(matrix, inequality)
   matrix
@@ -73,20 +73,20 @@ end
 
 Base.size{T<:MyType}(matrix::CDDMatrix{T}, i::Integer) = Base.size(matrix)[i]
 
-function dd_freematrix(matrix::Ptr{CDDMatrixData{Cdouble}})
-  @cddf_ccall FreeMatrix Void (Ptr{CDDMatrixData{Cdouble}},) matrix
+function dd_freematrix(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+  @ddf_ccall FreeMatrix Void (Ptr{Cdd_MatrixData{Cdouble}},) matrix
 end
-function dd_freematrix(matrix::Ptr{CDDMatrixData{GMPRational}})
-  @cdd_ccall FreeMatrix Void (Ptr{CDDMatrixData{GMPRational}},) matrix
+function dd_freematrix(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+  @dd_ccall FreeMatrix Void (Ptr{Cdd_MatrixData{GMPRational}},) matrix
 end
 function myfree{T<:MyType}(matrix::CDDMatrix{T})
   dd_freematrix(matrix.matrix)
 end
 
 type CDDInequalityMatrix{T <: MyType} <: CDDMatrix{T}
-  matrix::Ptr{CDDMatrixData{T}}
+  matrix::Ptr{Cdd_MatrixData{T}}
 
-  function CDDInequalityMatrix(matrix::Ptr{CDDMatrixData{T}})
+  function CDDInequalityMatrix(matrix::Ptr{Cdd_MatrixData{T}})
     m = new(matrix)
     finalizer(m, myfree)
     m
@@ -94,16 +94,16 @@ type CDDInequalityMatrix{T <: MyType} <: CDDMatrix{T}
 
 end
 
-CDDInequalityMatrix{T<:MyType}(matrix::Ptr{CDDMatrixData{T}}) = CDDInequalityMatrix{T}(matrix)
+CDDInequalityMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{T}(matrix)
 
 function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
   true
 end
 
 type CDDGeneratorMatrix{T <: MyType} <: CDDMatrix{T}
-  matrix::Ptr{CDDMatrixData{T}}
+  matrix::Ptr{Cdd_MatrixData{T}}
 
-  function CDDGeneratorMatrix(matrix::Ptr{CDDMatrixData{T}})
+  function CDDGeneratorMatrix(matrix::Ptr{Cdd_MatrixData{T}})
     m = new(matrix)
     finalizer(m, myfree)
     m
@@ -111,13 +111,13 @@ type CDDGeneratorMatrix{T <: MyType} <: CDDMatrix{T}
 
 end
 
-CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{CDDMatrixData{T}}) = CDDGeneratorMatrix{T}(matrix)
+CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{T}(matrix)
 
 function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
   false
 end
 
-function Base.show{T <: MyType}(io::IO, matrix::CDDMatrixData{T})
+function Base.show{T <: MyType}(io::IO, matrix::Cdd_MatrixData{T})
   if matrix.representation == dd_Inequality
     println(io, "H-representation")
   else
@@ -159,4 +159,4 @@ end
 
 Base.show(io::IO, matrix::CDDMatrix) = Base.show(io, unsafe_load(matrix.matrix))
 
-export CDDMatrixData, CDDMatrix, CDDInequalityMatrix, CDDGeneratorMatrix, isaninequalityrepresentation
+export CDDMatrix, CDDInequalityMatrix, CDDGeneratorMatrix, isaninequalityrepresentation

@@ -1,4 +1,4 @@
-type CDDPolyhedraData{T<:MyType}
+type Cdd_PolyhedraData{T<:MyType}
   representation::Cdd_RepresentationType
   # given representation
   homogeneous::Cdd_boolean
@@ -47,21 +47,21 @@ type CDDPolyhedraData{T<:MyType}
   #    dominant set of rows (those containing all rays).
 end
 
-function dd_matrix2poly(matrix::Ptr{CDDMatrixData{Cdouble}})
+function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{Cdouble}})
   err = Ref{Cdd_ErrorType}(0)
-  poly = @cddf_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{Cdouble}} (Ptr{CDDMatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err
+  poly = @ddf_ccall DDMatrix2Poly Ptr{Cdd_PolyhedraData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err
   myerror(err[])
   poly
 end
-function dd_matrix2poly(matrix::Ptr{CDDMatrixData{GMPRational}})
+function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
-  poly = @cdd_ccall DDMatrix2Poly Ptr{CDDPolyhedraData{GMPRational}} (Ptr{CDDMatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err
+  poly = @dd_ccall DDMatrix2Poly Ptr{Cdd_PolyhedraData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err
   myerror(err[])
   poly
 end
 
-type CDDPolyhedra{T<:MyType} <: Polyhedron
-  poly::Ptr{CDDPolyhedraData{T}}
+type CDDPolyhedra{T<:MyType}
+  poly::Ptr{Cdd_PolyhedraData{T}}
   inequality::Bool # The input type is inequality
 
   function CDDPolyhedra(matrix::CDDMatrix{T})
@@ -74,10 +74,10 @@ type CDDPolyhedra{T<:MyType} <: Polyhedron
 end
 
 function myfree(poly::CDDPolyhedra{Cdouble})
-  @cddf_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{Cdouble}},) poly.poly
+  @ddf_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{Cdouble}},) poly.poly
 end
 function myfree(poly::CDDPolyhedra{GMPRational})
-  @cdd_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{GMPRational}},) poly.poly
+  @dd_ccall FreePolyhedra Void (Ptr{CDDPolyhedra{GMPRational}},) poly.poly
 end
 
 CDDPolyhedra{T<:MyType}(matrix::CDDMatrix{T}) = CDDPolyhedra{T}(matrix)
@@ -88,21 +88,21 @@ function Base.convert{T<:MyType}(::Type{CDDPolyhedra{T}}, matrix::CDDMatrix{T})
 end
 Base.convert{T<:Real}(::Type{CDDPolyhedra{T}}, desc::Description{T}) = CDDPolyhedra{T}(CDDMatrix(desc))
 
-function dd_copyinequalities(poly::Ptr{CDDPolyhedraData{Cdouble}})
-  @cddf_ccall CopyInequalities Ptr{CDDMatrixData{Cdouble}} (Ptr{CDDPolyhedraData{Cdouble}},) poly
+function dd_copyinequalities(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
+  @ddf_ccall CopyInequalities Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
 end
-function dd_copyinequalities(poly::Ptr{CDDPolyhedraData{GMPRational}})
-  @cdd_ccall CopyInequalities Ptr{CDDMatrixData{GMPRational}} (Ptr{CDDPolyhedraData{GMPRational}},) poly
+function dd_copyinequalities(poly::Ptr{Cdd_PolyhedraData{GMPRational}})
+  @dd_ccall CopyInequalities Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_PolyhedraData{GMPRational}},) poly
 end
 function copyinequalities{T<:MyType}(poly::CDDPolyhedra{T})
   CDDInequalityMatrix(dd_copyinequalities(poly.poly))
 end
 
-function dd_copygenerators(poly::Ptr{CDDPolyhedraData{Cdouble}})
-  @cddf_ccall CopyGenerators Ptr{CDDMatrixData{Cdouble}} (Ptr{CDDPolyhedraData{Cdouble}},) poly
+function dd_copygenerators(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
+  @ddf_ccall CopyGenerators Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
 end
-function dd_copygenerators(poly::Ptr{CDDPolyhedraData{GMPRational}})
-  @cdd_ccall CopyGenerators Ptr{CDDMatrixData{GMPRational}} (Ptr{CDDPolyhedraData{GMPRational}},) poly
+function dd_copygenerators(poly::Ptr{Cdd_PolyhedraData{GMPRational}})
+  @dd_ccall CopyGenerators Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_PolyhedraData{GMPRational}},) poly
 end
 
 function copygenerators{T<:MyType}(poly::CDDPolyhedra{T})
@@ -122,19 +122,4 @@ function switchinputtype!{T<:MyType}(poly::CDDPolyhedra{T})
   poly.inequality = ~poly.inequality
 end
 
-function getinequalitydescription(poly::CDDPolyhedra{Cdouble})
-  InequalityDescription(copyinequalities(poly))
-end
-function getinequalitydescription(poly::CDDPolyhedra{GMPRational})
-  InequalityDescription{Rational{BigInt}}(InequalityDescription(copyinequalities(poly)))
-end
-
-function getgeneratordescription(poly::CDDPolyhedra{Cdouble})
-  GeneratorDescription(copygenerators(poly))
-end
-function getgeneratordescription(poly::CDDPolyhedra{GMPRational})
-  GeneratorDescription{Rational{BigInt}}(GeneratorDescription(copygenerators(poly)))
-end
-
-
-export CDDPolyhedraData, CDDPolyhedra, copyinequalities, copygenerators, switchinputtype!, getinequalitydescription, getgeneratordescription#TODO two last not needed
+export CDDPolyhedra, copyinequalities, copygenerators, switchinputtype!

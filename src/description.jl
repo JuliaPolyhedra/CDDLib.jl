@@ -44,7 +44,7 @@ function Base.convert{T<:MyType}(::Type{CDDGeneratorMatrix{T}}, ext::GeneratorDe
   b = settoCarray(T, ext.vertex, size(mA, 1))
   matrix = initmatrix([b mA], ext.Rlinset, false)
   mat = unsafe_load(matrix)
-  intsettosettype(mat.linset, ext.Vlinset, size(ext.V, 1))
+  dd_settype(mat.linset, ext.Vlinset, size(ext.V, 1))
   CDDGeneratorMatrix(matrix)
 end
 
@@ -66,7 +66,7 @@ Base.convert{T<:Real}(::Type{CDDGeneratorMatrix}, ext::GeneratorDescription{T}) 
 
 # converters CDDMatrix -> Description
 
-function extractAb(mat::CDDMatrixData{Cdouble})
+function extractAb(mat::Cdd_MatrixData{Cdouble})
   m = mat.rowsize
   d = mat.colsize-1
   b = Array{Cdouble, 1}(m)
@@ -81,7 +81,7 @@ function extractAb(mat::CDDMatrixData{Cdouble})
   (b, A)
 end
 
-function extractAb(mat::CDDMatrixData{GMPRational})
+function extractAb(mat::Cdd_MatrixData{GMPRational})
   m = mat.rowsize
   d = mat.colsize-1
   b = Array{GMPRationalMut, 1}(m)

@@ -1,5 +1,7 @@
 import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero, Base.zeros
 
+# It is immutable so that it is stored by value in the structures
+# GMPRational and GMPRationalMut and not by reference
 immutable GMPInteger
   alloc::Cint
   size::Cint
@@ -13,10 +15,11 @@ type GMPRationalMut
   function GMPRationalMut()
     m = new()
     ccall((:__gmpq_init, :libgmp), Void, (Ptr{GMPRationalMut},), &m)
-    #finalizer(m, _mpq_clear_fn) # Unused in immutable
+    # No need to clear anything since the num and den are used by
+    # the GMPRational that is created
+    #finalizer(m, _mpq_clear_fn)
     m
   end
-
 end
 
 function Base.convert(::Type{GMPRationalMut}, a::Rational{BigInt})
@@ -46,7 +49,8 @@ Base.convert(::Type{GMPRationalMut}, a::Rational{Int}) = GMPRationalMut(a.num, a
 
 Base.zero(::Type{GMPRationalMut}) = GMPRationalMut(0)
 
-# I cannot have a finalizer for an immutable so you are responsibe to free it if you use it
+# I cannot have a finalizer for an immutable so you are responsibe to free it
+# if you use it using e.g. myfree define below
 immutable GMPRational <: Real
   num::GMPInteger
   den::GMPInteger
@@ -71,8 +75,10 @@ Base.convert{T<:Real}(::Type{GMPRational}, a::T) = GMPRational(GMPRationalMut(a)
 Base.convert(::Type{GMPRational}, a::GMPRational) = a
 
 Base.zero(::Type{GMPRational}) = GMPRational(0)
+
 # The default zeros uses the same rational for each element
 # so each element has the same data1 and data2 pointers...
+# This is why I need to redefine it
 function Base.zeros(::Type{GMPRational}, dims...)
   ret = Array(GMPRational, dims...)
   for i in eachindex(ret)
@@ -100,8 +106,7 @@ function +(a::GMPRational, b::GMPRational)
   GMPRational(m)
 end
 
-
-
+# Debug
 function Base.show(io::IO, x::GMPInteger)
   Base.show(io, (x.alloc, x.size, unsafe_load(x.data)))
 end
@@ -126,10 +131,6 @@ Base.convert(::Type{Bool}, a::GMPRational) = Base.convert(Bool, Rational(a))
 Base.convert{T<:Integer}(::Type{T}, a::GMPRational) = Base.convert(T, Rational(a))
 
 promote_rule{T<:Integer}(::Type{GMPRational}, ::Type{T}) = GMPRational
-
-#function _mpq_clear_fn(a::GMPRational)
-#  ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &a)
-#end
 
 ==(x::GMPRational, y::GMPRational) = Rational(x) == Rational(y)
 
