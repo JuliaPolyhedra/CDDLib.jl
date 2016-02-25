@@ -1,4 +1,4 @@
-module CDD
+module CDoubleDescription
 
 using BinDeps
 import Base.show, Base.convert, Base.push!
@@ -7,7 +7,7 @@ using Polyhedra
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
   include("../deps/deps.jl")
 else
-  error("CDD not properly installed. Please run Pkg.build(\"CDD\")")
+  error("CDoubleDescription not properly installed. Please run Pkg.build(\"CDoubleDescription\")")
 end
 
 macro cdd_ccall(f, args...)

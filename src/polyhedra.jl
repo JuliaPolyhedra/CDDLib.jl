@@ -60,7 +60,7 @@ function dd_matrix2poly(matrix::Ptr{CDDMatrixData{GMPRational}})
   poly
 end
 
-type CDDPolyhedra{T<:MyType} <: Polyhedron{T}
+type CDDPolyhedra{T<:MyType} <: Polyhedron
   poly::Ptr{CDDPolyhedraData{T}}
   inequality::Bool # The input type is inequality
 

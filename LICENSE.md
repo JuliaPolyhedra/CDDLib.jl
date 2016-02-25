@@ -1,4 +1,4 @@
-The cdd.jl package is licensed under the GPLv2 License:
+The CDoubleDescription.jl package is licensed under the GPLv2 License:
 
 > Copyright (c) 2015: Benoît Legat.
 > All Rights Reserved.

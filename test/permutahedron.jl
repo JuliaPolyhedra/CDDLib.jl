@@ -1,6 +1,3 @@
-using CDD
-using Base.Test
-
 A = [1 1 1; 1 0 0; 0 1 0; 0 0 1; -1 0 0; 0 -1 0; 0 0 -1]
 b = [6, 3, 3, 3, -1, -1, -1]
 linset = IntSet([1])
