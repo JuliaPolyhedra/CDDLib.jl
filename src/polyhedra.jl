@@ -60,7 +60,7 @@ function dd_matrix2poly(matrix::Ptr{CDDMatrixData{GMPRational}})
   poly
 end
 
-type CDDPolyhedra{T<:MyType}
+type CDDPolyhedra{T<:MyType} <: Polyhedron{T}
   poly::Ptr{CDDPolyhedraData{T}}
   inequality::Bool # The input type is inequality
 
@@ -122,4 +122,19 @@ function switchinputtype!{T<:MyType}(poly::CDDPolyhedra{T})
   poly.inequality = ~poly.inequality
 end
 
-export CDDPolyhedraData, CDDPolyhedra, copyinequalities, copygenerators, switchinputtype!
+function getinequalitydescription(poly::CDDPolyhedra{Cdouble})
+  InequalityDescription(copyinequalities(poly))
+end
+function getinequalitydescription(poly::CDDPolyhedra{GMPRational})
+  InequalityDescription{Rational{BigInt}}(InequalityDescription(copyinequalities(poly)))
+end
+
+function getgeneratordescription(poly::CDDPolyhedra{Cdouble})
+  GeneratorDescription(copygenerators(poly))
+end
+function getgeneratordescription(poly::CDDPolyhedra{GMPRational})
+  GeneratorDescription{Rational{BigInt}}(GeneratorDescription(copygenerators(poly)))
+end
+
+
+export CDDPolyhedraData, CDDPolyhedra, copyinequalities, copygenerators, switchinputtype!, getinequalitydescription, getgeneratordescription#TODO two last not needed

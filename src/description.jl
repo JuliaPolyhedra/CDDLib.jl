@@ -10,6 +10,17 @@ function myfree(desc::GeneratorDescription{GMPRational})
   myfree(desc.R)
 end
 
+# CDDMatrix -> Description
+InequalityDescription{T<:Real}(matrix::CDDInequalityMatrix{T}) = InequalityDescription{T}(matrix)
+GeneratorDescription{T<:Real}(matrix::CDDGeneratorMatrix{T}) = GeneratorDescription{T}(matrix)
+
+Base.convert{T}(::Type{Description{T}}, ine::InequalityDescription{GMPRational}) = Base.convert(InequalityDescription{T}, ine)
+Base.convert{T}(::Type{Description{T}}, ext::GeneratorDescription{GMPRational}) = Base.convert(GeneratorDescription{T}, ext)
+
+Base.convert{T}(::Type{Polyhedra.InequalityDescription{T}}, ine::InequalityDescription{GMPRational}) = InequalityDescription{T}(Array{T}(ine.A), Array{T}(ine.b), ine.linset)
+
+Base.convert{T}(::Type{GeneratorDescription{T}}, ext::GeneratorDescription{GMPRational}) = GeneratorDescription{T}(Array{T}(ext.V), Array{T}(ext.R), ext.vertex, ext.Vlinset, ext.Rlinset)
+
 # converters Description -> CDDMatrix
 
 function Base.convert{T<:MyType}(::Type{CDDInequalityMatrix{T}}, ine::InequalityDescription{T})
@@ -108,7 +119,6 @@ function Base.convert{T<:MyType}(::Type{GeneratorDescription{T}}, matrix::CDDGen
 end
 
 Base.convert{T<:MyType}(::Type{Description{T}}, ine::CDDGeneratorMatrix{T}) = Base.convert(GeneratorDescription{T}, ine)
-
 
 Base.convert{T<:MyType, S<:Real}(::Type{Description{S}}, matrix::CDDMatrix{T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
 Base.convert{T<:MyType}(::Type{Description}, matrix::CDDMatrix{T}) = Base.convert(Description{T}, matrix)
