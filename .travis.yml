@@ -12,7 +12,7 @@ addons:
 notifications:
   email: false
 before_install:
-  - julia -e 'Pkg.clone("Pkg.clone("git://github.com/blegat/Polyhedra.jl.git")")'
+  - julia -e 'Pkg.clone("git://github.com/blegat/Polyhedra.jl.git")'
 # uncomment the following lines to override the default test script
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("cddlib"); Pkg.test("cddlib"; coverage=true)'
