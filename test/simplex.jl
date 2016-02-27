@@ -20,8 +20,6 @@ linset = IntSet([1])
 V = [0 1; 1 0]
 vertex = IntSet([1,2])
 
-@test_throws ErrorException Polyhedra.InequalityDescription(A, [0, 0], linset)
-@test_throws ErrorException Polyhedra.InequalityDescription(A, [0, 0], IntSet([4]))
 ine = Polyhedra.InequalityDescription(A, b, linset)
 #@test !isempty(ine)
 inef = Polyhedra.InequalityDescription(Array{Float64}(A), Array{Float64}(b), linset)
@@ -40,10 +38,6 @@ generator_fulltest(extout1f, V, vertex)
 Aalt = [1 0; -1 0; -1 -1]
 balt = [1,0,-1]
 linsetalt = IntSet([3])
-@test_throws ErrorException Polyhedra.GeneratorDescription(V, [1 0 0], vertex, IntSet([]), IntSet([]))
-@test_throws ErrorException Polyhedra.GeneratorDescription(V, [1 1], vertex, IntSet([]), IntSet([2]))
-@test_throws ErrorException Polyhedra.GeneratorDescription(V, [1 1], vertex, IntSet([4]), IntSet([]))
-@test_throws ErrorException Polyhedra.GeneratorDescription(V, IntSet([4]))
 ext = Polyhedra.GeneratorDescription(V, vertex)
 extf = Polyhedra.GeneratorDescription(Array{Float64}(V), vertex)
 poly2 = CDDPolyhedra(ext)
