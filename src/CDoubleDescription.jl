@@ -55,4 +55,6 @@ include("lp.jl")
 
 include("mathprogbase.jl")
 
+include("polyhedron.jl")
+
 end # module

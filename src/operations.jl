@@ -139,9 +139,37 @@ end
 function canonicalize!{T<:MyType}(matrix::CDDMatrix{T})
   (found, matrix.matrix, impl_linset, redset, newpos) = dd_matrixcanonicalize(matrix.matrix)
   if !Bool(found)
-    error("Redundancy removal not found")
+    error("Canonicalization not found")
   end
   (impl_linset, redset, newpos) # TODO transform and free
+end
+
+function dd_matrixcanonicalizelinearity(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+  matptr = Ref{Ptr{Cdd_MatrixData{Cdouble}}}(matrix)
+  impl_linset = Ref{Cdd_rowset}(0)
+  redset = Ref{Cdd_rowset}(0)
+  newpos = Ref{Cdd_rowindex}(0)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@ddf_ccall MatrixCanonicalizeLinearity Cdd_boolean (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset newpos err)
+  myerror(err[])
+  (found, matptr[], impl_linset[], newpos[])
+end
+function dd_matrixcanonicalizelinearity(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+  matptr = Ref{Ptr{Cdd_MatrixData{GMPRational}}}(matrix)
+  impl_linset = Ref{Cdd_rowset}(0)
+  redset = Ref{Cdd_rowset}(0)
+  newpos = Ref{Cdd_rowindex}(0)
+  err = Ref{Cdd_ErrorType}(0)
+  found = (@dd_ccall MatrixCanonicalizeLinearity Cdd_boolean (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset newpos err)
+  myerror(err[])
+  (found, matptr[], impl_linset[], newpos[])
+end
+function canonicalizelinearity!{T<:MyType}(matrix::CDDMatrix{T})
+  (found, matrix.matrix, impl_linset, newpos) = dd_matrixcanonicalizelinearity(matrix.matrix)
+  if !Bool(found)
+    error("Linearity canonicalization not found")
+  end
+  (impl_linset, newpos) # TODO transform and free
 end
 
 function dd_matrixredundancyremove(matrix::Ptr{Cdd_MatrixData{Cdouble}})
@@ -209,7 +237,11 @@ function dd_blockelimination(matrix::CDDInequalityMatrix{GMPRational}, delset::C
   CDDInequalityMatrix{GMPRational}(newmatrix)
 end
 function blockelimination{T<:MyType}(matrix::CDDInequalityMatrix{T}, delset::IntSet=IntSet([size(matrix, 2)]))
-  dd_blockelimination(matrix, CDDSet(delset, size(matrix, 2)).s)
+  nvars = size(matrix, 2)
+  if last(delset) > nvars
+    error("Invalid variable to eliminate")
+  end
+  dd_blockelimination(matrix, CDDSet(delset, nvars).s)
 end
 function blockelimination{S<:Real}(ine::InequalityDescription{S}, delset::IntSet=IntSet([size(ine.A, 2)]))
   blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)

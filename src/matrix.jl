@@ -91,7 +91,6 @@ type CDDInequalityMatrix{T <: MyType} <: CDDMatrix{T}
     finalizer(m, myfree)
     m
   end
-
 end
 
 CDDInequalityMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{T}(matrix)
@@ -108,7 +107,6 @@ type CDDGeneratorMatrix{T <: MyType} <: CDDMatrix{T}
     finalizer(m, myfree)
     m
   end
-
 end
 
 CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{T}(matrix)

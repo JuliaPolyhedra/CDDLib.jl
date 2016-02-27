@@ -23,9 +23,9 @@ vertex = IntSet([1,2])
 @test_throws ErrorException Polyhedra.InequalityDescription(A, [0, 0], linset)
 @test_throws ErrorException Polyhedra.InequalityDescription(A, [0, 0], IntSet([4]))
 ine = Polyhedra.InequalityDescription(A, b, linset)
-@test !isempty(ine)
+#@test !isempty(ine)
 inef = Polyhedra.InequalityDescription(Array{Float64}(A), Array{Float64}(b), linset)
-@test !isempty(inef)
+#@test !isempty(inef)
 poly1 = CDDPolyhedra(ine)
 poly1f = CDDPolyhedra(inef)
 ineout1  = Polyhedra.Description{Int}(copyinequalities(poly1 ))
@@ -58,7 +58,7 @@ generator_fulltest(extout2, V, vertex)
 generator_fulltest(extout2f, V, vertex)
 
 # x_1 cannot be 2
-@test isempty(Polyhedra.InequalityDescription([A; 1 0], [b; 2], union(linset, IntSet([4]))))
+#@test isempty(Polyhedra.InequalityDescription([A; 1 0], [b; 2], union(linset, IntSet([4]))))
 
 V0 = [0 0]
 vertex0 = IntSet([1])

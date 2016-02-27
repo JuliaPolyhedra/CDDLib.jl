@@ -1,6 +1,3 @@
-import MathProgBase
-importall MathProgBase.SolverInterface
-
 type CDDMathProgModel <: AbstractMathProgModel
   solver_type::Symbol
   exact::Bool
@@ -121,48 +118,25 @@ function optimize!(lpm::CDDMathProgModel)
   end
   dd_copyArow(unsafe_load(matrix.matrix).rowvec, obj, length(obj))
 
-  lp = dd_matrix2lp(matrix.matrix)
-  dd_lpsolve(lp, lpm.solver_type == :DualSimplex ? dd_DualSimplex : dd_CrissCross)
-  sol = dd_copylpsolution(lp)
-  dd_freelpdata(lp)
-  soldata = unsafe_load(sol)
-  if soldata.LPS == dd_Optimal
-    lpm.status = :Optimal
-  elseif soldata.LPS == dd_Inconsistent || soldata.LPS == dd_DualUnbounded || soldata.LPS == dd_StrucInconsistent
-    lpm.status = :Infeasible
-  elseif soldata.LPS == dd_DualInconsistent || soldata.LPS == dd_Unbounded || soldata.LPS == dd_StrucDualInconsistent
-    lpm.status = :Unbounded
-  else
-    lpm.status = :Error
-  end
-  if lpm.exact
-    lpm.objval = Rational{Int}(soldata.optvalue)
-  else
-    lpm.objval = soldata.optvalue
-  end
-  solutiontmp = myconvert(Array, soldata.sol, size(A, 2)+1)
-  if lpm.exact
-    lpm.solution = Array{Rational{BigInt}}(solutiontmp)[2:end]
-    myfree(solutiontmp)
-  else
-    lpm.solution = solutiontmp[2:end]
-  end
+  lp = matrix2lp(matrix)
+  lpsolve(lp, lpm.solver_type)
+  sol = copylpsolution(lp)
+  lpm.status = simplestatus(sol)
+  # We have just called lpsolve so it shouldn't be Undecided
+  # if no error occured
+  lpm.status == :Undecided && (lpm.status = :Error)
+  lpm.objval = getobjval(sol)
+  lpm.solution = getsolution(sol)
   lpm.constrsolution = lpm.A * lpm.solution
-  reducedcoststmp = myconvert(Array, soldata.dsol, size(A, 1))
+  lpm.reducedcosts = getreducedcosts(sol)
+  # FIXME if A has equalities, cddlib splits them as 2 inequalities
+  lpm.reducedcosts = lpm.reducedcosts[1:size(A, 1)]
+  # FIXME if A is GMPRational, check that no creation/leak
   if lpm.exact
-    lpm.reducedcosts = Array{Rational{BigInt}}(reducedcoststmp)
+    lpm.constrduals = Matrix{Rational{BigInt}}(A)' * lpm.reducedcosts
   else
-    lpm.reducedcosts = reducedcoststmp
+    lpm.constrduals = A' * lpm.reducedcosts
   end
-  constrdualstmp = A' * reducedcoststmp
-  if lpm.exact
-    lpm.constrduals = Array{Rational{BigInt}}(constrdualstmp)
-    myfree(constrdualstmp)
-    myfree(reducedcoststmp)
-  else
-    lpm.constrduals = constrdualstmp
-  end
-  dd_freelpsolution(sol)
 
   lpm.infeasibilityray = zeros(size(lpm.A, 1))
   eps = 1e-7

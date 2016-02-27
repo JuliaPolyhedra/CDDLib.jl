@@ -17,7 +17,7 @@ GeneratorDescription{T<:Real}(matrix::CDDGeneratorMatrix{T}) = GeneratorDescript
 Base.convert{T}(::Type{Description{T}}, ine::InequalityDescription{GMPRational}) = Base.convert(InequalityDescription{T}, ine)
 Base.convert{T}(::Type{Description{T}}, ext::GeneratorDescription{GMPRational}) = Base.convert(GeneratorDescription{T}, ext)
 
-Base.convert{T}(::Type{Polyhedra.InequalityDescription{T}}, ine::InequalityDescription{GMPRational}) = InequalityDescription{T}(Array{T}(ine.A), Array{T}(ine.b), ine.linset)
+Base.convert{T}(::Type{InequalityDescription{T}}, ine::InequalityDescription{GMPRational}) = InequalityDescription{T}(Array{T}(ine.A), Array{T}(ine.b), ine.linset)
 
 Base.convert{T}(::Type{GeneratorDescription{T}}, ext::GeneratorDescription{GMPRational}) = GeneratorDescription{T}(Array{T}(ext.V), Array{T}(ext.R), ext.vertex, ext.Vlinset, ext.Rlinset)
 
