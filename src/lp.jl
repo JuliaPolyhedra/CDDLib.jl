@@ -98,7 +98,6 @@ end
 function getreducedcosts(sol::CDDLPSolution{Cdouble})
   soldata = unsafe_load(sol.sol)
   # -1 because there is the objective
-  println(soldata.m)
   myconvert(Array, soldata.dsol, soldata.m-1)
 end
 

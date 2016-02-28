@@ -61,7 +61,7 @@ function redundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
   end
   (found, certificate) = dd_redundant(matrix, Cdd_rowrange(i))
   # FIXME what is the meaning of the first element of the certificate ?
-  (Bool(found), certificate)
+  (Bool(found), certificate[2:end])
 end
 function redundant{S<:Real}(desc::Description{S}, i::Integer)
   redundant(Base.convert(CDDMatrix, desc), i)
@@ -110,7 +110,7 @@ function sredundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
   end
   (found, certificate) = dd_sredundant(matrix, Cdd_rowrange(i))
   # FIXME what is the meaning of the first element of the certificate ? 1 for point, 0 for ray ?
-  (Bool(found), certificate)
+  (Bool(found), certificate[2:end])
 end
 function sredundant{S<:Real}(desc::Description{S}, i::Integer)
   sredundant(Base.convert(CDDMatrix, desc), i)
@@ -236,14 +236,16 @@ function dd_blockelimination(matrix::CDDInequalityMatrix{GMPRational}, delset::C
   myerror(err[])
   CDDInequalityMatrix{GMPRational}(newmatrix)
 end
-function blockelimination{T<:MyType}(matrix::CDDInequalityMatrix{T}, delset::IntSet=IntSet([size(matrix, 2)]))
+function blockelimination{T<:MyType}(matrix::CDDInequalityMatrix{T}, delset::IntSet=IntSet([size(matrix, 2)]-1))
   nvars = size(matrix, 2)
   if last(delset) > nvars
     error("Invalid variable to eliminate")
   end
-  dd_blockelimination(matrix, CDDSet(delset, nvars).s)
+  # offset of 1 because 1 is for the first column of the matrix
+  # (indicating the linearity) so 2 is the first dimension
+  dd_blockelimination(matrix, CDDSet(delset, nvars+1, 1).s)
 end
-function blockelimination{S<:Real}(ine::InequalityDescription{S}, delset::IntSet=IntSet([size(ine.A, 2)]))
+function blockelimination{S<:Real}(ine::InequalityDescription{S}, delset::IntSet=IntSet([size(ine.A, 2)-1]))
   blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)
 end
 

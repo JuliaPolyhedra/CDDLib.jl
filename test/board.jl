@@ -25,7 +25,6 @@ end
 A = [A1; A2; A3]
 b = [b1; b2; b3]
 ine = Polyhedra.InequalityDescription(A, b)
-#@test !isempty(ine)
 poly = CDDPolyhedra(ine)
 ext  = Polyhedra.Description{Rational{Int}}(copygenerators(poly))
 target = ones(Int, 9) * (3 // 4)
@@ -44,11 +43,10 @@ cutb = 6
 Acut = [cutA; A]
 bcut = [cutb; b]
 inecut = Polyhedra.InequalityDescription(Acut, bcut)
-#@test !isempty(inecut)
 (isredundant, certificate) = redundant(inecut, 1)
 @test !isredundant
-@test Array{Rational{Int}}(certificate) == [1//1; target]
+@test Array{Rational{Int}}(certificate) == target
 @test IntSet([]) == redundantrows(inecut)
 (issredundant, scertificate) = sredundant(inecut, 1)
 @test !issredundant
-@test Array{Rational{Int}}(scertificate) == [1//1; target]
+@test Array{Rational{Int}}(scertificate) == target

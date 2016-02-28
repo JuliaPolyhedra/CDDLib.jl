@@ -1,13 +1,13 @@
-export CDDPolyhedron, getinequalities, getgenerators
-import Base.isempty
+export CDDPolyhedron, getinequalities, getgenerators, removeredundantinequalities!, removeredundantgenerators!, isredundantinequality, isredundantgenerator, isstronglyredundantinequality, isstronglyredundantgenerator
+import Base.isempty, Base.push!
 
 type CDDPolyhedron{T<:MyType} <: Polyhedron
   ine::Nullable{CDDInequalityMatrix{T}}
   ext::Nullable{CDDGeneratorMatrix{T}}
   poly::Nullable{CDDPolyhedra{T}}
   linearitydetected::Bool
-  noredundantinequalities::Bool
-  noredundantgenerators::Bool
+  noredundantinequality::Bool
+  noredundantgenerator::Bool
 
   function CDDPolyhedron(ine::CDDInequalityMatrix{T})
     new(ine, nothing, nothing, false, false, false)
@@ -19,6 +19,9 @@ type CDDPolyhedron{T<:MyType} <: Polyhedron
 #   new(nothing, nothing, poly)
 # end
 end
+
+CDDPolyhedron{T<:MyType}(matrix::CDDMatrix{T}) = CDDPolyhedron{T}(matrix)
+call{T<:MyType}(::Type{CDDPolyhedron{T}}, desc::Description) = CDDPolyhedron{T}(CDDMatrix{T}(desc))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -33,9 +36,11 @@ function getext(p::CDDPolyhedron)
   end
   get(p.ext)
 end
-function getpoly(p::CDDPolyhedron)
+function getpoly(p::CDDPolyhedron, inepriority=true)
   if isnull(p.poly)
-    if !isnull(p.ine)
+    if !inepriority && !isnull(p.ext)
+      p.poly = CDDPolyhedra(get(p.ext))
+    elseif !isnull(p.ine)
       p.poly = CDDPolyhedra(get(p.ine))
     elseif !isnull(p.ext)
       p.poly = CDDPolyhedra(get(p.ext))
@@ -51,8 +56,8 @@ function clearfield!(p::CDDPolyhedron)
   p.ext = nothing
   p.poly = nothing
   linearitydetected = false
-  noredundantinequalities = false
-  noredundantgenerators = false
+  noredundantinequality = false
+  noredundantgenerator = false
 end
 function updateine!{T<:MyType}(p::CDDPolyhedron{T}, ine::CDDInequalityMatrix{T})
   clearfield!(p)
@@ -79,6 +84,9 @@ function CDDPolyhedron{T<:Real}(desc::Description{T}, precision=:float)
   end
 end
 
+function inequalitiesarecomputed(p::CDDPolyhedron)
+  !isnull(p.ine)
+end
 function getinequalities(p::CDDPolyhedron{Cdouble})
   InequalityDescription(getine(p))
 end
@@ -86,6 +94,9 @@ function getinequalities(p::CDDPolyhedron{GMPRational})
   InequalityDescription{Rational{BigInt}}(InequalityDescription(getine(p)))
 end
 
+function generatorsarecomputed(p::CDDPolyhedron)
+  !isnull(p.ine)
+end
 function getgenerators(p::CDDPolyhedron{Cdouble})
   GeneratorDescription(getext(p))
 end
@@ -95,7 +106,7 @@ end
 
 function eliminate(ine::CDDInequalityMatrix, delset::IntSet)
   if length(delset) > 0
-    if length(delset) == 1 && size(ine, 2) in delset
+    if length(delset) == 1 && (size(ine, 2)-1) in delset
       fourierelimination(ine)
     else
       blockelimination(ine, delset)
@@ -127,10 +138,10 @@ end
 function removeredundantinequalities!(p::CDDPolyhedron)
   if !p.noredundantinequality
     if !p.linearitydetected
-      canonicalize!(p.ine)
+      canonicalize!(getine(p))
       p.linearitydetected = true
     else
-      redundancyremove!(p.ine)
+      redundancyremove!(getine(p))
     end
     p.noredundantinequality = true
     # See detectlinearities! for a discussion about the following line
@@ -140,18 +151,48 @@ end
 
 function removeredundantgenerators!(p::CDDPolyhedron)
   if !p.noredundantgenerator
-    canonicalize!(!p.ext)
+    canonicalize!(getext(p))
     p.noredundantgenerator = true
     # See detectlinearities! for a discussion about the following line
     p.poly = nothing
   end
 end
 
+function Base.push!(p::CDDPolyhedron, ine::InequalityDescription)
+  push!(getpoly(p, true), ine)
+  updatepoly!(p, getpoly(p)) # invalidate others
+end
+function Base.push!(p::CDDPolyhedron, ext::GeneratorDescription)
+  push!(getpoly(p, false), ext)
+  updatepoly!(p, getpoly(p)) # invalidate others
+end
+
+function isredundantinequality(p::CDDPolyhedron, i::Integer)
+  redundant(getine(p), i)
+end
+function isredundantgenerator(p::CDDPolyhedron, i::Integer)
+  redundant(getext(p), i)
+end
+
+function isstronglyredundantinequality(p::CDDPolyhedron, i::Integer)
+  sredundant(getine(p), i)
+end
+function isstronglyredundantgenerator(p::CDDPolyhedron, i::Integer)
+  sredundant(getext(p), i)
+end
+
 # Implementation of Polyhedron's optional interface
-function Base.isempty(p::Polyhedron)
+function Base.isempty(p::CDDPolyhedron)
   lp = matrix2feasibility(getine(p))
   lpsolve(lp)
-  # I could also check for like dual unbounded but
-  # in cddlib in ExistsRestrictedFace, this is the only check...
-  status(lp) != :Optimal
+  # It is impossible to be unbounded since there is no objective
+  # Note that `status` would also work
+  simplestatus(copylpsolution(lp)) != :Optimal
+end
+
+function getredundantinequalities(p::CDDPolyhedron)
+  redundantrows(getine(p))
+end
+function getredundantgenerators(p::CDDPolyhedron)
+  redundantrows(getext(p))
 end
