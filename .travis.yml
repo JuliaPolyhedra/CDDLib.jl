@@ -25,4 +25,4 @@ before_script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 #  - julia -e 'Pkg.clone(pwd()); Pkg.build("cddlib"); Pkg.test("cddlib"; coverage=true)'
 after_success:
-  - julia -e 'cd(Pkg.dir("CDD")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
+  - julia -e 'cd(Pkg.dir("CDDLib")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
