@@ -2,7 +2,7 @@ using BinDeps
 
 @BinDeps.setup
 
-cddlib_commit = "616f01f11e89e80b57fb23d5036b39b6d7feb3d9"
+cddlib_commit = "05bfc8ad9015cc2e88cf887381e8bcbfcca3bcbf"
 #cddname = "cddlib-094h"
 cddname = "cddlib-$cddlib_commit"
 
