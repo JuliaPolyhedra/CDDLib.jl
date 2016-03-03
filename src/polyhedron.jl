@@ -1,5 +1,16 @@
-export CDDPolyhedron, getinequalities, getgenerators, removeredundantinequalities!, removeredundantgenerators!, isredundantinequality, isredundantgenerator, isstronglyredundantinequality, isstronglyredundantgenerator
+export CDDLibrary, CDDPolyhedron, getinequalities, getgenerators, removeredundantinequalities!, removeredundantgenerators!, isredundantinequality, isredundantgenerator, isstronglyredundantinequality, isstronglyredundantgenerator
 import Base.isempty, Base.push!
+
+type CDDLibrary <: PolyhedraLibrary
+  precision::Symbol
+
+  function CDDLibrary(precision::Symbol=:float)
+    if !(precision in [:float, :exact])
+      error("Invalid precision, it should be :float or :exact")
+    end
+    new(precision)
+  end
+end
 
 type CDDPolyhedron{T<:MyType} <: Polyhedron
   ine::Nullable{CDDInequalityMatrix{T}}
@@ -73,6 +84,16 @@ function updatepoly!{T<:MyType}(p::CDDPolyhedron{T}, poly::CDDPolyhedra{T})
 end
 
 # Implementation of Polyhedron's mandatory interface
+function polyhedron(desc::Description, lib::CDDLibrary)
+  CDDPolyhedron(desc, lib.precision)
+end
+
+getlibrary(p::CDDPolyhedron{Cdouble}) = CDDLibrary(:float)
+getlibrary(p::CDDPolyhedron{GMPRational}) = CDDLibrary(:exact)
+
+exacttype{T<:Real}(::Type{T}) = GMPRational
+exacttype{T<:AbstractFloat}(::Type{T}) = Cdouble
+
 function CDDPolyhedron{T<:Real}(desc::Description{T}, precision=:float)
   if !(precision in (:float, :exact))
     error("precision should be :float or :exact, you gave $precision")
@@ -80,7 +101,8 @@ function CDDPolyhedron{T<:Real}(desc::Description{T}, precision=:float)
   if precision == :float
     CDDPolyhedron{Cdouble}(CDDMatrix{Cdouble}(desc))
   else
-    CDDPolyhedron{GMPRational}(CDDMatrix{GMPRational}(desc))
+    S = exacttype(T)
+    CDDPolyhedron{S}(CDDMatrix{S}(desc))
   end
 end
 
