@@ -1,4 +1,4 @@
-using CDoubleDescription
+using CDDLib
 using Base.Test
 
 include("simplex.jl")

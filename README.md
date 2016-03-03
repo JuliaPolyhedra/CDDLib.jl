@@ -1,6 +1,6 @@
-# CDoubleDescription
+# CDDLib
 
-CDoubleDescription.jl is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/).
+CDDLib.jl is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/).
 
 As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/README.libcdd):
 > The C-library  cddlib is a C implementation of the Double Description
@@ -20,6 +20,6 @@ As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/
 > programming problem, i.e. a problem of maximizing and minimizing
 > a linear function over P.
 
-[![Build Status](https://travis-ci.org/blegat/CDoubleDescription.jl.svg?branch=master)](https://travis-ci.org/blegat/CDoubleDescription.jl)
+[![Build Status](https://travis-ci.org/blegat/CDDLib.jl.svg?branch=master)](https://travis-ci.org/blegat/CDDLib.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/bfcfmeq2yxn3bj07?svg=true)](https://ci.appveyor.com/project/blegat/cdoubledescription-jl)
-[![Coverage Status](https://coveralls.io/repos/github/blegat/CDoubleDescription.jl/badge.svg?branch=master)](https://coveralls.io/github/blegat/CDoubleDescription.jl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/blegat/CDDLib.jl/badge.svg?branch=master)](https://coveralls.io/github/blegat/CDDLib.jl?branch=master)

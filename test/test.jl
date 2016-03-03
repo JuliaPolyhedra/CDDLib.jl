@@ -1,4 +1,4 @@
-using CDoubleDescription
+using CDDLib
 
 # returns extreme points of polyhedron Ax <= b
 function extremepoints(A,b)

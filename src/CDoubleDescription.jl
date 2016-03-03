@@ -1,4 +1,4 @@
-module CDoubleDescription
+module CDDLib
 
 using BinDeps
 importall Polyhedra
@@ -6,7 +6,7 @@ importall Polyhedra
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
   include("../deps/deps.jl")
 else
-  error("CDoubleDescription not properly installed. Please run Pkg.build(\"CDoubleDescription\")")
+  error("CDDLib not properly installed. Please run Pkg.build(\"CDDLib\")")
 end
 
 macro dd_ccall(f, args...)
