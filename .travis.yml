@@ -6,6 +6,10 @@ os:
 julia:
   - release
   - nightly
+addons:
+  apt:
+    packages:
+      - libgmp-dev
 notifications:
   email: false
 before_script:
