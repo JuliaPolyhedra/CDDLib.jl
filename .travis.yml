@@ -2,20 +2,10 @@
 language: julia
 os:
   - linux
-  - osx
+#  - osx # osx nightly is failing: https://github.com/travis-ci/travis-ci/issues/5740
 julia:
   - release
   - nightly
-addons:
-  apt:
-    sources:
-      - kubuntu-backports
-    packages:
-      - libgmp-dev
-      - xorg-dev
-      - libglu1-mesa-dev
-      - cmake
-      - libxxf86vm-dev
 notifications:
   email: false
 before_script:
