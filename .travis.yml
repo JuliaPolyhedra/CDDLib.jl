@@ -2,14 +2,13 @@
 language: julia
 os:
   - linux
-#  - osx # osx nightly is failing: https://github.com/travis-ci/travis-ci/issues/5740
+  - osx
 julia:
   - release
   - nightly
 addons:
-  apt:
-    packages:
-      - libgmp-dev
+  apt_packages:
+    - libgmp-dev
 notifications:
   email: false
 before_script:
