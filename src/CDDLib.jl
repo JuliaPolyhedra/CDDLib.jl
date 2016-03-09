@@ -33,7 +33,7 @@ end
 
 @dd_ccall set_global_constants Void ()
 
-import Base.show, Base.convert, Base.push!
+import Base.show, Base.convert, Base.push!, Base.eltype
 
 include("cddtypes.jl")
 

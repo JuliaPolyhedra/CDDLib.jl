@@ -1,65 +1,65 @@
-function dd_inputappend(poly::CDDPolyhedra{Cdouble}, matrix::Ptr{Cdd_MatrixData{Cdouble}})
+function dd_inputappend(poly::Ptr{Cdd_PolyhedraData{Cdouble}}, matrix::Ptr{Cdd_MatrixData{Cdouble}})
   err = Ref{Cdd_ErrorType}(0)
-  polyptr = Ref{Ptr{Cdd_PolyhedraData{Cdouble}}}(poly.poly)
+  polyptr = Ref{Ptr{Cdd_PolyhedraData{Cdouble}}}(poly)
   found = (@ddf_ccall DDInputAppend Cdd_boolean (Ref{Ptr{Cdd_PolyhedraData{Cdouble}}}, Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) polyptr matrix err)
-  poly.poly = polyptr[]
   myerror(err[])
   if !Bool(found)
     println("Double description not found")
   end
+  polyptr[]
 end
 
-function dd_inputappend(poly::CDDPolyhedra{GMPRational}, matrix::Ptr{Cdd_MatrixData{GMPRational}})
+function dd_inputappend(poly::Ptr{Cdd_PolyhedraData{GMPRational}}, matrix::Ptr{Cdd_MatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
-  polyptr = Ref{Ptr{Cdd_PolyhedraData{GMPRational}}}(poly.poly)
+  polyptr = Ref{Ptr{Cdd_PolyhedraData{GMPRational}}}(poly)
   found = (@dd_ccall DDInputAppend Cdd_boolean (Ref{Ptr{Cdd_PolyhedraData{GMPRational}}}, Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) polyptr matrix err)
-  poly.poly = polyptr[]
   myerror(err[])
   if !Bool(found)
     println("Double description not found") # FIXME
   end
+  polyptr[]
 end
 
-function Base.push!{T<:MyType}(poly::CDDPolyhedra{T}, ine::CDDInequalityMatrix{T})
+function Base.push!{N, T<:MyType}(poly::CDDPolyhedra{N, T}, ine::CDDInequalityMatrix{N, T})
   if !poly.inequality
     switchinputtype!(poly)
   end
-  dd_inputappend(poly, ine.matrix)
+  poly.poly = dd_inputappend(poly.poly, ine.matrix)
 end
 
-function Base.push!{T<:MyType}(poly::CDDPolyhedra{T}, ext::CDDGeneratorMatrix{T})
+function Base.push!{N, T<:MyType}(poly::CDDPolyhedra{N, T}, ext::CDDGeneratorMatrix{N, T})
   if poly.inequality
     switchinputtype!(poly)
   end
-  dd_inputappend(poly, ext.matrix)
+  poly.poly = dd_inputappend(poly.poly, ext.matrix)
 end
 
-function Base.push!{T<:MyType,S<:Real}(poly::CDDPolyhedra{T}, desc::Description{S})
-  Base.push!(poly, convert(CDDMatrix{T}, desc))
+function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, desc::Description{S})
+  Base.push!(poly, convert(CDDMatrix{N, T}, desc))
 end
 
 # Redundant
-function dd_redundant(matrix::CDDMatrix{Cdouble}, i::Cdd_rowrange)
+function dd_redundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
   err = Ref{Cdd_ErrorType}(0)
-  certificate = Array{Cdouble, 1}(size(matrix, 2))
-  found = (@ddf_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix.matrix  i certificate err)
+  certificate = Array{Cdouble, 1}(len)
+  found = (@ddf_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix  i certificate err)
   myerror(err[])
   (found, certificate)
 end
-function dd_redundant(matrix::CDDMatrix{GMPRational}, i::Cdd_rowrange)
+function dd_redundant(matrix::Ptr{Cdd_MatrixData{GMPRational}}, i::Cdd_rowrange, len::Int)
   err = Ref{Cdd_ErrorType}(0)
-  certificateGMPRat = zeros(GMPRational, size(matrix, 2))
-  found = (@dd_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix.matrix i certificateGMPRat err)
+  certificateGMPRat = zeros(GMPRational, len)
+  found = (@dd_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix i certificateGMPRat err)
   myerror(err[])
   certificate = Array{Rational{BigInt}}(certificateGMPRat)
   myfree(certificateGMPRat)
   (found, certificate)
 end
-function redundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
+function redundant(matrix::CDDMatrix, i::Integer)
   if dd_set_member(unsafe_load(matrix.matrix).linset, i)
     error("Redundancy check for equality not supported")
   end
-  (found, certificate) = dd_redundant(matrix, Cdd_rowrange(i))
+  (found, certificate) = dd_redundant(matrix.matrix, Cdd_rowrange(i), size(matrix, 2))
   # FIXME what is the meaning of the first element of the certificate ?
   (Bool(found), certificate[2:end])
 end
@@ -68,51 +68,51 @@ function redundant{S<:Real}(desc::Description{S}, i::Integer)
 end
 
 # Redundant rows
-function dd_redundantrows(matrix::CDDMatrix{Cdouble})
+function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{Cdouble}})
   err = Ref{Cdd_ErrorType}(0)
-  redundant_list = (@ddf_ccall RedundantRows Ptr{Culong} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix.matrix err)
+  redundant_list = (@ddf_ccall RedundantRows Ptr{Culong} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   redundant_list
 end
-function dd_redundantrows(matrix::CDDMatrix{GMPRational})
+function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
-  redundant_list = (@dd_ccall RedundantRows Ptr{Culong} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix.matrix err)
+  redundant_list = (@dd_ccall RedundantRows Ptr{Culong} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
   redundant_list
 end
-function redundantrows{T<:MyType}(matrix::CDDMatrix{T})
-  Base.convert(IntSet, CDDSet(dd_redundantrows(matrix), size(matrix, 2)))
+function redundantrows(matrix::CDDMatrix)
+  Base.convert(IntSet, CDDSet(dd_redundantrows(matrix.matrix), size(matrix, 2)))
 end
-function redundantrows{S<:Real}(desc::Description{S})
+function redundantrows(desc::Description)
   redundantrows(Base.convert(CDDMatrix, desc))
 end
 
 # Strictly redundant
-function dd_sredundant(matrix::CDDMatrix{Cdouble}, i::Cdd_rowrange)
+function dd_sredundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
   err = Ref{Cdd_ErrorType}(0)
-  certificate = Array{Cdouble, 1}(size(matrix, 2))
-  found = (@ddf_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix.matrix  i certificate err)
+  certificate = Array{Cdouble, 1}(len)
+  found = (@ddf_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix  i certificate err)
   myerror(err[])
   (found, certificate)
 end
-function dd_sredundant(matrix::CDDMatrix{GMPRational}, i::Cdd_rowrange)
+function dd_sredundant(matrix::Ptr{Cdd_MatrixData{GMPRational}}, i::Cdd_rowrange, len::Int)
   err = Ref{Cdd_ErrorType}(0)
-  certificateGMPRat = zeros(GMPRational, size(matrix, 2))
-  found = (@dd_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix.matrix i certificateGMPRat err)
+  certificateGMPRat = zeros(GMPRational, len)
+  found = (@dd_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix i certificateGMPRat err)
   myerror(err[])
   certificate = Array{Rational{BigInt}}(certificateGMPRat)
   myfree(certificateGMPRat)
   (found, certificate)
 end
-function sredundant{T<:MyType}(matrix::CDDMatrix{T}, i::Integer)
+function sredundant(matrix::CDDMatrix, i::Integer)
   if dd_set_member(unsafe_load(matrix.matrix).linset, i)
     error("Redundancy check for equality not supported")
   end
-  (found, certificate) = dd_sredundant(matrix, Cdd_rowrange(i))
+  (found, certificate) = dd_sredundant(matrix.matrix, Cdd_rowrange(i), size(matrix, 2))
   # FIXME what is the meaning of the first element of the certificate ? 1 for point, 0 for ray ?
   (Bool(found), certificate[2:end])
 end
-function sredundant{S<:Real}(desc::Description{S}, i::Integer)
+function sredundant(desc::Description, i::Integer)
   sredundant(Base.convert(CDDMatrix, desc), i)
 end
 
@@ -136,7 +136,7 @@ function dd_matrixcanonicalize(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   myerror(err[])
   (found, matptr[], impl_linset[], redset[], newpos[])
 end
-function canonicalize!{T<:MyType}(matrix::CDDMatrix{T})
+function canonicalize!(matrix::CDDMatrix)
   (found, matrix.matrix, impl_linset, redset, newpos) = dd_matrixcanonicalize(matrix.matrix)
   if !Bool(found)
     error("Canonicalization not found")
@@ -164,7 +164,7 @@ function dd_matrixcanonicalizelinearity(matrix::Ptr{Cdd_MatrixData{GMPRational}}
   myerror(err[])
   (found, matptr[], impl_linset[], newpos[])
 end
-function canonicalizelinearity!{T<:MyType}(matrix::CDDMatrix{T})
+function canonicalizelinearity!(matrix::CDDMatrix)
   (found, matrix.matrix, impl_linset, newpos) = dd_matrixcanonicalizelinearity(matrix.matrix)
   if !Bool(found)
     error("Linearity canonicalization not found")
@@ -191,7 +191,7 @@ function dd_matrixredundancyremove(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   println(matptr[])
   (found, matptr[], redset[], newpos[])
 end
-function redundancyremove!{T<:MyType}(matrix::CDDMatrix{T})
+function redundancyremove!(matrix::CDDMatrix)
   println("before $(matrix.matrix)")
   (found, matrix.matrix, redset, newpos) = dd_matrixredundancyremove(matrix.matrix)
   println("after $(matrix.matrix)")
@@ -203,49 +203,48 @@ end
 
 # Fourier Elimination
 
-function dd_fourierelimination(matrix::CDDInequalityMatrix{Cdouble})
+function dd_fourierelimination(matrix::Ptr{Cdd_MatrixData{Cdouble}})
   err = Ref{Cdd_ErrorType}(0)
-  newmatrix = (@ddf_ccall FourierElimination Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix.matrix err)
+  newmatrix = (@ddf_ccall FourierElimination Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
-  CDDInequalityMatrix{Cdouble}(newmatrix)
+  newmatrix
 end
-function dd_fourierelimination(matrix::CDDInequalityMatrix{GMPRational})
+function dd_fourierelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
-  newmatrix = (@dd_ccall FourierElimination Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix.matrix err)
+  newmatrix = (@dd_ccall FourierElimination Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
   myerror(err[])
-  CDDInequalityMatrix{GMPRational}(newmatrix)
+  newmatrix
 end
-function fourierelimination{T<:MyType}(matrix::CDDInequalityMatrix{T})
-  dd_fourierelimination(matrix)
+function fourierelimination{N, T}(matrix::CDDInequalityMatrix{N, T})
+  CDDInequalityMatrix{N-1, T}(dd_fourierelimination(matrix.matrix))
 end
-function fourierelimination{S<:Real}(ine::InequalityDescription{S})
+function fourierelimination(ine::InequalityDescription)
   fourierelimination(Base.convert(CDDInequalityMatrix, ine))
 end
 
 # Block Elimination
 
-function dd_blockelimination(matrix::CDDInequalityMatrix{Cdouble}, delset::Cdd_colset)
+function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{Cdouble}}, delset::Cdd_colset)
   err = Ref{Cdd_ErrorType}(0)
-  newmatrix = (@ddf_ccall BlockElimination Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_colset, Ref{Cdd_ErrorType}) matrix.matrix delset err)
+  newmatrix = (@ddf_ccall BlockElimination Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_colset, Ref{Cdd_ErrorType}) matrix delset err)
   myerror(err[])
-  CDDInequalityMatrix{Cdouble}(newmatrix)
+  newmatrix
 end
-function dd_blockelimination(matrix::CDDInequalityMatrix{GMPRational}, delset::Cdd_colset)
+function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}}, delset::Cdd_colset)
   err = Ref{Cdd_ErrorType}(0)
-  newmatrix = (@dd_ccall BlockElimination Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_colset, Ref{Cdd_ErrorType}) matrix.matrix delset err)
+  newmatrix = (@dd_ccall BlockElimination Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_colset, Ref{Cdd_ErrorType}) matrix delset err)
   myerror(err[])
-  CDDInequalityMatrix{GMPRational}(newmatrix)
+  newmatrix
 end
-function blockelimination{T<:MyType}(matrix::CDDInequalityMatrix{T}, delset::IntSet=IntSet([size(matrix, 2)]-1))
-  nvars = size(matrix, 2)
-  if last(delset) > nvars
+function blockelimination{N, T}(matrix::CDDInequalityMatrix{N, T}, delset::IntSet=IntSet([N]))
+  if last(delset) > N
     error("Invalid variable to eliminate")
   end
   # offset of 1 because 1 is for the first column of the matrix
   # (indicating the linearity) so 2 is the first dimension
-  dd_blockelimination(matrix, CDDSet(delset, nvars+1, 1).s)
+  CDDInequalityMatrix{N-length(delset), T}(dd_blockelimination(matrix.matrix, CDDSet(delset, N+1, 1).s))
 end
-function blockelimination{S<:Real}(ine::InequalityDescription{S}, delset::IntSet=IntSet([size(ine.A, 2)-1]))
+function blockelimination(ine::InequalityDescription, delset::IntSet=IntSet([fulldim(ine)]))
   blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)
 end
 

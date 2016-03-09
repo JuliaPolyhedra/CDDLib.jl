@@ -64,14 +64,18 @@ function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
   matrix
 end
 
-abstract CDDMatrix{T <: MyType}
+abstract CDDMatrix{N, T <: MyType}
 
-function Base.size{T<:MyType}(matrix::CDDMatrix{T})
+fulldim{N, T}(matrix::CDDMatrix{N, T}) = N
+eltype{N, T}(matrix::CDDMatrix{N, T}) = T
+
+function Base.size{N, T<:MyType}(matrix::CDDMatrix{N, T})
   mat = unsafe_load(matrix.matrix)
-  (Int64(mat.rowsize), Int64(mat.colsize))
+  @assert Int(mat.colsize) == N+1
+  (Int(mat.rowsize), Int(mat.colsize))
 end
 
-Base.size{T<:MyType}(matrix::CDDMatrix{T}, i::Integer) = Base.size(matrix)[i]
+Base.size{N, T<:MyType}(matrix::CDDMatrix{N, T}, i::Integer) = (i == 2 ? N+1 : Base.size(matrix)[i])
 
 function dd_freematrix(matrix::Ptr{Cdd_MatrixData{Cdouble}})
   @ddf_ccall FreeMatrix Void (Ptr{Cdd_MatrixData{Cdouble}},) matrix
@@ -79,11 +83,11 @@ end
 function dd_freematrix(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   @dd_ccall FreeMatrix Void (Ptr{Cdd_MatrixData{GMPRational}},) matrix
 end
-function myfree{T<:MyType}(matrix::CDDMatrix{T})
+function myfree(matrix::CDDMatrix)
   dd_freematrix(matrix.matrix)
 end
 
-type CDDInequalityMatrix{T <: MyType} <: CDDMatrix{T}
+type CDDInequalityMatrix{N, T <: MyType} <: CDDMatrix{N, T}
   matrix::Ptr{Cdd_MatrixData{T}}
 
   function CDDInequalityMatrix(matrix::Ptr{Cdd_MatrixData{T}})
@@ -93,13 +97,13 @@ type CDDInequalityMatrix{T <: MyType} <: CDDMatrix{T}
   end
 end
 
-CDDInequalityMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{T}(matrix)
+CDDInequalityMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, T}(matrix)
 
 function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
   true
 end
 
-type CDDGeneratorMatrix{T <: MyType} <: CDDMatrix{T}
+type CDDGeneratorMatrix{N, T <: MyType} <: CDDMatrix{N, T}
   matrix::Ptr{Cdd_MatrixData{T}}
 
   function CDDGeneratorMatrix(matrix::Ptr{Cdd_MatrixData{T}})
@@ -109,7 +113,7 @@ type CDDGeneratorMatrix{T <: MyType} <: CDDMatrix{T}
   end
 end
 
-CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{T}(matrix)
+CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{unsafe_load(matrix).colsize-1, T}(matrix)
 
 function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
   false

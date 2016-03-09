@@ -12,18 +12,19 @@ type CDDLibrary <: PolyhedraLibrary
   end
 end
 
-type CDDPolyhedron{T<:MyType} <: Polyhedron
-  ine::Nullable{CDDInequalityMatrix{T}}
-  ext::Nullable{CDDGeneratorMatrix{T}}
-  poly::Nullable{CDDPolyhedra{T}}
+type CDDPolyhedron{N, T} <: Polyhedron{N, T}
+  # The type of the CDDMatrix and CDDPolyhedra is not especially T !
+  ine::Nullable{CDDInequalityMatrix{N}}
+  ext::Nullable{CDDGeneratorMatrix{N}}
+  poly::Nullable{CDDPolyhedra{N}}
   linearitydetected::Bool
   noredundantinequality::Bool
   noredundantgenerator::Bool
 
-  function CDDPolyhedron(ine::CDDInequalityMatrix{T})
+  function CDDPolyhedron(ine::CDDInequalityMatrix)
     new(ine, nothing, nothing, false, false, false)
   end
-  function CDDPolyhedron(ext::CDDGeneratorMatrix{T})
+  function CDDPolyhedron(ext::CDDGeneratorMatrix)
     new(nothing, ext, nothing, false, false, false)
   end
 # function CDDPolyhedron(poly::CDDPolyhedra{T})
@@ -31,8 +32,8 @@ type CDDPolyhedron{T<:MyType} <: Polyhedron
 # end
 end
 
-CDDPolyhedron{T<:MyType}(matrix::CDDMatrix{T}) = CDDPolyhedron{T}(matrix)
-call{T<:MyType}(::Type{CDDPolyhedron{T}}, desc::Description) = CDDPolyhedron{T}(CDDMatrix{T}(desc))
+CDDPolyhedron{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedron{N, T}(matrix)
+call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, desc::Description) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(desc))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -70,15 +71,15 @@ function clearfield!(p::CDDPolyhedron)
   noredundantinequality = false
   noredundantgenerator = false
 end
-function updateine!{T<:MyType}(p::CDDPolyhedron{T}, ine::CDDInequalityMatrix{T})
+function updateine!{N, T<:MyType}(p::CDDPolyhedron{N, T}, ine::CDDInequalityMatrix{N, T})
   clearfield!(p)
   p.ine = ine
 end
-function updateext!{T<:MyType}(p::CDDPolyhedron{T}, ext::CDDGeneratorMatrix{T})
+function updateext!{N, T<:MyType}(p::CDDPolyhedron{N, T}, ext::CDDGeneratorMatrix{N, T})
   clearfield!(p)
   p.ext = ext
 end
-function updatepoly!{T<:MyType}(p::CDDPolyhedron{T}, poly::CDDPolyhedra{T})
+function updatepoly!{N, T<:MyType}(p::CDDPolyhedron{N, T}, poly::CDDPolyhedra{N, T})
   clearfield!(p)
   p.poly = poly
 end
@@ -88,41 +89,38 @@ function polyhedron(desc::Description, lib::CDDLibrary)
   CDDPolyhedron(desc, lib.precision)
 end
 
-getlibrary(p::CDDPolyhedron{Cdouble}) = CDDLibrary(:float)
-getlibrary(p::CDDPolyhedron{GMPRational}) = CDDLibrary(:exact)
+# Be the default library
+getlibraryfor{T<:Real}(::Type{T}) = CDDLibrary(:exact)
+getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
+getlibraryfor{T<:AbstractFloat}(::Type{T}) = CDDLibrary(:float)
+getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
-exacttype{T<:Real}(::Type{T}) = GMPRational
-exacttype{T<:AbstractFloat}(::Type{T}) = Cdouble
-
-function CDDPolyhedron{T<:Real}(desc::Description{T}, precision=:float)
+function CDDPolyhedron(desc::Description, precision=:float)
   if !(precision in (:float, :exact))
     error("precision should be :float or :exact, you gave $precision")
   end
-  if precision == :float
-    CDDPolyhedron{Cdouble}(CDDMatrix{Cdouble}(desc))
-  else
-    S = exacttype(T)
-    CDDPolyhedron{S}(CDDMatrix{S}(desc))
-  end
+  N = fulldim(desc)
+  T = precision == :float ? Cdouble : GMPRational
+  CDDPolyhedron{N, T}(CDDMatrix{N, T}(desc))
 end
 
 function inequalitiesarecomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
-function getinequalities(p::CDDPolyhedron{Cdouble})
+function getinequalities{N}(p::CDDPolyhedron{N, Cdouble})
   InequalityDescription(getine(p))
 end
-function getinequalities(p::CDDPolyhedron{GMPRational})
+function getinequalities{N}(p::CDDPolyhedron{N, GMPRational})
   InequalityDescription{Rational{BigInt}}(InequalityDescription(getine(p)))
 end
 
 function generatorsarecomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
-function getgenerators(p::CDDPolyhedron{Cdouble})
+function getgenerators{N}(p::CDDPolyhedron{N, Cdouble})
   GeneratorDescription(getext(p))
 end
-function getgenerators(p::CDDPolyhedron{GMPRational})
+function getgenerators{N}(p::CDDPolyhedron{N, GMPRational})
   GeneratorDescription{Rational{BigInt}}(GeneratorDescription(getext(p)))
 end
 
@@ -138,9 +136,6 @@ end
 
 function eliminate(p::CDDPolyhedron, delset::IntSet)
   CDDPolyhedron(eliminate(getine(p), delset))
-end
-function eliminate!(p::CDDPolyhedron, delset::IntSet)
-  updateine!(p, (eliminate(getine(p), delset)))
 end
 
 # FIXME Would detect linearities for generators make sense/be usefull ?
