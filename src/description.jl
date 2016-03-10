@@ -59,12 +59,14 @@ Base.convert{N, T<:MyType}(::Type{CDDMatrix{N, T}}, ext::GeneratorDescription{T}
 # Specified T
 Base.convert{N, T<:MyType, S<:Real}(::Type{CDDMatrix{N, T}}, desc::Description{S}) = Base.convert(CDDMatrix{N, T}, Base.convert(Description{T}, desc))
 # Unspecified T
-Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Description{S}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Description{GMPRational}, desc))
-Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Description{Rational{S}}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Description{GMPRational}, desc))
-Base.convert{S<:BigFloat}(::Type{CDDMatrix}, desc::Description{S}) = error("not implemented yet")
-Base.convert(::Type{CDDMatrix}, desc::Description{Float32}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, Base.convert(Description{Cdouble}, desc))
-Base.convert(::Type{CDDMatrix}, desc::Description{Float64}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, desc)
-Base.convert(::Type{CDDMatrix}, desc::Description{GMPRational}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, desc)
+#Base.convert{S<:MyType}(::Type{CDDMatrix}, desc::Description{S}) = Base.convert(CDDMatrix{fulldim(desc), S}, desc)
+Base.convert{S}(::Type{CDDMatrix}, desc::Description{S})         = Base.convert(CDDMatrix{fulldim(desc), mytypefor(S)}, desc)
+# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Description{S}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Description{GMPRational}, desc))
+# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Description{Rational{S}}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Description{GMPRational}, desc))
+# Base.convert{S<:BigFloat}(::Type{CDDMatrix}, desc::Description{S}) = error("not implemented yet")
+# Base.convert(::Type{CDDMatrix}, desc::Description{Float32}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, Base.convert(Description{Cdouble}, desc))
+# Base.convert(::Type{CDDMatrix}, desc::Description{Float64}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, desc)
+# Base.convert(::Type{CDDMatrix}, desc::Description{GMPRational}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, desc)
 
 Base.convert{T<:Real}(::Type{CDDInequalityMatrix}, ine::InequalityDescription{T}) = Base.convert(CDDMatrix, ine)
 Base.convert{T<:Real}(::Type{CDDGeneratorMatrix}, ext::GeneratorDescription{T}) = Base.convert(CDDMatrix, ext)
@@ -126,5 +128,7 @@ end
 
 Base.convert{N, T<:MyType}(::Type{Description{T}}, ine::CDDGeneratorMatrix{N, T}) = Base.convert(GeneratorDescription{T}, ine)
 
+Base.convert{N, T<:MyType, S<:Real}(::Type{InequalityDescription{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
+Base.convert{N, T<:MyType, S<:Real}(::Type{GeneratorDescription{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
 Base.convert{N, T<:MyType, S<:Real}(::Type{Description{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
 Base.convert{N, T<:MyType}(::Type{Description}, matrix::CDDMatrix{N, T}) = Base.convert(Description{T}, matrix)

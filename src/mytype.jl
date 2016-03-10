@@ -135,6 +135,9 @@ promote_rule{T<:Integer}(::Type{GMPRational}, ::Type{T}) = GMPRational
 ==(x::GMPRational, y::GMPRational) = Rational(x) == Rational(y)
 
 typealias MyType Union{GMPRational, Cdouble}
+mytypefor{T <: Real}(::Type{T})          = GMPRational
+mytypefor{T <: AbstractFloat}(::Type{T}) = Cdouble
+mytypefor{T <: MyType}(::Type{T})        = T
 
 # Used by mathprogbase.jl
 function myconvert(::Type{Array}, x::Ptr{Cdouble}, n)
