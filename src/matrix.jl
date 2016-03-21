@@ -51,6 +51,13 @@ function dd_setmatrixrepresentationtype(matrix::Ptr{Cdd_MatrixData{GMPRational}}
   @dd_ccall SetMatrixRepresentationType Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
 end
 
+function dd_matrixcopy(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+  @ddf_ccall MatrixCopy Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}},) matrix
+end
+function dd_matrixcopy(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+  @dd_ccall MatrixCopy Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}},) matrix
+end
+
 
 function initmatrix{T<:MyType}(M::Array{T, 2}, linset, inequality::Bool)
   m = Cdd_rowrange(size(M, 1))
@@ -99,6 +106,10 @@ end
 
 CDDInequalityMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, T}(matrix)
 
+function Base.copy{N, T}(matrix::CDDInequalityMatrix{N, T})
+  CDDInequalityMatrix{N, T}(dd_matrixcopy(matrix.matrix))
+end
+
 function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
   true
 end
@@ -114,6 +125,10 @@ type CDDGeneratorMatrix{N, T <: MyType} <: CDDMatrix{N, T}
 end
 
 CDDGeneratorMatrix{T<:MyType}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{unsafe_load(matrix).colsize-1, T}(matrix)
+
+function Base.copy{N, T}(matrix::CDDGeneratorMatrix{N, T})
+  CDDGeneratorMatrix{N, T}(dd_matrixcopy(matrix.matrix))
+end
 
 function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
   false

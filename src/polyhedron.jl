@@ -84,6 +84,30 @@ function updatepoly!{N}(p::CDDPolyhedron{N}, poly::CDDPolyhedra{N})
   p.poly = poly
 end
 
+function Base.copy{N, T}(p::CDDPolyhedron{N, T})
+  pcopy = nothing
+  if !isnull(p.ine)
+    pcopy = CDDPolyhedron{N, T}(copy(get(p.ine)))
+  end
+  if !isnull(p.ext)
+    if pcopy == nothing
+      pcopy = CDDPolyhedron{N, T}(copy(get(p.ext)))
+    else
+      pcopy.ext = copy(get(p.ext))
+    end
+  end
+  if pcopy == nothing
+    # copy of ine and ext may be not necessary here
+    # but I do it to be sure
+    pcopy = CDDPolyhedron{N, T}(copy(getine(p)))
+    pcopy.ext = copy(getext(p))
+  end
+  pcopy.linearitydetected     = p.linearitydetected
+  pcopy.noredundantinequality = p.noredundantinequality
+  pcopy.noredundantgenerator  = p.noredundantgenerator
+  pcopy
+end
+
 # Implementation of Polyhedron's mandatory interface
 function polyhedron(desc::Description, lib::CDDLibrary)
   CDDPolyhedron(desc, lib.precision)
