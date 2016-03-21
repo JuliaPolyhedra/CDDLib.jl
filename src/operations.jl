@@ -34,7 +34,7 @@ function Base.push!{N, T<:MyType}(poly::CDDPolyhedra{N, T}, ext::CDDGeneratorMat
   poly.poly = dd_inputappend(poly.poly, ext.matrix)
 end
 
-function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, desc::Description{S})
+function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, desc::Representation{S})
   Base.push!(poly, convert(CDDMatrix{N, T}, desc))
 end
 
@@ -63,7 +63,7 @@ function redundant(matrix::CDDMatrix, i::Integer)
   # FIXME what is the meaning of the first element of the certificate ?
   (Bool(found), certificate[2:end])
 end
-function redundant{S<:Real}(desc::Description{S}, i::Integer)
+function redundant{S<:Real}(desc::Representation{S}, i::Integer)
   redundant(Base.convert(CDDMatrix, desc), i)
 end
 
@@ -83,7 +83,7 @@ end
 function redundantrows(matrix::CDDMatrix)
   Base.convert(IntSet, CDDSet(dd_redundantrows(matrix.matrix), size(matrix, 2)))
 end
-function redundantrows(desc::Description)
+function redundantrows(desc::Representation)
   redundantrows(Base.convert(CDDMatrix, desc))
 end
 
@@ -112,7 +112,7 @@ function sredundant(matrix::CDDMatrix, i::Integer)
   # FIXME what is the meaning of the first element of the certificate ? 1 for point, 0 for ray ?
   (Bool(found), certificate[2:end])
 end
-function sredundant(desc::Description, i::Integer)
+function sredundant(desc::Representation, i::Integer)
   sredundant(Base.convert(CDDMatrix, desc), i)
 end
 
@@ -218,7 +218,7 @@ end
 function fourierelimination{N, T}(matrix::CDDInequalityMatrix{N, T})
   CDDInequalityMatrix{N-1, T}(dd_fourierelimination(matrix.matrix))
 end
-function fourierelimination(ine::InequalityDescription)
+function fourierelimination(ine::HRepresentation)
   fourierelimination(Base.convert(CDDInequalityMatrix, ine))
 end
 
@@ -244,7 +244,7 @@ function blockelimination{N, T}(matrix::CDDInequalityMatrix{N, T}, delset::IntSe
   # (indicating the linearity) so 2 is the first dimension
   CDDInequalityMatrix{N-length(delset), T}(dd_blockelimination(matrix.matrix, CDDSet(delset, N+1, 1).s))
 end
-function blockelimination(ine::InequalityDescription, delset::IntSet=IntSet([fulldim(ine)]))
+function blockelimination(ine::HRepresentation, delset::IntSet=IntSet([fulldim(ine)]))
   blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)
 end
 

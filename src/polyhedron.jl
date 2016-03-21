@@ -33,7 +33,7 @@ type CDDPolyhedron{N, T} <: Polyhedron{N, T}
 end
 
 CDDPolyhedron{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedron{N, T}(matrix)
-call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, desc::Description) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(desc))
+call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, desc::Representation) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(desc))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -109,7 +109,7 @@ function Base.copy{N, T}(p::CDDPolyhedron{N, T})
 end
 
 # Implementation of Polyhedron's mandatory interface
-function polyhedron(desc::Description, lib::CDDLibrary)
+function polyhedron(desc::Representation, lib::CDDLibrary)
   CDDPolyhedron(desc, lib.precision)
 end
 
@@ -119,11 +119,11 @@ getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
 getlibraryfor{T<:AbstractFloat}(::Type{T}) = CDDLibrary(:float)
 getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
-function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, desc::Description{DT})
+function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, desc::Representation{DT})
   CDDPolyhedron{N, T}(CDDMatrix{N, mytypefor(T)}(desc))
 end
 
-function CDDPolyhedron{DT}(desc::Description{DT}, precision=:float)
+function CDDPolyhedron{DT}(desc::Representation{DT}, precision=:float)
   if !(precision in (:float, :exact))
     error("precision should be :float or :exact, you gave $precision")
   end
@@ -136,14 +136,14 @@ function inequalitiesarecomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
 function getinequalities{N, T}(p::CDDPolyhedron{N, T})
-  InequalityDescription{T}(getine(p))
+  HRepresentation{T}(getine(p))
 end
 
 function generatorsarecomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
 function getgenerators{N, T}(p::CDDPolyhedron{N, T})
-  GeneratorDescription{T}(getext(p))
+  VRepresentation{T}(getext(p))
 end
 
 function eliminate(ine::CDDInequalityMatrix, delset::IntSet)
@@ -197,11 +197,11 @@ function removeredundantgenerators!(p::CDDPolyhedron)
   end
 end
 
-function Base.push!(p::CDDPolyhedron, ine::InequalityDescription)
+function Base.push!(p::CDDPolyhedron, ine::HRepresentation)
   push!(getpoly(p, true), ine)
   updatepoly!(p, getpoly(p)) # invalidate others
 end
-function Base.push!(p::CDDPolyhedron, ext::GeneratorDescription)
+function Base.push!(p::CDDPolyhedron, ext::VRepresentation)
   push!(getpoly(p, false), ext)
   updatepoly!(p, getpoly(p)) # invalidate others
 end

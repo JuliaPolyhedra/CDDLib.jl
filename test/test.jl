@@ -2,9 +2,9 @@ using CDDLib
 
 # returns extreme points of polyhedron Ax <= b
 function extremepoints(A,b)
-    m = InequalityDescription(A, b)
+    m = HRepresentation(A, b)
     p = CDDPolyhedra(m)
-    EPs = Description{Rational{BigInt}}(copygenerators(p))
+    EPs = Representation{Rational{BigInt}}(copygenerators(p))
     splitvertexrays!(EPs)
     return EPs.V, EPs.R
 end

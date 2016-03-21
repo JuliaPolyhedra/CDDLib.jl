@@ -107,7 +107,7 @@ function optimize!(lpm::CDDMathProgModel)
     b = Array{GMPRational}(b)
   end
 
-  ine = InequalityDescription(A, b, linset)
+  ine = HRepresentation(A, b, linset)
 
   matrix = CDDMatrix(ine)
   dd_setmatrixobjective(matrix.matrix, lpm.sense == :Max ? dd_LPmax : dd_LPmin)

@@ -1,29 +1,29 @@
 import Base.round
 
-function myfree(ine::InequalityDescription{GMPRational})
+function myfree(ine::HRepresentation{GMPRational})
   myfree(ine.A)
   myfree(ine.b)
 end
 
-function myfree(desc::GeneratorDescription{GMPRational})
+function myfree(desc::VRepresentation{GMPRational})
   myfree(desc.V)
   myfree(desc.R)
 end
 
-# CDDMatrix -> Description
-InequalityDescription{N, T<:Real}(matrix::CDDInequalityMatrix{N, T}) = InequalityDescription{T}(matrix)
-GeneratorDescription{N, T<:Real}(matrix::CDDGeneratorMatrix{N, T}) = GeneratorDescription{T}(matrix)
+# CDDMatrix -> Representation
+HRepresentation{N, T<:Real}(matrix::CDDInequalityMatrix{N, T}) = HRepresentation{T}(matrix)
+VRepresentation{N, T<:Real}(matrix::CDDGeneratorMatrix{N, T}) = VRepresentation{T}(matrix)
 
-Base.convert{T}(::Type{Description{T}}, ine::InequalityDescription{GMPRational}) = Base.convert(InequalityDescription{T}, ine)
-Base.convert{T}(::Type{Description{T}}, ext::GeneratorDescription{GMPRational}) = Base.convert(GeneratorDescription{T}, ext)
+Base.convert{T}(::Type{Representation{T}}, ine::HRepresentation{GMPRational}) = Base.convert(HRepresentation{T}, ine)
+Base.convert{T}(::Type{Representation{T}}, ext::VRepresentation{GMPRational}) = Base.convert(VRepresentation{T}, ext)
 
-Base.convert{T}(::Type{InequalityDescription{T}}, ine::InequalityDescription{GMPRational}) = InequalityDescription{T}(Array{T}(ine.A), Array{T}(ine.b), ine.linset)
+Base.convert{T}(::Type{HRepresentation{T}}, ine::HRepresentation{GMPRational}) = HRepresentation{T}(Array{T}(ine.A), Array{T}(ine.b), ine.linset)
 
-Base.convert{T}(::Type{GeneratorDescription{T}}, ext::GeneratorDescription{GMPRational}) = GeneratorDescription{T}(Array{T}(ext.V), Array{T}(ext.R), ext.vertex, ext.Vlinset, ext.Rlinset)
+Base.convert{T}(::Type{VRepresentation{T}}, ext::VRepresentation{GMPRational}) = VRepresentation{T}(Array{T}(ext.V), Array{T}(ext.R), ext.vertex, ext.Vlinset, ext.Rlinset)
 
-# converters Description -> CDDMatrix
+# converters Representation -> CDDMatrix
 
-function Base.convert{N, T<:MyType}(::Type{CDDInequalityMatrix{N, T}}, ine::InequalityDescription{T})
+function Base.convert{N, T<:MyType}(::Type{CDDInequalityMatrix{N, T}}, ine::HRepresentation{T})
   if N != fulldim(ine)
     error("N should be equal to the number of columns of A")
   end
@@ -32,7 +32,7 @@ function Base.convert{N, T<:MyType}(::Type{CDDInequalityMatrix{N, T}}, ine::Ineq
   CDDInequalityMatrix{N, T}(matrix)
 end
 
-Base.convert{N, T<:MyType}(::Type{CDDMatrix{N, T}}, ine::InequalityDescription{T}) = Base.convert(CDDInequalityMatrix{N, T}, ine)
+Base.convert{N, T<:MyType}(::Type{CDDMatrix{N, T}}, ine::HRepresentation{T}) = Base.convert(CDDInequalityMatrix{N, T}, ine)
 
 function settoCarray{T<:MyType}(::Type{T}, set::IntSet, m::Integer)
   s = zeros(T, m)
@@ -42,7 +42,7 @@ function settoCarray{T<:MyType}(::Type{T}, set::IntSet, m::Integer)
   s
 end
 
-function Base.convert{N, T<:MyType}(::Type{CDDGeneratorMatrix{N, T}}, ext::GeneratorDescription{T})
+function Base.convert{N, T<:MyType}(::Type{CDDGeneratorMatrix{N, T}}, ext::VRepresentation{T})
   if N != fulldim(ext)
     error("N should be equal to the number of columns of V and R")
   end
@@ -54,25 +54,25 @@ function Base.convert{N, T<:MyType}(::Type{CDDGeneratorMatrix{N, T}}, ext::Gener
   CDDGeneratorMatrix(matrix)
 end
 
-Base.convert{N, T<:MyType}(::Type{CDDMatrix{N, T}}, ext::GeneratorDescription{T}) = Base.convert(CDDGeneratorMatrix{N, T}, ext)
+Base.convert{N, T<:MyType}(::Type{CDDMatrix{N, T}}, ext::VRepresentation{T}) = Base.convert(CDDGeneratorMatrix{N, T}, ext)
 
 # Specified T
-Base.convert{N, T<:MyType, S<:Real}(::Type{CDDMatrix{N, T}}, desc::Description{S}) = Base.convert(CDDMatrix{N, T}, Base.convert(Description{T}, desc))
+Base.convert{N, T<:MyType, S<:Real}(::Type{CDDMatrix{N, T}}, desc::Representation{S}) = Base.convert(CDDMatrix{N, T}, Base.convert(Representation{T}, desc))
 # Unspecified T
-#Base.convert{S<:MyType}(::Type{CDDMatrix}, desc::Description{S}) = Base.convert(CDDMatrix{fulldim(desc), S}, desc)
-Base.convert{S}(::Type{CDDMatrix}, desc::Description{S})         = Base.convert(CDDMatrix{fulldim(desc), mytypefor(S)}, desc)
-# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Description{S}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Description{GMPRational}, desc))
-# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Description{Rational{S}}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Description{GMPRational}, desc))
-# Base.convert{S<:BigFloat}(::Type{CDDMatrix}, desc::Description{S}) = error("not implemented yet")
-# Base.convert(::Type{CDDMatrix}, desc::Description{Float32}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, Base.convert(Description{Cdouble}, desc))
-# Base.convert(::Type{CDDMatrix}, desc::Description{Float64}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, desc)
-# Base.convert(::Type{CDDMatrix}, desc::Description{GMPRational}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, desc)
+#Base.convert{S<:MyType}(::Type{CDDMatrix}, desc::Representation{S}) = Base.convert(CDDMatrix{fulldim(desc), S}, desc)
+Base.convert{S}(::Type{CDDMatrix}, desc::Representation{S})         = Base.convert(CDDMatrix{fulldim(desc), mytypefor(S)}, desc)
+# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Representation{S}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Representation{GMPRational}, desc))
+# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Representation{Rational{S}}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Representation{GMPRational}, desc))
+# Base.convert{S<:BigFloat}(::Type{CDDMatrix}, desc::Representation{S}) = error("not implemented yet")
+# Base.convert(::Type{CDDMatrix}, desc::Representation{Float32}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, Base.convert(Representation{Cdouble}, desc))
+# Base.convert(::Type{CDDMatrix}, desc::Representation{Float64}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, desc)
+# Base.convert(::Type{CDDMatrix}, desc::Representation{GMPRational}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, desc)
 
-Base.convert{T<:Real}(::Type{CDDInequalityMatrix}, ine::InequalityDescription{T}) = Base.convert(CDDMatrix, ine)
-Base.convert{T<:Real}(::Type{CDDGeneratorMatrix}, ext::GeneratorDescription{T}) = Base.convert(CDDMatrix, ext)
+Base.convert{T<:Real}(::Type{CDDInequalityMatrix}, ine::HRepresentation{T}) = Base.convert(CDDMatrix, ine)
+Base.convert{T<:Real}(::Type{CDDGeneratorMatrix}, ext::VRepresentation{T}) = Base.convert(CDDMatrix, ext)
 
 
-# converters CDDMatrix -> Description
+# converters CDDMatrix -> Representation
 
 function extractAb(mat::Cdd_MatrixData{Cdouble})
   m = mat.rowsize
@@ -106,29 +106,29 @@ function extractAb(mat::Cdd_MatrixData{GMPRational})
   (Array{GMPRational}(b), Array{GMPRational}(A))
 end
 
-function Base.convert{N, T<:MyType}(::Type{InequalityDescription{T}}, matrix::CDDInequalityMatrix{N, T})
+function Base.convert{N, T<:MyType}(::Type{HRepresentation{T}}, matrix::CDDInequalityMatrix{N, T})
   mat = unsafe_load(matrix.matrix)
   @assert mat.representation == 1
 
   linset = Base.convert(IntSet, CDDSet(mat.linset, mat.rowsize))
   (b, A) = extractAb(mat)
-  InequalityDescription(-A, b, linset)
+  HRepresentation(-A, b, linset)
 end
 
-Base.convert{N, T<:MyType}(::Type{Description{T}}, ine::CDDInequalityMatrix{N, T}) = Base.convert(InequalityDescription{T}, ine)
+Base.convert{N, T<:MyType}(::Type{Representation{T}}, ine::CDDInequalityMatrix{N, T}) = Base.convert(HRepresentation{T}, ine)
 
-function Base.convert{N, T<:MyType}(::Type{GeneratorDescription{T}}, matrix::CDDGeneratorMatrix{N, T})
+function Base.convert{N, T<:MyType}(::Type{VRepresentation{T}}, matrix::CDDGeneratorMatrix{N, T})
   mat = unsafe_load(matrix.matrix)
   @assert mat.representation == 2
 
   linset = Base.convert(IntSet, CDDSet(mat.linset, mat.rowsize))
   (b, A) = extractAb(mat)
-  GeneratorDescription(A, myconvert(IntSet, b), linset)
+  VRepresentation(A, myconvert(IntSet, b), linset)
 end
 
-Base.convert{N, T<:MyType}(::Type{Description{T}}, ine::CDDGeneratorMatrix{N, T}) = Base.convert(GeneratorDescription{T}, ine)
+Base.convert{N, T<:MyType}(::Type{Representation{T}}, ine::CDDGeneratorMatrix{N, T}) = Base.convert(VRepresentation{T}, ine)
 
-Base.convert{N, T<:MyType, S<:Real}(::Type{InequalityDescription{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
-Base.convert{N, T<:MyType, S<:Real}(::Type{GeneratorDescription{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
-Base.convert{N, T<:MyType, S<:Real}(::Type{Description{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Description{S}, Base.convert(Description{T}, matrix))
-Base.convert{N, T<:MyType}(::Type{Description}, matrix::CDDMatrix{N, T}) = Base.convert(Description{T}, matrix)
+Base.convert{N, T<:MyType, S<:Real}(::Type{HRepresentation{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Representation{S}, Base.convert(Representation{T}, matrix))
+Base.convert{N, T<:MyType, S<:Real}(::Type{VRepresentation{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Representation{S}, Base.convert(Representation{T}, matrix))
+Base.convert{N, T<:MyType, S<:Real}(::Type{Representation{S}}, matrix::CDDMatrix{N, T}) = Base.convert(Representation{S}, Base.convert(Representation{T}, matrix))
+Base.convert{N, T<:MyType}(::Type{Representation}, matrix::CDDMatrix{N, T}) = Base.convert(Representation{T}, matrix)

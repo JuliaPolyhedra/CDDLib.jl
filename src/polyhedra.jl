@@ -81,12 +81,12 @@ function myfree{N}(poly::CDDPolyhedra{N, GMPRational})
 end
 
 CDDPolyhedra{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedra{N, T}(matrix)
-CDDPolyhedra{T<:Real}(desc::Description{T}) = CDDPolyhedra(CDDMatrix(desc))
+CDDPolyhedra{T<:Real}(desc::Representation{T}) = CDDPolyhedra(CDDMatrix(desc))
 
 function Base.convert{N, T<:MyType}(::Type{CDDPolyhedra{N, T}}, matrix::CDDMatrix{N, T})
   CDDPolyhedra{N, T}(matrix)
 end
-Base.convert{N, T<:Real}(::Type{CDDPolyhedra{N, T}}, desc::Description{T}) = CDDPolyhedra{N, T}(CDDMatrix(desc))
+Base.convert{N, T<:Real}(::Type{CDDPolyhedra{N, T}}, desc::Representation{T}) = CDDPolyhedra{N, T}(CDDMatrix(desc))
 
 function dd_copyinequalities(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
   @ddf_ccall CopyInequalities Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
