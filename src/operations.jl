@@ -38,6 +38,22 @@ function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, desc::Repres
   Base.push!(poly, convert(CDDMatrix{N, T}, desc))
 end
 
+function dd_matrixappend(matrix1::Ptr{Cdd_MatrixData{Cdouble}}, matrix2::Ptr{Cdd_MatrixData{Cdouble}})
+  @ddf_ccall MatrixAppend Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ptr{Cdd_MatrixData{Cdouble}}) matrix1 matrix2
+end
+function dd_matrixappend(matrix1::Ptr{Cdd_MatrixData{GMPRational}}, matrix2::Ptr{Cdd_MatrixData{GMPRational}})
+  @dd_ccall MatrixAppend Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ptr{Cdd_MatrixData{GMPRational}}) matrix1 matrix2
+end
+function matrixappend{N, T}(matrix1::CDDInequalityMatrix{N, T}, matrix2::CDDInequalityMatrix{N, T})
+  CDDInequalityMatrix{N, T}(dd_matrixappend(matrix1.matrix, matrix2.matrix))
+end
+function matrixappend{N, T}(matrix1::CDDGeneratorMatrix{N, T}, matrix2::CDDGeneratorMatrix{N, T})
+  CDDGeneratorMatrix{N, T}(dd_matrixappend(matrix1.matrix, matrix2.matrix))
+end
+function matrixappend{N, S, T}(matrix::CDDMatrix{N, T}, repr::Representation{S})
+  matrixappend(matrix, convert(CDDMatrix{N, T}, repr))
+end
+
 # Redundant
 function dd_redundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
   err = Ref{Cdd_ErrorType}(0)

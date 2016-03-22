@@ -198,12 +198,14 @@ function removeredundantgenerators!(p::CDDPolyhedron)
 end
 
 function Base.push!(p::CDDPolyhedron, ine::HRepresentation)
-  push!(getpoly(p, true), ine)
-  updatepoly!(p, getpoly(p)) # invalidate others
+  updateine!(p, matrixappend(getine(p), ine))
+  #push!(getpoly(p, true), ine) # too slow because it computes double description
+  #updatepoly!(p, getpoly(p)) # invalidate others
 end
 function Base.push!(p::CDDPolyhedron, ext::VRepresentation)
-  push!(getpoly(p, false), ext)
-  updatepoly!(p, getpoly(p)) # invalidate others
+  updateext!(p, matrixappend(getext(p), ext))
+  #push!(getpoly(p, false), ext) # too slow because it computes double description
+  #updatepoly!(p, getpoly(p)) # invalidate others
 end
 
 function isredundantinequality(p::CDDPolyhedron, i::Integer)
