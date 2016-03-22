@@ -235,3 +235,50 @@ end
 function getredundantgenerators(p::CDDPolyhedron)
   redundantrows(getext(p))
 end
+
+type CDDLPPolyhedron{N, T} <: LPPolyhedron{N, T}
+  ine::CDDInequalityMatrix{N}
+  has_objective::Bool
+
+  objval
+  solution
+  status
+end
+
+function LinearQuadraticModel{N, T}(p::CDDPolyhedron{N, T})
+  CDDLPPolyhedron{N, T}(getine(p), false, nothing, nothing, nothing)
+end
+function loadproblem!(lpm::CDDLPPolyhedron, obj, sense)
+  if sum(abs(obj)) != 0
+    setobjective(lpm.ine, obj, sense)
+    lpm.has_objective = true
+  end
+end
+function optimize!(lpm::CDDLPPolyhedron)
+  if lpm.has_objective
+    lp = matrix2lp(lpm.ine)
+  else
+    lp = matrix2feasibility(lpm.ine)
+  end
+  lpsolve(lp)
+  sol = copylpsolution(lp)
+  lpm.status = simplestatus(sol)
+  # We have just called lpsolve so it shouldn't be Undecided
+  # if no error occured
+  lpm.status == :Undecided && (lpm.status = :Error)
+  lpm.objval = getobjval(sol)
+  lpm.solution = getsolution(sol)
+end
+
+function status(lpm::CDDLPPolyhedron)
+  lpm.status
+end
+function getobjval(lpm::CDDLPPolyhedron)
+  lpm.objval
+end
+function getsolution(lpm::CDDLPPolyhedron)
+  copy(lpm.solution)
+end
+function getunboundedray(lpm::CDDLPPolyhedron)
+  copy(lpm.solution)
+end

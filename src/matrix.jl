@@ -114,6 +114,13 @@ function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
   true
 end
 
+function setobjective{N, T}(matrix::CDDInequalityMatrix{N, T}, c, sense)
+  dd_setmatrixobjective(matrix.matrix, sense == :Max ? dd_LPmax : dd_LPmin)
+  obj = [zero(T); Vector{T}(c)]
+  dd_copyArow(unsafe_load(matrix.matrix).rowvec, obj, length(obj))
+  myfree(obj)
+end
+
 type CDDGeneratorMatrix{N, T <: MyType} <: CDDMatrix{N, T}
   matrix::Ptr{Cdd_MatrixData{T}}
 

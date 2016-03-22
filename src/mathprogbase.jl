@@ -110,13 +110,7 @@ function optimize!(lpm::CDDMathProgModel)
   ine = HRepresentation(A, b, linset)
 
   matrix = CDDMatrix(ine)
-  dd_setmatrixobjective(matrix.matrix, lpm.sense == :Max ? dd_LPmax : dd_LPmin)
-  if lpm.exact
-    obj = [GMPRational(0); Array{GMPRational}(lpm.obj)]
-  else
-    obj = [Cdouble(0); Array{Cdouble}(lpm.obj)]
-  end
-  dd_copyArow(unsafe_load(matrix.matrix).rowvec, obj, length(obj))
+  setobjective(matrix, lpm.obj, lpm.sense)
 
   lp = matrix2lp(matrix)
   lpsolve(lp, lpm.solver_type)

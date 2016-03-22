@@ -60,6 +60,9 @@ immutable GMPRational <: Real
   end
 end
 
+function myfree(a::Array{Cdouble})
+  # nothing to free
+end
 function myfree(a::Array{GMPRational})
   for el in a
     ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &el)
