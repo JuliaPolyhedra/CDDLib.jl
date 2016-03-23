@@ -5,9 +5,9 @@ function myfree(ine::HRepresentation{GMPRational})
   myfree(ine.b)
 end
 
-function myfree(desc::VRepresentation{GMPRational})
-  myfree(desc.V)
-  myfree(desc.R)
+function myfree(repr::VRepresentation{GMPRational})
+  myfree(repr.V)
+  myfree(repr.R)
 end
 
 # CDDMatrix -> Representation
@@ -57,16 +57,16 @@ end
 Base.convert{N, T<:MyType}(::Type{CDDMatrix{N, T}}, ext::VRepresentation{T}) = Base.convert(CDDGeneratorMatrix{N, T}, ext)
 
 # Specified T
-Base.convert{N, T<:MyType, S<:Real}(::Type{CDDMatrix{N, T}}, desc::Representation{S}) = Base.convert(CDDMatrix{N, T}, Base.convert(Representation{T}, desc))
+Base.convert{N, T<:MyType, S<:Real}(::Type{CDDMatrix{N, T}}, repr::Representation{S}) = Base.convert(CDDMatrix{N, T}, Base.convert(Representation{T}, repr))
 # Unspecified T
-#Base.convert{S<:MyType}(::Type{CDDMatrix}, desc::Representation{S}) = Base.convert(CDDMatrix{fulldim(desc), S}, desc)
-Base.convert{S}(::Type{CDDMatrix}, desc::Representation{S})         = Base.convert(CDDMatrix{fulldim(desc), mytypefor(S)}, desc)
-# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Representation{S}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Representation{GMPRational}, desc))
-# Base.convert{S<:Integer}(::Type{CDDMatrix}, desc::Representation{Rational{S}}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, Base.convert(Representation{GMPRational}, desc))
-# Base.convert{S<:BigFloat}(::Type{CDDMatrix}, desc::Representation{S}) = error("not implemented yet")
-# Base.convert(::Type{CDDMatrix}, desc::Representation{Float32}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, Base.convert(Representation{Cdouble}, desc))
-# Base.convert(::Type{CDDMatrix}, desc::Representation{Float64}) = Base.convert(CDDMatrix{fulldim(desc), Cdouble}, desc)
-# Base.convert(::Type{CDDMatrix}, desc::Representation{GMPRational}) = Base.convert(CDDMatrix{fulldim(desc), GMPRational}, desc)
+#Base.convert{S<:MyType}(::Type{CDDMatrix}, repr::Representation{S}) = Base.convert(CDDMatrix{fulldim(repr), S}, repr)
+Base.convert{S}(::Type{CDDMatrix}, repr::Representation{S})         = Base.convert(CDDMatrix{fulldim(repr), mytypefor(S)}, repr)
+# Base.convert{S<:Integer}(::Type{CDDMatrix}, repr::Representation{S}) = Base.convert(CDDMatrix{fulldim(repr), GMPRational}, Base.convert(Representation{GMPRational}, repr))
+# Base.convert{S<:Integer}(::Type{CDDMatrix}, repr::Representation{Rational{S}}) = Base.convert(CDDMatrix{fulldim(repr), GMPRational}, Base.convert(Representation{GMPRational}, repr))
+# Base.convert{S<:BigFloat}(::Type{CDDMatrix}, repr::Representation{S}) = error("not implemented yet")
+# Base.convert(::Type{CDDMatrix}, repr::Representation{Float32}) = Base.convert(CDDMatrix{fulldim(repr), Cdouble}, Base.convert(Representation{Cdouble}, repr))
+# Base.convert(::Type{CDDMatrix}, repr::Representation{Float64}) = Base.convert(CDDMatrix{fulldim(repr), Cdouble}, repr)
+# Base.convert(::Type{CDDMatrix}, repr::Representation{GMPRational}) = Base.convert(CDDMatrix{fulldim(repr), GMPRational}, repr)
 
 Base.convert{T<:Real}(::Type{CDDInequalityMatrix}, ine::HRepresentation{T}) = Base.convert(CDDMatrix, ine)
 Base.convert{T<:Real}(::Type{CDDGeneratorMatrix}, ext::VRepresentation{T}) = Base.convert(CDDMatrix, ext)

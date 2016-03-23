@@ -34,8 +34,8 @@ function Base.push!{N, T<:MyType}(poly::CDDPolyhedra{N, T}, ext::CDDGeneratorMat
   poly.poly = dd_inputappend(poly.poly, ext.matrix)
 end
 
-function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, desc::Representation{S})
-  Base.push!(poly, convert(CDDMatrix{N, T}, desc))
+function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, repr::Representation{S})
+  Base.push!(poly, convert(CDDMatrix{N, T}, repr))
 end
 
 function dd_matrixappend(matrix1::Ptr{Cdd_MatrixData{Cdouble}}, matrix2::Ptr{Cdd_MatrixData{Cdouble}})
@@ -79,8 +79,8 @@ function redundant(matrix::CDDMatrix, i::Integer)
   # FIXME what is the meaning of the first element of the certificate ?
   (Bool(found), certificate[2:end])
 end
-function redundant{S<:Real}(desc::Representation{S}, i::Integer)
-  redundant(Base.convert(CDDMatrix, desc), i)
+function redundant{S<:Real}(repr::Representation{S}, i::Integer)
+  redundant(Base.convert(CDDMatrix, repr), i)
 end
 
 # Redundant rows
@@ -99,8 +99,8 @@ end
 function redundantrows(matrix::CDDMatrix)
   Base.convert(IntSet, CDDSet(dd_redundantrows(matrix.matrix), size(matrix, 2)))
 end
-function redundantrows(desc::Representation)
-  redundantrows(Base.convert(CDDMatrix, desc))
+function redundantrows(repr::Representation)
+  redundantrows(Base.convert(CDDMatrix, repr))
 end
 
 # Strictly redundant
@@ -128,8 +128,8 @@ function sredundant(matrix::CDDMatrix, i::Integer)
   # FIXME what is the meaning of the first element of the certificate ? 1 for point, 0 for ray ?
   (Bool(found), certificate[2:end])
 end
-function sredundant(desc::Representation, i::Integer)
-  sredundant(Base.convert(CDDMatrix, desc), i)
+function sredundant(repr::Representation, i::Integer)
+  sredundant(Base.convert(CDDMatrix, repr), i)
 end
 
 function dd_matrixcanonicalize(matrix::Ptr{Cdd_MatrixData{Cdouble}})

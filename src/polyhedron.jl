@@ -33,7 +33,7 @@ type CDDPolyhedron{N, T} <: Polyhedron{N, T}
 end
 
 CDDPolyhedron{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedron{N, T}(matrix)
-call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, desc::Representation) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(desc))
+call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, repr::Representation) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(repr))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -109,8 +109,8 @@ function Base.copy{N, T}(p::CDDPolyhedron{N, T})
 end
 
 # Implementation of Polyhedron's mandatory interface
-function polyhedron(desc::Representation, lib::CDDLibrary)
-  CDDPolyhedron(desc, lib.precision)
+function polyhedron(repr::Representation, lib::CDDLibrary)
+  CDDPolyhedron(repr, lib.precision)
 end
 
 # Be the default library
@@ -119,17 +119,17 @@ getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
 getlibraryfor{T<:AbstractFloat}(::Type{T}) = CDDLibrary(:float)
 getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
-function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, desc::Representation{DT})
-  CDDPolyhedron{N, T}(CDDMatrix{N, mytypefor(T)}(desc))
+function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, repr::Representation{DT})
+  CDDPolyhedron{N, T}(CDDMatrix{N, mytypefor(T)}(repr))
 end
 
-function CDDPolyhedron{DT}(desc::Representation{DT}, precision=:float)
+function CDDPolyhedron{DT}(repr::Representation{DT}, precision=:float)
   if !(precision in (:float, :exact))
     error("precision should be :float or :exact, you gave $precision")
   end
-  N = fulldim(desc)
+  N = fulldim(repr)
   (T, PT) = precision == :float ? (Cdouble, Cdouble) : (GMPRational, Rational{BigInt})
-  CDDPolyhedron{N, PT}(CDDMatrix{N, T}(desc))
+  CDDPolyhedron{N, PT}(CDDMatrix{N, T}(repr))
 end
 
 function inequalitiesarecomputed(p::CDDPolyhedron)
