@@ -97,7 +97,7 @@ function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   redundant_list
 end
 function redundantrows(matrix::CDDMatrix)
-  Base.convert(IntSet, CDDSet(dd_redundantrows(matrix.matrix), size(matrix, 2)))
+  Base.convert(IntSet, CDDSet(dd_redundantrows(matrix.matrix), size(matrix, 1)))
 end
 function redundantrows(repr::Representation)
   redundantrows(Base.convert(CDDMatrix, repr))
