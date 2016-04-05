@@ -1,6 +1,8 @@
 # CDDLib
 
 CDDLib.jl is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra.jl](https://github.com/blegat/Polyhedra.jl).
+I needed to fork cddlib to write the wrapper because it is interface is text file based.
+My changes are not upstream yet, the version used by CDDLib.jl can be found [here](https://github.com/blegat/cddlib).
 
 As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/README.libcdd):
 > The C-library  cddlib is a C implementation of the Double Description
