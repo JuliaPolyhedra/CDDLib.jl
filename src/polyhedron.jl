@@ -33,7 +33,7 @@ type CDDPolyhedron{N, T} <: Polyhedron{N, T}
 end
 
 CDDPolyhedron{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedron{N, T}(matrix)
-call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, repr::Representation) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(repr))
+call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, repr::Representation{N}) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(repr))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -119,7 +119,7 @@ getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
 getlibraryfor{T<:AbstractFloat}(::Type{T}) = CDDLibrary(:float)
 getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
-function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, repr::Representation{DT})
+function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, repr::Representation{N, DT})
   CDDPolyhedron{N, T}(CDDMatrix{N, mytypefor(T)}(repr))
 end
 
@@ -136,14 +136,14 @@ function inequalitiesarecomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
 function getinequalities{N, T}(p::CDDPolyhedron{N, T})
-  HRepresentation{T}(getine(p))
+  HRepresentation{N, T}(getine(p))
 end
 
 function generatorsarecomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
 function getgenerators{N, T}(p::CDDPolyhedron{N, T})
-  VRepresentation{T}(getext(p))
+  VRepresentation{N, T}(getext(p))
 end
 
 function eliminate(ine::CDDInequalityMatrix, delset::IntSet)
@@ -197,12 +197,12 @@ function removeredundantgenerators!(p::CDDPolyhedron)
   end
 end
 
-function Base.push!(p::CDDPolyhedron, ine::HRepresentation)
+function Base.push!{N}(p::CDDPolyhedron{N}, ine::HRepresentation{N})
   updateine!(p, matrixappend(getine(p), ine))
   #push!(getpoly(p, true), ine) # too slow because it computes double description
   #updatepoly!(p, getpoly(p)) # invalidate others
 end
-function Base.push!(p::CDDPolyhedron, ext::VRepresentation)
+function Base.push!{N}(p::CDDPolyhedron{N}, ext::VRepresentation{N})
   updateext!(p, matrixappend(getext(p), ext))
   #push!(getpoly(p, false), ext) # too slow because it computes double description
   #updatepoly!(p, getpoly(p)) # invalidate others

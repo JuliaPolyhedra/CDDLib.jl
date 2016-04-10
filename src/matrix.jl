@@ -161,9 +161,8 @@ function Base.show{T <: MyType}(io::IO, matrix::Cdd_MatrixData{T})
 
   println(io, "begin")
   println(io, " $(matrix.rowsize) $(matrix.colsize) $(T == Cdouble ? "real" : "rational")")
-  (b, A) = extractAb(matrix)
+  A = extractA(matrix)
   for i = 1:size(A, 1)
-    print(io, " $(b[i])")
     for j = 1:size(A, 2)
       print(io, " $(A[i, j])")
     end

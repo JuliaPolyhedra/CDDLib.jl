@@ -34,7 +34,7 @@ function Base.push!{N, T<:MyType}(poly::CDDPolyhedra{N, T}, ext::CDDGeneratorMat
   poly.poly = dd_inputappend(poly.poly, ext.matrix)
 end
 
-function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, repr::Representation{S})
+function Base.push!{N, T<:MyType,S<:Real}(poly::CDDPolyhedra{N, T}, repr::Representation{N, S})
   Base.push!(poly, convert(CDDMatrix{N, T}, repr))
 end
 
@@ -50,7 +50,7 @@ end
 function matrixappend{N, T}(matrix1::CDDGeneratorMatrix{N, T}, matrix2::CDDGeneratorMatrix{N, T})
   CDDGeneratorMatrix{N, T}(dd_matrixappend(matrix1.matrix, matrix2.matrix))
 end
-function matrixappend{N, S, T}(matrix::CDDMatrix{N, T}, repr::Representation{S})
+function matrixappend{N, S, T}(matrix::CDDMatrix{N, T}, repr::Representation{N, S})
   matrixappend(matrix, convert(CDDMatrix{N, T}, repr))
 end
 
@@ -79,7 +79,7 @@ function redundant(matrix::CDDMatrix, i::Integer)
   # FIXME what is the meaning of the first element of the certificate ?
   (Bool(found), certificate[2:end])
 end
-function redundant{S<:Real}(repr::Representation{S}, i::Integer)
+function redundant(repr::Representation, i::Integer)
   redundant(Base.convert(CDDMatrix, repr), i)
 end
 

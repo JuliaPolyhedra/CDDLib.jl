@@ -107,7 +107,7 @@ function optimize!(lpm::CDDMathProgModel)
     b = Array{GMPRational}(b)
   end
 
-  ine = HRepresentation(A, b, linset)
+  ine = SimpleHRepresentation(A, b, linset)
 
   matrix = CDDMatrix(ine)
   setobjective(matrix, lpm.obj, lpm.sense)
