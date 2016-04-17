@@ -17,15 +17,16 @@ type CDDPolyhedron{N, T} <: Polyhedron{N, T}
   ine::Nullable{CDDInequalityMatrix{N}}
   ext::Nullable{CDDGeneratorMatrix{N}}
   poly::Nullable{CDDPolyhedra{N}}
-  linearitydetected::Bool
+  hlinearitydetected::Bool
+  vlinearitydetected::Bool
   noredundantinequality::Bool
   noredundantgenerator::Bool
 
   function CDDPolyhedron(ine::CDDInequalityMatrix)
-    new(ine, nothing, nothing, false, false, false)
+    new(ine, nothing, nothing, false, false, false, false)
   end
   function CDDPolyhedron(ext::CDDGeneratorMatrix)
-    new(nothing, ext, nothing, false, false, false)
+    new(nothing, ext, nothing, false, false, false, false)
   end
 # function CDDPolyhedron(poly::CDDPolyhedra{T})
 #   new(nothing, nothing, poly)
@@ -67,9 +68,10 @@ function clearfield!(p::CDDPolyhedron)
   p.ine = nothing
   p.ext = nothing
   p.poly = nothing
-  linearitydetected = false
-  noredundantinequality = false
-  noredundantgenerator = false
+  p.hlinearitydetected = false
+  p.vlinearitydetected = false
+  p.noredundantinequality = false
+  p.noredundantgenerator = false
 end
 function updateine!{N}(p::CDDPolyhedron{N}, ine::CDDInequalityMatrix{N})
   clearfield!(p)
@@ -102,7 +104,8 @@ function Base.copy{N, T}(p::CDDPolyhedron{N, T})
     pcopy = CDDPolyhedron{N, T}(copy(getine(p)))
     pcopy.ext = copy(getext(p))
   end
-  pcopy.linearitydetected     = p.linearitydetected
+  pcopy.hlinearitydetected     = p.hlinearitydetected
+  pcopy.vlinearitydetected     = p.vlinearitydetected
   pcopy.noredundantinequality = p.noredundantinequality
   pcopy.noredundantgenerator  = p.noredundantgenerator
   pcopy
@@ -160,11 +163,10 @@ function eliminate{N, T}(p::CDDPolyhedron{N, T}, delset::IntSet)
   CDDPolyhedron{N-length(delset), T}(eliminate(getine(p), delset))
 end
 
-# FIXME Would detect linearities for generators make sense/be usefull ?
-function detectlinearities!(p::CDDPolyhedron)
-  if !p.linearitydetected
-    canonicalizelinearity!(p.ine)
-    p.linearitydetected = true
+function detecthlinearities!(p::CDDPolyhedron)
+  if !p.vlinearitydetected
+    canonicalizelinearity!(getext(p))
+    p.vlinearitydetected = true
     # getine(p.poly) would return bad inequalities.
     # If someone use the poly then ine will be invalidated
     # and if he asks the inequalities he will be surprised that the
@@ -173,12 +175,25 @@ function detectlinearities!(p::CDDPolyhedron)
     p.poly = nothing
   end
 end
+function detectvlinearities!(p::CDDPolyhedron)
+  if !p.hlinearitydetected
+    canonicalizelinearity!(getine(p))
+    p.hlinearitydetected = true
+    # getext(p.poly) would return bad inequalities.
+    # If someone use the poly then ext will be invalidated
+    # and if he asks the generators he will be surprised that the
+    # linearities are not detected properly
+    # However, the inequalities can be kept
+    p.poly = nothing
+  end
+end
+
 
 function removeredundantinequalities!(p::CDDPolyhedron)
   if !p.noredundantinequality
-    if !p.linearitydetected
+    if !p.hlinearitydetected
       canonicalize!(getine(p))
-      p.linearitydetected = true
+      p.hlinearitydetected = true
     else
       redundancyremove!(getine(p))
     end
@@ -192,7 +207,7 @@ function removeredundantgenerators!(p::CDDPolyhedron)
   if !p.noredundantgenerator
     canonicalize!(getext(p))
     p.noredundantgenerator = true
-    # See detectlinearities! for a discussion about the following line
+    # See detecthlinearities! for a discussion about the following line
     p.poly = nothing
   end
 end
@@ -209,17 +224,17 @@ function Base.push!{N}(p::CDDPolyhedron{N}, ext::VRepresentation{N})
 end
 
 function isredundantinequality(p::CDDPolyhedron, i::Integer)
-  redundant(getine(p), i)
+  redundant(getine(p), i)[1]
 end
 function isredundantgenerator(p::CDDPolyhedron, i::Integer)
-  redundant(getext(p), i)
+  redundant(getext(p), i)[1]
 end
 
 function isstronglyredundantinequality(p::CDDPolyhedron, i::Integer)
-  sredundant(getine(p), i)
+  sredundant(getine(p), i)[1]
 end
 function isstronglyredundantgenerator(p::CDDPolyhedron, i::Integer)
-  sredundant(getext(p), i)
+  sredundant(getext(p), i)[1]
 end
 
 # Implementation of Polyhedron's optional interface
