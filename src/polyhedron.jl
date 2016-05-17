@@ -116,10 +116,7 @@ function polyhedron(repr::Representation, lib::CDDLibrary)
   CDDPolyhedron(repr, lib.precision)
 end
 
-# Be the default library
-getlibraryfor{T<:Real}(::Type{T}) = CDDLibrary(:exact)
 getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
-getlibraryfor{T<:AbstractFloat}(::Type{T}) = CDDLibrary(:float)
 getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
 function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, repr::Representation{N, DT})
