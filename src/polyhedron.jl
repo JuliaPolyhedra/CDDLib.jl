@@ -140,7 +140,7 @@ function getinequalities{N, T}(p::CDDPolyhedron{N, T})
 end
 
 function generatorsarecomputed(p::CDDPolyhedron)
-  !isnull(p.ine)
+  !isnull(p.ext)
 end
 function getgenerators{N, T}(p::CDDPolyhedron{N, T})
   VRepresentation{N, T}(getext(p))
