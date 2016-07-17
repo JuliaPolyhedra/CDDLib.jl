@@ -2,7 +2,7 @@ using BinDeps
 
 @BinDeps.setup
 
-cddlib_commit = "d26c8f8a4c9443d886f95201e1356b74b9408ac5"
+cddlib_commit = "5ff766051042f3413c534af8ffcbbe00f66b3ab1"
 #cddname = "cddlib-094h"
 cddname = "cddlib-$cddlib_commit"
 
@@ -13,10 +13,6 @@ cddname = "cddlib-$cddlib_commit"
 #       It sees libgmp.so (installed by libgmp10 as a julia dependency) and thinks that it's ok but
 #       it does not have the headers
 #libgmpdev = library_dependency("libgmp-dev", aliases=["libgmp"])
-libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit"])#, depends=[libgmpdev])
-
-official_repo = "ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/$cddname.tar.gz"
-forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
 
 #GMP
 @linux_only begin
@@ -37,8 +33,28 @@ forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
     println("\$ sudo $pkgman install $pkgname")
   end
 end
+@windows_only begin
+    using WinRPM
+    libgmp = library_dependency("libgmp",aliases=["libgmp-10"])
+    provides(WinRPM.RPM, "libgmp10", [libgmp], os = :Windows)
+end
 
 #CDD
+
+official_repo = "ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/$cddname.tar.gz"
+forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
+@unix_only begin
+    libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit", "libcddgmp-0"])#, depends=[libgmpdev])
+end
+@windows_only begin
+    libcdd = library_dependency("libcddgmp", aliases=["libcddgmp-0"], depends=[libgmp])
+    using WinRPM
+    push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win32/openSUSE_13.2")
+    push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win64/openSUSE_13.2")
+    WinRPM.update()
+    provides(WinRPM.RPM, "libcdd-$(cddlib_commit[1:8])", [libcdd], os = :Windows)
+end
+
 provides(Sources,
         Dict(URI(forked_repo) => libcdd), unpacked_dir="$cddname")
 
