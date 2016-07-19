@@ -35,8 +35,9 @@ cddname = "cddlib-$cddlib_commit"
 end
 @windows_only begin
     using WinRPM
-    libgmp = library_dependency("libgmp",aliases=["libgmp-10"])
-    provides(WinRPM.RPM, "libgmp10", [libgmp], os = :Windows)
+    #libgmp = library_dependency("libgmp", aliases=["libgmp-10"])
+    #provides(WinRPM.RPM, "libgmp10", [libgmp], os = :Windows)
+    WinRPM.install("libgmp10")
 end
 
 #CDD
@@ -47,7 +48,7 @@ forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
     libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit", "libcddgmp-0"])#, depends=[libgmpdev])
 end
 @windows_only begin
-    libcdd = library_dependency("libcddgmp", aliases=["libcddgmp-0"], depends=[libgmp])
+    libcdd = library_dependency("libcddgmp", aliases=["libcddgmp-0"]) #, depends=[libgmp])
     using WinRPM
     push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win32/openSUSE_13.2")
     push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win64/openSUSE_13.2")
