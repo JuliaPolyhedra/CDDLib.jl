@@ -37,7 +37,7 @@ end
     using WinRPM
     #libgmp = library_dependency("libgmp", aliases=["libgmp-10"])
     #provides(WinRPM.RPM, "libgmp10", [libgmp], os = :Windows)
-    WinRPM.install("libgmp10")
+    WinRPM.install("libgmp10", yes = true)
 end
 
 #CDD

@@ -23,5 +23,5 @@ As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/
 > a linear function over P.
 
 [![Build Status](https://travis-ci.org/blegat/CDDLib.jl.svg?branch=master)](https://travis-ci.org/blegat/CDDLib.jl)
-[![Build status](https://ci.appveyor.com/api/projects/status/bfcfmeq2yxn3bj07?svg=true)](https://ci.appveyor.com/project/blegat/cdoubledescription-jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/bfcfmeq2yxn3bj07?svg=true)](https://ci.appveyor.com/project/blegat/cdd-jl/settings/badges)
 [![Coverage Status](https://coveralls.io/repos/github/blegat/CDDLib.jl/badge.svg?branch=master)](https://coveralls.io/github/blegat/CDDLib.jl?branch=master)
