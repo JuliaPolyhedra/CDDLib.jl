@@ -1,33 +1,17 @@
-import Base.round
-
-function myfree(ine::SimpleHRepresentation{GMPRational})
-  myfree(ine.A)
-  myfree(ine.b)
-end
-
-function myfree(ext::LiftedVRepresentation{GMPRational})
-  myfree(ext.R)
-end
-
-function myfree(ext::SimpleVRepresentation{GMPRational})
-  myfree(ext.V)
-  myfree(ext.R)
-end
-
 # CDDMatrix -> Representation
-HRepresentation{N, T<:Real}(matrix::CDDInequalityMatrix{N, T}) = HRepresentation{N,T}(matrix)
-VRepresentation{N, T<:Real}(matrix::CDDGeneratorMatrix{N, T}) = VRepresentation{N,T}(matrix)
-
-Base.convert{N,T}(::Type{Representation{N,T}}, ine::SimpleHRepresentation{N,GMPRational}) = Base.convert(SimpleHRepresentation{N,T}, ine)
-Base.convert{N,T}(::Type{Representation{N,T}}, ine::LiftedHRepresentation{N,GMPRational}) = Base.convert(LiftedHRepresentation{N,T}, ine)
-Base.convert{N,T}(::Type{Representation{N,T}}, ext::SimpleVRepresentation{N,GMPRational}) = Base.convert(SimpleVRepresentation{N,T}, ext)
-Base.convert{N,T}(::Type{Representation{N,T}}, ext::LiftedVRepresentation{N,GMPRational}) = Base.convert(LiftedVRepresentation{N,T}, ext)
-
-Base.convert{N,T}(::Type{SimpleHRepresentation{N,T}}, ine::SimpleHRepresentation{N,GMPRational}) = SimpleHRepresentation{N,T}(Array{T}(ine.A), Array{T}(ine.b), copy(ine.linset))
-Base.convert{N,T}(::Type{LiftedHRepresentation{N,T}}, ine::LiftedHRepresentation{N,GMPRational}) = LiftedHRepresentation{N,T}(Array{T}(ine.A), copy(ine.linset))
-
-Base.convert{N,T}(::Type{SimpleVRepresentation{N,T}}, ext::SimpleVRepresentation{N,GMPRational}) = SimpleVRepresentation{N,T}(Array{T}(ext.V), Array{T}(ext.R), copy(ext.Vlinset), copy(ext.Rlinset))
-Base.convert{N,T}(::Type{LiftedVRepresentation{N,T}}, ext::LiftedVRepresentation{N,GMPRational}) = LiftedVRepresentation{N,T}(Array{T}(ext.R), copy(ext.linset))
+# HRepresentation{N, T<:Real}(matrix::CDDInequalityMatrix{N, T}) = HRepresentation{N,T}(matrix)
+# VRepresentation{N, T<:Real}(matrix::CDDGeneratorMatrix{N, T}) = VRepresentation{N,T}(matrix)
+#
+# Base.convert{N,T}(::Type{Representation{N,T}}, ine::SimpleHRepresentation{N,GMPRational}) = Base.convert(SimpleHRepresentation{N,T}, ine)
+# Base.convert{N,T}(::Type{Representation{N,T}}, ine::LiftedHRepresentation{N,GMPRational}) = Base.convert(LiftedHRepresentation{N,T}, ine)
+# Base.convert{N,T}(::Type{Representation{N,T}}, ext::SimpleVRepresentation{N,GMPRational}) = Base.convert(SimpleVRepresentation{N,T}, ext)
+# Base.convert{N,T}(::Type{Representation{N,T}}, ext::LiftedVRepresentation{N,GMPRational}) = Base.convert(LiftedVRepresentation{N,T}, ext)
+#
+# Base.convert{N,T}(::Type{SimpleHRepresentation{N,T}}, ine::SimpleHRepresentation{N,GMPRational}) = SimpleHRepresentation{N,T}(Array{T}(ine.A), Array{T}(ine.b), copy(ine.linset))
+# Base.convert{N,T}(::Type{LiftedHRepresentation{N,T}}, ine::LiftedHRepresentation{N,GMPRational}) = LiftedHRepresentation{N,T}(Array{T}(ine.A), copy(ine.linset))
+#
+# Base.convert{N,T}(::Type{SimpleVRepresentation{N,T}}, ext::SimpleVRepresentation{N,GMPRational}) = SimpleVRepresentation{N,T}(Array{T}(ext.V), Array{T}(ext.R), copy(ext.Vlinset), copy(ext.Rlinset))
+# Base.convert{N,T}(::Type{LiftedVRepresentation{N,T}}, ext::LiftedVRepresentation{N,GMPRational}) = LiftedVRepresentation{N,T}(Array{T}(ext.R), copy(ext.linset))
 
 # converters Representation -> CDDMatrix
 

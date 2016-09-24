@@ -29,10 +29,8 @@ poly = CDDPolyhedra(ine)
 ext  = Polyhedra.SimpleVRepresentation{9, Rational{Int}}(copygenerators(poly))
 target = ones(Int, 9) * (3 // 4)
 ok = false
-for i = 1:size(ext.V, 1)
-  # In julia v0.4 [i,:] returns a row matrix and in v0.5 it is
-  # a 1D vector hence the use of vec
-  if vec(ext.V[i,:]) == target
+for v in vrep(ext)
+  if v == target
     ok = true
   end
 end
@@ -46,6 +44,7 @@ inecut = Polyhedra.SimpleHRepresentation(Acut, bcut)
 (isredundant, certificate) = redundant(inecut, 1)
 @test !isredundant
 @test Array{Rational{Int}}(certificate) == target
+redundantrows(inecut)
 @test IntSet([]) == redundantrows(inecut)
 (issredundant, scertificate) = sredundant(inecut, 1)
 @test !issredundant

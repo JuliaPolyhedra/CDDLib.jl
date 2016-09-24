@@ -1,4 +1,4 @@
-export CDDLibrary, CDDPolyhedron, getinequalities, getgenerators, removeredundantinequalities!, removeredundantgenerators!, isredundantinequality, isredundantgenerator, isstronglyredundantinequality, isstronglyredundantgenerator
+export CDDLibrary, CDDPolyhedron
 import Base.isempty, Base.push!
 
 type CDDLibrary <: PolyhedraLibrary
@@ -12,11 +12,10 @@ type CDDLibrary <: PolyhedraLibrary
   end
 end
 
-type CDDPolyhedron{N, T} <: Polyhedron{N, T}
-  # The type of the CDDMatrix and CDDPolyhedra is not especially T !
-  ine::Nullable{CDDInequalityMatrix{N}}
-  ext::Nullable{CDDGeneratorMatrix{N}}
-  poly::Nullable{CDDPolyhedra{N}}
+type CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
+  ine::Nullable{CDDInequalityMatrix{N,T}}
+  ext::Nullable{CDDGeneratorMatrix{N,T}}
+  poly::Nullable{CDDPolyhedra{N,T}}
   hlinearitydetected::Bool
   vlinearitydetected::Bool
   noredundantinequality::Bool
@@ -32,9 +31,15 @@ type CDDPolyhedron{N, T} <: Polyhedron{N, T}
 #   new(nothing, nothing, poly)
 # end
 end
+changeeltype{N, T, NewT}(::Type{CDDPolyhedron{N, T}}, ::Type{NewT}) = CDDPolyhedron{N, NewT}
+changefulldim{N, T}(::Type{CDDPolyhedron{N, T}}, NewN) = CDDPolyhedron{NewN, T}
+changeboth{N, T, NewT}(::Type{CDDPolyhedron{N, T}}, NewN, ::Type{NewT}) = CDDPolyhedron{NewN, NewT}
 
-CDDPolyhedron{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedron{N, T}(matrix)
-call{N, T<:MyType}(::Type{CDDPolyhedron{N, T}}, repr::Representation{N}) = CDDPolyhedron{N, T}(CDDMatrix{N, T}(repr))
+decomposedhfast(p::CDDPolyhedron) = false
+decomposedvfast(p::CDDPolyhedron) = false
+
+CDDPolyhedron{N, T}(matrix::CDDMatrix{N, T}) = CDDPolyhedron{N, T}(matrix)
+Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::Representation{N, T}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -112,43 +117,100 @@ function Base.copy{N, T}(p::CDDPolyhedron{N, T})
 end
 
 # Implementation of Polyhedron's mandatory interface
-function polyhedron(repr::Representation, lib::CDDLibrary)
-  CDDPolyhedron(repr, lib.precision)
+function polytypeforprecision(precision::Symbol)
+  if !(precision in (:float, :exact))
+    error("precision should be :float or :exact, you gave $precision")
+  end
+  precision == :float ? Cdouble : Rational{BigInt}
+end
+
+function polyhedron{N}(repit::Union{Representation{N},HRepIterator{N},VRepIterator{N}}, lib::CDDLibrary)
+  T = polytypeforprecision(lib.precision)
+  CDDPolyhedron{N, T}(repit)
+end
+function polyhedron(lib::CDDLibrary ;eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
+  its = [eqs, ineqs, points, rays]
+  i = findfirst(x -> !(x === nothing), its)
+  if i == 0
+    error("polyhedron should be given at least one iterator")
+  end
+  N = fulldim(its[i])
+  T = polytypeforprecision(lib.precision)
+  CDDPolyhedron{N, T}(eqs=eqs, ineqs=ineqs, points=points, rays=rays)
 end
 
 getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
 getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
-function call{N, T, DT}(::Type{CDDPolyhedron{N, T}}, repr::Representation{N, DT})
-  CDDPolyhedron{N, T}(CDDMatrix{N, mytypefor(T)}(repr))
-end
+# need to specify to avoid ambiguïty
+Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
+Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
-function CDDPolyhedron{DT}(repr::Representation{DT}, precision=:float)
-  if !(precision in (:float, :exact))
-    error("precision should be :float or :exact, you gave $precision")
+(::Type{CDDPolyhedron{N, T}}){N, T}(it::HRepIterator{N,T}) = CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(it))
+(::Type{CDDPolyhedron{N, T}}){N, T}(it::VRepIterator{N,T}) = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N,T,mytype(T)}(it))
+
+function (::Type{CDDPolyhedron{N, T}}){N, T}(;eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
+  noth = eqs === nothing && ineqs === nothing
+  notv = points === nothing && rays === nothing
+  if noth && notv
+    error("CDDPolyhedron should have at least one iterator to be built")
   end
-  N = fulldim(repr)
-  (T, PT) = precision == :float ? (Cdouble, Cdouble) : (GMPRational, Rational{BigInt})
-  CDDPolyhedron{N, PT}(CDDMatrix{N, T}(repr))
+  if !noth && !notv
+    error("CDDPolyhedron constructed with a combination of eqs/ineqs with points/rays")
+  end
+  if notv
+    CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(eqs=eqs,ineqs=ineqs))
+  else
+    CDDPolyhedron{N, T}(CDDGeneratorMatrix{N,T,mytype(T)}(points=points, rays=rays))
+  end
 end
 
-function inequalitiesarecomputed(p::CDDPolyhedron)
+function hrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
-function getinequalities{N, T}(p::CDDPolyhedron{N, T})
-  HRepresentation{N, T}(getine(p))
+function gethrep{N, T}(p::CDDPolyhedron{N, T})
+  getine(p)
 end
+nhreps(p::CDDPolyhedron) = nhreps(getine(p))
+starthrep(p::CDDPolyhedron) = starthrep(getine(p))
+donehrep(p::CDDPolyhedron, state) = donehrep(getine(p), state)
+nexthrep(p::CDDPolyhedron, state) = nexthrep(getine(p), state)
 
-function generatorsarecomputed(p::CDDPolyhedron)
+nineqs(p::CDDPolyhedron) = nineqs(getine(p))
+startineq(p::CDDPolyhedron) = startineq(getine(p))
+doneineq(p::CDDPolyhedron, state) = doneineq(getine(p), state)
+nextineq(p::CDDPolyhedron, state) = nextineq(getine(p), state)
+
+neqs(p::CDDPolyhedron) = neqs(getine(p))
+starteq(p::CDDPolyhedron) = starteq(getine(p))
+doneeq(p::CDDPolyhedron, state) = doneeq(getine(p), state)
+nexteq(p::CDDPolyhedron, state) = nexteq(getine(p), state)
+
+nvreps(p::CDDPolyhedron) = nvreps(getext(p))
+startvrep(p::CDDPolyhedron) = startvrep(getext(p))
+donevrep(p::CDDPolyhedron, state) = donevrep(getext(p), state)
+nextvrep(p::CDDPolyhedron, state) = nextvrep(getext(p), state)
+
+npoints(p::CDDPolyhedron) = npoints(getext(p))
+startpoint(p::CDDPolyhedron) = startpoint(getext(p))
+donepoint(p::CDDPolyhedron, state) = donepoint(getext(p), state)
+nextpoint(p::CDDPolyhedron, state) = nextpoint(getext(p), state)
+
+nrays(p::CDDPolyhedron) = nrays(getext(p))
+startray(p::CDDPolyhedron) = startray(getext(p))
+doneray(p::CDDPolyhedron, state) = doneray(getext(p), state)
+nextray(p::CDDPolyhedron, state) = nextray(getext(p), state)
+
+function vrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ext)
 end
-function getgenerators{N, T}(p::CDDPolyhedron{N, T})
-  VRepresentation{N, T}(getext(p))
+function getvrep{N, T}(p::CDDPolyhedron{N, T})
+  getext(p)
 end
 
 function eliminate(ine::CDDInequalityMatrix, delset::IntSet)
   if length(delset) > 0
-    if length(delset) == 1 && (size(ine, 2)-1) in delset
+    if length(delset) == 1 && fulldim(ine) in delset
       fourierelimination(ine)
     else
       blockelimination(ine, delset)
@@ -186,7 +248,7 @@ function detectvlinearities!(p::CDDPolyhedron)
 end
 
 
-function removeredundantinequalities!(p::CDDPolyhedron)
+function removehredundancy!(p::CDDPolyhedron)
   if !p.noredundantinequality
     if !p.hlinearitydetected
       canonicalize!(getine(p))
@@ -200,7 +262,7 @@ function removeredundantinequalities!(p::CDDPolyhedron)
   end
 end
 
-function removeredundantgenerators!(p::CDDPolyhedron)
+function removevredundancy!(p::CDDPolyhedron)
   if !p.noredundantgenerator
     canonicalize!(getext(p))
     p.noredundantgenerator = true
@@ -220,18 +282,25 @@ function Base.push!{N}(p::CDDPolyhedron{N}, ext::VRepresentation{N})
   #updatepoly!(p, getpoly(p)) # invalidate others
 end
 
-function isredundantinequality(p::CDDPolyhedron, i::Integer)
-  redundant(getine(p), i)[1]
+# TODO other solvers
+defaultLPsolverfor{N,T}(p::CDDPolyhedron{N,T}) = CDDSolver(exact=T == Rational{BigInt})
+function ishredundant(p::CDDPolyhedron, i::Integer; strongly=false, cert=false, solver=defaultLPsolverfor(p))
+  f = strongly ? sredundant : redundant
+  ans = redundant(getine(p), i)
+  if cert
+    ans
+  else
+    ans[1]
+  end
 end
-function isredundantgenerator(p::CDDPolyhedron, i::Integer)
-  redundant(getext(p), i)[1]
-end
-
-function isstronglyredundantinequality(p::CDDPolyhedron, i::Integer)
-  sredundant(getine(p), i)[1]
-end
-function isstronglyredundantgenerator(p::CDDPolyhedron, i::Integer)
-  sredundant(getext(p), i)[1]
+function isvredundant(p::CDDPolyhedron, i::Integer; strongly=false, cert=false, solver=defaultLPsolverfor(p))
+  f = strongly ? sredundant : redundant
+  ans = redundant(getine(p), i)
+  if cert
+    ans
+  else
+    ans[1]
+  end
 end
 
 # Implementation of Polyhedron's optional interface
@@ -243,56 +312,56 @@ function Base.isempty(p::CDDPolyhedron)
   simplestatus(copylpsolution(lp)) != :Optimal
 end
 
-function getredundantinequalities(p::CDDPolyhedron)
+function gethredundantindices(p::CDDPolyhedron)
   redundantrows(getine(p))
 end
-function getredundantgenerators(p::CDDPolyhedron)
+function getvredundantindices(p::CDDPolyhedron)
   redundantrows(getext(p))
 end
 
-type CDDLPPolyhedron{N, T} <: LPPolyhedron{N, T}
-  ine::CDDInequalityMatrix{N}
-  has_objective::Bool
-
-  objval
-  solution
-  status
-end
-
-function LinearQuadraticModel{N, T}(p::CDDPolyhedron{N, T})
-  CDDLPPolyhedron{N, T}(getine(p), false, nothing, nothing, nothing)
-end
-function loadproblem!(lpm::CDDLPPolyhedron, obj, sense)
-  if sum(abs(obj)) != 0
-    setobjective(lpm.ine, obj, sense)
-    lpm.has_objective = true
-  end
-end
-function optimize!(lpm::CDDLPPolyhedron)
-  if lpm.has_objective
-    lp = matrix2lp(lpm.ine)
-  else
-    lp = matrix2feasibility(lpm.ine)
-  end
-  lpsolve(lp)
-  sol = copylpsolution(lp)
-  lpm.status = simplestatus(sol)
-  # We have just called lpsolve so it shouldn't be Undecided
-  # if no error occured
-  lpm.status == :Undecided && (lpm.status = :Error)
-  lpm.objval = getobjval(sol)
-  lpm.solution = getsolution(sol)
-end
-
-function status(lpm::CDDLPPolyhedron)
-  lpm.status
-end
-function getobjval(lpm::CDDLPPolyhedron)
-  lpm.objval
-end
-function getsolution(lpm::CDDLPPolyhedron)
-  copy(lpm.solution)
-end
-function getunboundedray(lpm::CDDLPPolyhedron)
-  copy(lpm.solution)
-end
+# type CDDLPPolyhedron{N, T} <: LPPolyhedron{N, T}
+#   ine::CDDInequalityMatrix{N}
+#   has_objective::Bool
+#
+#   objval
+#   solution
+#   status
+# end
+#
+# function LinearQuadraticModel{N, T}(p::CDDPolyhedron{N, T})
+#   CDDLPPolyhedron{N, T}(getine(p), false, nothing, nothing, nothing)
+# end
+# function loadproblem!(lpm::CDDLPPolyhedron, obj, sense)
+#   if sum(abs(obj)) != 0
+#     setobjective(lpm.ine, obj, sense)
+#     lpm.has_objective = true
+#   end
+# end
+# function optimize!(lpm::CDDLPPolyhedron)
+#   if lpm.has_objective
+#     lp = matrix2lp(lpm.ine)
+#   else
+#     lp = matrix2feasibility(lpm.ine)
+#   end
+#   lpsolve(lp)
+#   sol = copylpsolution(lp)
+#   lpm.status = simplestatus(sol)
+#   # We have just called lpsolve so it shouldn't be Undecided
+#   # if no error occured
+#   lpm.status == :Undecided && (lpm.status = :Error)
+#   lpm.objval = getobjval(sol)
+#   lpm.solution = getsolution(sol)
+# end
+#
+# function status(lpm::CDDLPPolyhedron)
+#   lpm.status
+# end
+# function getobjval(lpm::CDDLPPolyhedron)
+#   lpm.objval
+# end
+# function getsolution(lpm::CDDLPPolyhedron)
+#   copy(lpm.solution)
+# end
+# function getunboundedray(lpm::CDDLPPolyhedron)
+#   copy(lpm.solution)
+# end

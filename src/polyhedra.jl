@@ -60,8 +60,8 @@ function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   poly
 end
 
-type CDDPolyhedra{N, T<:MyType}
-  poly::Ptr{Cdd_PolyhedraData{T}}
+type CDDPolyhedra{N, T<:PolyType, S}
+  poly::Ptr{Cdd_PolyhedraData{S}}
   inequality::Bool # The input type is inequality
 
   function CDDPolyhedra(matrix::CDDMatrix{N, T})
@@ -76,17 +76,17 @@ end
 function myfree{N}(poly::CDDPolyhedra{N, Cdouble})
   @ddf_ccall FreePolyhedra Void (Ptr{Cdd_PolyhedraData{Cdouble}},) poly.poly
 end
-function myfree{N}(poly::CDDPolyhedra{N, GMPRational})
+function myfree{N}(poly::CDDPolyhedra{N, Rational{BigInt}})
   @dd_ccall FreePolyhedra Void (Ptr{Cdd_PolyhedraData{GMPRational}},) poly.poly
 end
 
-CDDPolyhedra{N, T<:MyType}(matrix::CDDMatrix{N, T}) = CDDPolyhedra{N, T}(matrix)
-CDDPolyhedra(repr::Representation) = CDDPolyhedra(CDDMatrix(repr))
+CDDPolyhedra{N, T, S}(matrix::CDDMatrix{N, T, S}) = CDDPolyhedra{N, T, S}(matrix)
+CDDPolyhedra(rep::Representation) = CDDPolyhedra(CDDMatrix(rep))
 
-function Base.convert{N, T<:MyType}(::Type{CDDPolyhedra{N, T}}, matrix::CDDMatrix{N, T})
-  CDDPolyhedra{N, T}(matrix)
+function Base.convert{N, T, S}(::Type{CDDPolyhedra{N, T, S}}, matrix::CDDMatrix{N, T, S})
+  CDDPolyhedra{N, T, S}(matrix)
 end
-Base.convert{N, T<:Real}(::Type{CDDPolyhedra{N, T}}, repr::Representation{N, T}) = CDDPolyhedra{N, T}(CDDMatrix(repr))
+Base.convert{N, T, S}(::Type{CDDPolyhedra{N, T, S}}, repr::Representation{N, T}) = CDDPolyhedra(CDDMatrix(repr))
 
 function dd_copyinequalities(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
   @ddf_ccall CopyInequalities Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly

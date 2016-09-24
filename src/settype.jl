@@ -47,7 +47,7 @@ function Base.convert(::Type{IntSet}, st::CDDSet)
 end
 
 # I don't want it to overwrite Base.convert behaviour
-function myconvert{T<:MyType}(::Type{IntSet}, a::Array{T, 1})
+function myconvert(::Type{IntSet}, a::Matrix)
   b = Array{Bool}(a)
   s = IntSet()
   for i = 1:length(a)

@@ -49,8 +49,6 @@ include("settype.jl")
 
 include("matrix.jl")
 
-include("representation.jl")
-
 include("polyhedra.jl")
 
 include("operations.jl")
