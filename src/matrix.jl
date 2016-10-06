@@ -79,7 +79,7 @@ function initmatrix(inequality::Bool, itr1, itr2=nothing)
   if !(itr2 === nothing)
     m += length(itr2)
   end
-  matrix = dd_creatematrix(mytype(eltype(itr1)), m, n)
+  matrix = dd_creatematrix(mytype(eltype(itr1)), Cdd_rowrange(m), Cdd_colrange(n))
   mat = unsafe_load(matrix)
   linset = fillmatrix(inequality, mat.matrix, itr1)
   if !(itr2 === nothing)
