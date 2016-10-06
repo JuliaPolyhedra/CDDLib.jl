@@ -11,6 +11,7 @@ end
 function dd_set_member(st::Cset_type, el::Clong)
   1 == (@cdd_ccall set_member Cint (Clong, Cset_type) el st)
 end
+dd_set_member(st::Cset_type, el) = dd_set_member(st, Clong(el))
 
 function dd_set_card(st::Cset_type)
   @cdd_ccall set_card Clong (Cset_type,) st
