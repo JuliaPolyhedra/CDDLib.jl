@@ -3,3 +3,4 @@ BinDeps
 MathProgBase
 Polyhedra 0.1
 @windows WinRPM
+@osx Homebrew

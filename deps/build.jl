@@ -15,7 +15,7 @@ cddname = "cddlib-$cddlib_commit"
 #libgmpdev = library_dependency("libgmp-dev", aliases=["libgmp"])
 
 #GMP
-@linux_only begin
+@static if is_linux()
   const has_apt = try success(`apt-get -v`) catch e false end
   const has_yum = try success(`yum --version`) catch e false end
   const has_pacman = try success(`pacman -Qq`) catch e false end
@@ -33,7 +33,11 @@ cddname = "cddlib-$cddlib_commit"
     println("\$ sudo $pkgman install $pkgname")
   end
 end
-@windows_only begin
+@static if is_apple()
+    using Homebrew
+    Homebrew.add("gmp")
+end
+@static if is_windows()
     using WinRPM
     #libgmp = library_dependency("libgmp", aliases=["libgmp-10"])
     #provides(WinRPM.RPM, "libgmp10", [libgmp], os = :Windows)
@@ -44,10 +48,10 @@ end
 
 official_repo = "ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/$cddname.tar.gz"
 forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
-@unix_only begin
+@static if is_unix()
     libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit", "libcddgmp-0"])#, depends=[libgmpdev])
 end
-@windows_only begin
+@static if is_windows()
     libcdd = library_dependency("libcddgmp", aliases=["libcddgmp-0"]) #, depends=[libgmp])
     using WinRPM
     push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win32/openSUSE_13.2")
