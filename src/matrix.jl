@@ -298,7 +298,7 @@ function nrays(matrix::CDDGeneratorMatrix)
   count = 0
   for i in 1:length(matrix)
     b = extractrow(matrix, i)
-    if b[1] == 0
+    if isray(b)
       count += 1
     end
   end
@@ -311,13 +311,13 @@ donevrep(ext::CDDGeneratorMatrix, state) = state > length(ext)
 nextvrep(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), state+1)
 
 function nextray(ext::CDDGeneratorMatrix, i, n)
-  while i <= n && isrowpoint(is, i)
+  while i <= n && isrowpoint(ext, i)
     i += 1
   end
   i
 end
 function nextpoint(ext::CDDGeneratorMatrix, i, n)
-  while i <= n && !isrowpoint(is, i)
+  while i <= n && !isrowpoint(ext, i)
     i += 1
   end
   i
