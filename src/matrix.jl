@@ -294,17 +294,16 @@ function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(;rays=nothing, points=nothin
 end
 
 nvreps(matrix::CDDGeneratorMatrix) = length(matrix)
-function nrays(matrix::CDDGeneratorMatrix)
+function npoints(matrix::CDDGeneratorMatrix)
   count = 0
   for i in 1:length(matrix)
-    b = extractrow(matrix, i)
-    if isray(b)
+    if isrowpoint(matrix, i)
       count += 1
     end
   end
   count
 end
-npoints(matrix::CDDGeneratorMatrix) = length(matrix) - nrays(matrix)
+nrays(matrix::CDDGeneratorMatrix) = length(matrix) - npoints(matrix)
 
 startvrep(ext::CDDGeneratorMatrix) = 1
 donevrep(ext::CDDGeneratorMatrix, state) = state > length(ext)
@@ -322,7 +321,6 @@ function nextpoint(ext::CDDGeneratorMatrix, i, n)
   end
   i
 end
-
 
 startray(ext::CDDGeneratorMatrix) = nextray(ext, 1, length(ext))
 doneray(ext::CDDGeneratorMatrix, state) = state > length(ext)
