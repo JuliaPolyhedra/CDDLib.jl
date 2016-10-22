@@ -171,35 +171,20 @@ end
 function gethrep{N, T}(p::CDDPolyhedron{N, T})
   getine(p)
 end
-nhreps(p::CDDPolyhedron) = nhreps(getine(p))
-starthrep(p::CDDPolyhedron) = starthrep(getine(p))
-donehrep(p::CDDPolyhedron, state) = donehrep(getine(p), state)
-nexthrep(p::CDDPolyhedron, state) = nexthrep(getine(p), state)
 
-nineqs(p::CDDPolyhedron) = nineqs(getine(p))
-startineq(p::CDDPolyhedron) = startineq(getine(p))
-doneineq(p::CDDPolyhedron, state) = doneineq(getine(p), state)
-nextineq(p::CDDPolyhedron, state) = nextineq(getine(p), state)
+for f in [:nhreps, :starthrep, :nineqs, :startineq, :neqs, :starteq]
+    @eval $f(p::CDDPolyhedron) = $f(getine(p))
+end
+for f in [:donehrep, :nexthrep, :doneineq, :nextineq, :doneeq, :nexteq]
+    @eval $f(p::CDDPolyhedron, state) = $f(getine(p), state)
+end
 
-neqs(p::CDDPolyhedron) = neqs(getine(p))
-starteq(p::CDDPolyhedron) = starteq(getine(p))
-doneeq(p::CDDPolyhedron, state) = doneeq(getine(p), state)
-nexteq(p::CDDPolyhedron, state) = nexteq(getine(p), state)
-
-nvreps(p::CDDPolyhedron) = nvreps(getext(p))
-startvrep(p::CDDPolyhedron) = startvrep(getext(p))
-donevrep(p::CDDPolyhedron, state) = donevrep(getext(p), state)
-nextvrep(p::CDDPolyhedron, state) = nextvrep(getext(p), state)
-
-npoints(p::CDDPolyhedron) = npoints(getext(p))
-startpoint(p::CDDPolyhedron) = startpoint(getext(p))
-donepoint(p::CDDPolyhedron, state) = donepoint(getext(p), state)
-nextpoint(p::CDDPolyhedron, state) = nextpoint(getext(p), state)
-
-nrays(p::CDDPolyhedron) = nrays(getext(p))
-startray(p::CDDPolyhedron) = startray(getext(p))
-doneray(p::CDDPolyhedron, state) = doneray(getext(p), state)
-nextray(p::CDDPolyhedron, state) = nextray(getext(p), state)
+for f in [:nvreps, :startvrep, :npoints, :startpoint, :nrays, :startray]
+    @eval $f(p::CDDPolyhedron) = $f(getext(p))
+end
+for f in [:donevrep, :nextvrep, :donepoint, :nextpoint, :doneray, :nextray]
+    @eval $f(p::CDDPolyhedron, state) = $f(getext(p), state)
+end
 
 function vrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ext)

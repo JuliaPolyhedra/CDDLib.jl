@@ -215,7 +215,7 @@ function extractrow(ine::CDDInequalityMatrix, i)
 end
 function extractrow{N,T}(ext::CDDGeneratorMatrix{N,T}, i)
   mat = unsafe_load(ext.matrix)
-  b = extractrow(unsafe_load(ext.matrix), i)
+  b = extractrow(mat, i)
   ispoint = b[1]
   @assert ispoint == zero(T) || ispoint == one(T)
   a = b[2:end]
