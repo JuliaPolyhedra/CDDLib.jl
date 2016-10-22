@@ -27,9 +27,10 @@ type CDDSolver <: AbstractMathProgSolver
   end
 end
 
-function LinearQuadraticModel(s::CDDSolver)
+function PolyhedraModel(s::CDDSolver)
   CDDPolyhedraModel(s.solver_type, s.exact, nothing, :Undefined, 0, [], [], [], [], [])
 end
+LinearQuadraticModel(s::CDDSolver) = PolyhedraToLPQPBridge(PolyhedraModel(s))
 
 function loadproblem!{N}(lpm::CDDPolyhedraModel, rep::HRep{N}, obj, sense)
   T = lpm.exact ? Rational{BigInt} : Float64
