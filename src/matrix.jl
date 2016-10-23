@@ -167,7 +167,7 @@ CDDInequalityMatrix{T}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{uns
 function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(it::HRepIterator{N, T})
   CDDInequalityMatrix(initmatrix(true, it))
 end
-function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(;eqs=nothing, ineqs=nothing)
+function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(; eqs=nothing, ineqs=nothing)
   CDDInequalityMatrix(initmatrix(true, eqs, ineqs))
 end
 
@@ -219,17 +219,17 @@ function extractrow{N,T}(ext::CDDGeneratorMatrix{N,T}, i)
   ispoint = b[1]
   @assert ispoint == zero(T) || ispoint == one(T)
   a = b[2:end]
-  if ispoint == zero(T)
-    if dd_set_member(mat.linset, i)
-      Line(a)
-    else
-      Ray(a)
-    end
-  else
+  if ispoint == one(T)
     if dd_set_member(mat.linset, i)
       SymPoint(a)
     else
       a
+    end
+  else
+    if dd_set_member(mat.linset, i)
+      Line(a)
+    else
+      Ray(a)
     end
   end
 end
@@ -289,7 +289,7 @@ end
 function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(it::VRepIterator{N, T})
   CDDGeneratorMatrix(initmatrix(false, it))
 end
-function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(;rays=nothing, points=nothing)
+function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(; rays=nothing, points=nothing)
   CDDGeneratorMatrix(initmatrix(false, rays, points))
 end
 
@@ -309,26 +309,26 @@ startvrep(ext::CDDGeneratorMatrix) = 1
 donevrep(ext::CDDGeneratorMatrix, state) = state > length(ext)
 nextvrep(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), state+1)
 
-function nextray(ext::CDDGeneratorMatrix, i, n)
+function nextrayidx(ext::CDDGeneratorMatrix, i, n)
   while i <= n && isrowpoint(ext, i)
     i += 1
   end
   i
 end
-function nextpoint(ext::CDDGeneratorMatrix, i, n)
+function nextpointidx(ext::CDDGeneratorMatrix, i, n)
   while i <= n && !isrowpoint(ext, i)
     i += 1
   end
   i
 end
 
-startray(ext::CDDGeneratorMatrix) = nextray(ext, 1, length(ext))
+startray(ext::CDDGeneratorMatrix) = nextrayidx(ext, 1, length(ext))
 doneray(ext::CDDGeneratorMatrix, state) = state > length(ext)
-nextray(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), nextray(ext, state+1, length(ext)))
+nextray(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), nextrayidx(ext, state+1, length(ext)))
 
-startpoint(ext::CDDGeneratorMatrix) = nextpoint(ext, 1, length(ext))
+startpoint(ext::CDDGeneratorMatrix) = nextpointidx(ext, 1, length(ext))
 donepoint(ext::CDDGeneratorMatrix, state) = state > length(ext)
-nextpoint(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), nextpoint(ext, state+1, length(ext)))
+nextpoint(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), nextpointidx(ext, state+1, length(ext)))
 
 function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
   false

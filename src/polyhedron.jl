@@ -149,7 +149,7 @@ Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPo
 (::Type{CDDPolyhedron{N, T}}){N, T}(it::HRepIterator{N,T}) = CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(it))
 (::Type{CDDPolyhedron{N, T}}){N, T}(it::VRepIterator{N,T}) = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N,T,mytype(T)}(it))
 
-function (::Type{CDDPolyhedron{N, T}}){N, T}(;eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
+function (::Type{CDDPolyhedron{N, T}}){N, T}(; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
   noth = eqs === nothing && ineqs === nothing
   notv = points === nothing && rays === nothing
   if noth && notv
@@ -159,7 +159,7 @@ function (::Type{CDDPolyhedron{N, T}}){N, T}(;eqs=nothing, ineqs=nothing, points
     error("CDDPolyhedron constructed with a combination of eqs/ineqs with points/rays")
   end
   if notv
-    CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(eqs=eqs,ineqs=ineqs))
+    CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(eqs=eqs, ineqs=ineqs))
   else
     CDDPolyhedron{N, T}(CDDGeneratorMatrix{N,T,mytype(T)}(points=points, rays=rays))
   end
