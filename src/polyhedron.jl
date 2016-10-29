@@ -128,7 +128,7 @@ function polyhedron{N}(repit::Union{Representation{N},HRepIterator{N},VRepIterat
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(repit)
 end
-function polyhedron(lib::CDDLibrary ;eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
+function polyhedron(lib::CDDLibrary; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
   its = [eqs, ineqs, points, rays]
   i = findfirst(x -> !(x === nothing), its)
   if i == 0
@@ -139,8 +139,8 @@ function polyhedron(lib::CDDLibrary ;eqs=nothing, ineqs=nothing, points=nothing,
   CDDPolyhedron{N, T}(eqs=eqs, ineqs=ineqs, points=points, rays=rays)
 end
 
-getlibraryfor{T<:Real}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
-getlibraryfor{T<:AbstractFloat}(p::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
+getlibraryfor{T<:Real}(::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
+getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
 
 # need to specify to avoid ambiguïty
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
