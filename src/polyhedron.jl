@@ -193,18 +193,46 @@ function getvrep{N, T}(p::CDDPolyhedron{N, T})
   getext(p)
 end
 
-function eliminate(ine::CDDInequalityMatrix, delset::IntSet)
+
+implementseliminationmethod(p::CDDPolyhedron, ::Type{Val{:FourierMotzkin}}) = true
+function eliminate(p::CDDPolyhedron, delset::IntSet, ::Type{Val{:FourierMotzkin}})
+    eliminate(p, delset, :FourierMotzkin)
+end
+implementseliminationmethod(p::CDDPolyhedron, ::Type{Val{:BlockElimination}}) = true
+function eliminate(p::CDDPolyhedron, delset::IntSet, ::Type{Val{:BlockElimination}})
+    eliminate(p, delset, :BlockElimination)
+end
+
+function eliminate(ine::CDDInequalityMatrix, delset::IntSet, method=:Auto)
   if length(delset) > 0
-    if length(delset) == 1 && fulldim(ine) in delset
-      fourierelimination(ine)
+    if method == :Auto
+        fourier = false
+        if length(delset) == 1 && fulldim(ine) in delset
+            # CDD's implementation of Fourier-Motzkin does not support linearity
+            canonicalizelinearity!(ine)
+            if neqs(ine) == 0
+                fourier = true
+            end
+        end
+    else
+        fourier = method == :FourierMotzkin
+    end
+    if fourier
+      ds = collect(delset)
+      for i in length(ds):-1:1
+          if ds[i] != fulldim(ine)
+              error("The CDD implementation of Fourier-Motzkin only support removing the last dimensions")
+          end
+          fourierelimination(ine)
+      end
     else
       blockelimination(ine, delset)
     end
   end
 end
 
-function eliminate{N, T}(p::CDDPolyhedron{N, T}, delset::IntSet)
-  CDDPolyhedron{N-length(delset), T}(eliminate(getine(p), delset))
+function eliminate{N, T}(p::CDDPolyhedron{N, T}, delset::IntSet, method::Symbol=:Auto)
+  CDDPolyhedron{N-length(delset), T}(eliminate(getine(p), delset, method))
 end
 
 function detecthlinearities!(p::CDDPolyhedron)
