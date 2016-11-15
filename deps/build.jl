@@ -69,7 +69,12 @@ libsrcgmp_dir = joinpath(src_dir, "lib-src-gmp")
 
 includedirs = AbstractString[libsrc_dir, libsrcgmp_dir]
 targetdirs = AbstractString["lib-src-gmp/libcddgmp.la","lib-src-gmp/.libs/libcddgmp.la"]
-configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir)"]
+@static if is_apple()
+    homebrew_includedir = joinpath(Homebrew.brew_prefix, "include")
+    configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir) -I$(homebrew_includedir)"]
+else
+    configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir)"]
+end
 
 provides(BuildProcess,
         Dict(
