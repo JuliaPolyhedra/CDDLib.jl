@@ -69,13 +69,22 @@ libsrcgmp_dir = joinpath(src_dir, "lib-src-gmp")
 
 includedirs = AbstractString[libsrc_dir, libsrcgmp_dir]
 targetdirs = AbstractString["lib-src-gmp/libcddgmp.la","lib-src-gmp/.libs/libcddgmp.la"]
-configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir)"]
+@static if is_apple()
+    homebrew_includedir = joinpath(Homebrew.brew_prefix, "include")
+    configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir) -I$(homebrew_includedir)"]
+    homebrew_libdir = joinpath(Homebrew.brew_prefix, "lib")
+    libdirs = AbstractString[homebrew_libdir]
+else
+    configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir)"]
+    libdirs = AbstractString[]  # What to include?
+end
 
 provides(BuildProcess,
         Dict(
         Autotools(
         libtarget = targetdirs,
         include_dirs = includedirs,
+        lib_dirs = libdirs,
         configure_options = configureopts) => libcdd))
 
 @BinDeps.install Dict(:libcddgmp => :libcdd)
