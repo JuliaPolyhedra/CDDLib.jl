@@ -30,7 +30,7 @@ facts("Low-level board tests") do
     ext  = Polyhedra.SimpleVRepresentation{9, Rational{Int}}(copygenerators(poly))
     target = ones(Int, 9) * (3 // 4)
     ok = false
-    for v in vrep(ext)
+    for v in vreps(ext)
       if v == target
         ok = true
       end

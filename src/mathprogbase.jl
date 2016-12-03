@@ -68,7 +68,7 @@ function optimize!(lpm::CDDPolyhedraModel)
   lpm.infeasibilityray = zeros(T, nhreps(prob))
 
   eps = 1e-7
-  for (i,h) in enumerate(hrep(prob))
+  for (i,h) in enumerate(hreps(prob))
     lpm.constrsolution[i] = dot(coord(h), lpm.solution)
     lpm.constrduals += lpm.reducedcosts[i] * coord(h)
     if Polyhedra.mygt(lpm.constrsolution[i], h.β)

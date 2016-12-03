@@ -168,18 +168,18 @@ end
 function hrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
-function gethrep{N, T}(p::CDDPolyhedron{N, T})
+function hrep{N, T}(p::CDDPolyhedron{N, T})
   getine(p)
 end
 
-for f in [:nhreps, :starthrep, :nineqs, :startineq, :neqs, :starteq]
+for f in [:hashreps, :nhreps, :starthrep, :hasineqs, :nineqs, :startineq, :haseqs, :neqs, :starteq]
     @eval $f(p::CDDPolyhedron) = $f(getine(p))
 end
 for f in [:donehrep, :nexthrep, :doneineq, :nextineq, :doneeq, :nexteq]
     @eval $f(p::CDDPolyhedron, state) = $f(getine(p), state)
 end
 
-for f in [:nvreps, :startvrep, :npoints, :startpoint, :nrays, :startray]
+for f in [:hasvreps, :nvreps, :startvrep, :haspoints, :npoints, :startpoint, :hasrays, :nrays, :startray]
     @eval $f(p::CDDPolyhedron) = $f(getext(p))
 end
 for f in [:donevrep, :nextvrep, :donepoint, :nextpoint, :doneray, :nextray]
@@ -189,7 +189,7 @@ end
 function vrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ext)
 end
-function getvrep{N, T}(p::CDDPolyhedron{N, T})
+function vrep{N, T}(p::CDDPolyhedron{N, T})
   getext(p)
 end
 
