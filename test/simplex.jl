@@ -1,44 +1,44 @@
 function inequality_simpletest(ine::SimpleHRepresentation, A, b, linset)
 # @show ine
 # @show SimpleHRepresentation(A, b, linset)
-# @fact size(A) --> size(ine.A)
-# @fact length(b) --> length(ine.b)
+# @test size(A) == size(ine.A)
+# @test length(b) == length(ine.b)
 # for i in 1:length(b)
-#   @assert (i in linset) --> (i in ine.linset)
+#   @assert (i in linset) == (i in ine.linset)
 #   if i in linset
 #     if b[i] < 0 $ ine.b[i] < 0
-#       @fact -A[i,:] --> ine.A[i,:]
-#       @fact -b[i] --> ine.b[i]
+#       @test -A[i,:] == ine.A[i,:]
+#       @test -b[i] == ine.b[i]
 #     else
-#       @fact A[i,:] --> ine.A[i,:]
-#       @fact b[i] --> ine.b[i]
+#       @test A[i,:] == ine.A[i,:]
+#       @test b[i] == ine.b[i]
 #     end
 #   else
-#     @fact A[i,:] --> ine.A[i,:]
-#     @fact b[i] --> ine.b[i]
+#     @test A[i,:] == ine.A[i,:]
+#     @test b[i] == ine.b[i]
 #   end
 # end
-  @fact A --> ine.A
-  @fact b --> ine.b
-  @fact linset --> ine.linset
+  @test A == ine.A
+  @test b == ine.b
+  @test linset == ine.linset
 end
 inequality_simpletest(ine::HRepresentation, A, b, linset) = inequality_simpletest(SimpleHRepresentation(ine), A, b, linset)
 function generator_simpletest(ext::SimpleVRepresentation, V, R = Matrix{eltype(V)}(0, size(V, 2)))
-  @fact sortrows(V) --> sortrows(ext.V)
-  @fact sortrows(R) --> sortrows(ext.R)
+  @test sortrows(V) == sortrows(ext.V)
+  @test sortrows(R) == sortrows(ext.R)
 end
 generator_simpletest(ext::VRepresentation, V, R = Matrix{eltype(V)}(0, size(V, 2))) = generator_simpletest(SimpleVRepresentation(ext), V, R)
 
-facts("Low-level simplex tests") do
+@testset "Low-level simplex tests" begin
     A = [1 1; -1 0; 0 -1]
     b = [1, 0, 0]
     ls = IntSet([1])
     V = [0 1; 1 0]
 
     ine = SimpleHRepresentation(A, b, ls)
-    #@fact isempty(ine) --> false
+    #@test !isempty(ine)
     inef = SimpleHRepresentation(Array{Float64}(A), Array{Float64}(b), ls)
-    #@fact isempty(inef) --> false
+    #@test !isempty(inef)
     poly1 = CDDPolyhedra(ine)
     poly1f = CDDPolyhedra(inef)
     ineout1  = SimpleHRepresentation{2,Int}(copyinequalities(poly1 ))
@@ -67,7 +67,7 @@ facts("Low-level simplex tests") do
     generator_simpletest(extout2f, V)
 
     # x_1 cannot be 2
-    #@fact isempty(HRepresentation([A; 1 0], [b; 2], union(linset, IntSet([4])))) --> true
+    #@test isempty(HRepresentation([A; 1 0], [b; 2], union(linset, IntSet([4]))))
 
     V0 = [0 0]
     ext0 = SimpleVRepresentation(V0)

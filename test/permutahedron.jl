@@ -1,19 +1,19 @@
-facts("Low-level permutahedron tests") do
+@testset "Low-level permutahedron tests" begin
     A = [1 1 1; 1 0 0; 0 1 0; 0 0 1; -1 0 0; 0 -1 0; 0 0 -1]
     b = [6, 3, 3, 3, -1, -1, -1]
     ls = IntSet([1])
     V = [2 3 1; 1 3 2; 3 1 2; 3 2 1; 2 1 3; 1 2 3]
     ine = SimpleHRepresentation(A, b, ls)
-    #@fact isempty(ine) --> false
+    #@test !isempty(ine)
     inef = SimpleHRepresentation(Array{Float64}(A), Array{Float64}(b), ls)
-    #@fact isempty(inef) --> false
+    #@test !isempty(inef)
     poly = CDDPolyhedra(ine)
     polyf = CDDPolyhedra(inef)
     ineoutm  = copyinequalities(poly)
     ineoutmf = copyinequalities(polyf)
     extm     = copygenerators(poly)
     extmf    = copygenerators(polyf)
-    @fact string(ineoutm) --> "H-representation
+    @test string(ineoutm) == "H-representation
 linearity 1 1
 begin
  7 4 rational
@@ -25,7 +25,7 @@ begin
  -1//1 0//1 1//1 0//1
  -1//1 0//1 0//1 1//1
 end"
-    @fact string(ineoutmf) --> "H-representation
+    @test string(ineoutmf) == "H-representation
 linearity 1 1
 begin
  7 4 real
@@ -37,7 +37,7 @@ begin
  -1.0 -0.0 1.0 -0.0
  -1.0 -0.0 -0.0 1.0
 end"
-    @fact string(extm) --> "V-representation
+    @test string(extm) == "V-representation
 begin
  6 4 rational
  1//1 2//1 3//1 1//1
@@ -47,7 +47,7 @@ begin
  1//1 2//1 1//1 3//1
  1//1 1//1 2//1 3//1
 end"
-    @fact string(extmf) --> "V-representation
+    @test string(extmf) == "V-representation
 begin
  6 4 real
  1.0 2.0 3.0 0.9999999999999998
@@ -100,14 +100,14 @@ end"
     canonicalize!(inelift0f)
     inelift0d = SimpleHRepresentation{3,Int}(inelift0)
     inelift0df = SimpleHRepresentation{3,Int}(inelift0f)
-    @fact inelift0d.linset --> IntSet(1)
-    @fact length(inelift0d.b) --> 7
-    @fact inelift0d.b[1] / sign(inelift0d.b[1]) --> 6
-    @fact vec(Array{Int}(inelift0d.A[1,:] / sign(inelift0d.b[1]))) --> [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
-    @fact inelift0df.linset --> IntSet(1)
-    @fact length(inelift0df.b) --> 7
-    @fact inelift0df.b[1] / sign(inelift0df.b[1]) --> 6
-    @fact vec(Array{Int}(inelift0df.A[1,:] / sign(inelift0df.b[1]))) --> [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
+    @test inelift0d.linset == IntSet(1)
+    @test length(inelift0d.b) == 7
+    @test inelift0d.b[1] / sign(inelift0d.b[1]) == 6
+    @test vec(Array{Int}(inelift0d.A[1,:] / sign(inelift0d.b[1]))) == [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
+    @test inelift0df.linset == IntSet(1)
+    @test length(inelift0df.b) == 7
+    @test inelift0df.b[1] / sign(inelift0df.b[1]) == 6
+    @test vec(Array{Int}(inelift0df.A[1,:] / sign(inelift0df.b[1]))) == [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
     polylift = CDDPolyhedra(inelift0)
     polyliftf = CDDPolyhedra(inelift0f)
     extunlift = SimpleVRepresentation{3,Int}(copygenerators(polylift))

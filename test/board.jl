@@ -1,4 +1,4 @@
-facts("Low-level board tests") do
+@testset "Low-level board tests" begin
     A1 = -eye(Int, 9) # x >= 0
     b1 = zeros(Int, 9)
     A2 = eye(Int, 9) # x <= 1
@@ -35,7 +35,7 @@ facts("Low-level board tests") do
         ok = true
       end
     end
-    @fact ok --> true
+    @test ok
 
     cutA = ones(Int, 1, 9)
     cutb = 6
@@ -43,11 +43,11 @@ facts("Low-level board tests") do
     bcut = [cutb; b]
     inecut = Polyhedra.SimpleHRepresentation(Acut, bcut)
     (isredundant, certificate) = redundant(inecut, 1)
-    @fact isredundant --> false
-    @fact Array{Rational{Int}}(certificate) --> target
+    @test !isredundant
+    @test Array{Rational{Int}}(certificate) == target
     redundantrows(inecut)
-    @fact IntSet() --> redundantrows(inecut)
+    @test IntSet() == redundantrows(inecut)
     (issredundant, scertificate) = sredundant(inecut, 1)
-    @fact issredundant --> false
-    @fact Array{Rational{Int}}(scertificate) --> target
+    @test !issredundant
+    @test Array{Rational{Int}}(scertificate) == target
 end
