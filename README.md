@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/JuliaPolyhedra/CDDLib.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaPolyhedra/CDDLib.jl?branch=master)
 [![codecov.io](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl?branch=master)
 
-CDDLib.jl is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra.jl](https://github.com/blegat/Polyhedra.jl).
+CDDLib.jl is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra.jl](https://github.com/JuliaPolyhedra/Polyhedra.jl).
 I needed to fork cddlib to write the wrapper because it is interface is text file based.
 My changes are not upstream yet, the version used by CDDLib.jl can be found [here](https://github.com/blegat/cddlib).
 
