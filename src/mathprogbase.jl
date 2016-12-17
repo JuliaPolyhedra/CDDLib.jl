@@ -10,7 +10,6 @@ type CDDPolyhedraModel <: AbstractPolyhedraModel
   objval
   solution
   constrsolution
-  reducedcosts
   constrduals
   infeasibilityray
 end
@@ -28,7 +27,7 @@ type CDDSolver <: AbstractMathProgSolver
 end
 
 function PolyhedraModel(s::CDDSolver)
-  CDDPolyhedraModel(s.solver_type, s.exact, nothing, :Undefined, 0, [], [], [], [], [])
+  CDDPolyhedraModel(s.solver_type, s.exact, nothing, :Undefined, 0, [], [], [], [])
 end
 LinearQuadraticModel(s::CDDSolver) = PolyhedraToLPQPBridge(PolyhedraModel(s))
 
@@ -56,21 +55,24 @@ function optimize!(lpm::CDDPolyhedraModel)
   lpm.objval = getobjval(sol)
   lpm.solution = getsolution(sol)
 
-  lpm.reducedcosts = getreducedcosts(sol)
-  # FIXME if A has equalities, cddlib splits them as 2 inequalities
-  lpm.reducedcosts = lpm.reducedcosts[1:nhreps(prob)]
+  lpm.constrduals = getconstrduals(sol)
+  # if A has equalities, cddlib splits them as 2 inequalities
+  m = nhreps(prob)
+  if length(lpm.constrduals) > m
+      secondeqduals = lpm.constrduals[m+1:end]
+      lpm.constrduals = lpm.constrduals[1:m]
+      lpm.constrduals[collect(linset(prob))] -= secondeqduals
+  end
   # FIXME if A is GMPRational, check that no creation/leak
 
   T = eltype(prob)
 
   lpm.constrsolution = Vector{T}(nhreps(prob))
-  lpm.constrduals = zeros(T, fulldim(prob))
   lpm.infeasibilityray = zeros(T, nhreps(prob))
 
   eps = 1e-7
   for (i,h) in enumerate(hreps(prob))
     lpm.constrsolution[i] = dot(coord(h), lpm.solution)
-    lpm.constrduals += lpm.reducedcosts[i] * coord(h)
     if Polyhedra.mygt(lpm.constrsolution[i], h.β)
       lpm.infeasibilityray[i] = -1
     end
@@ -96,7 +98,8 @@ function getconstrsolution(lpm::CDDPolyhedraModel)
 end
 
 function getreducedcosts(lpm::CDDPolyhedraModel)
-  copy(lpm.reducedcosts)
+  prob = get(lpm.prob)
+  spzeros(eltype(prob), fulldim(prob))
 end
 
 function getconstrduals(lpm::CDDPolyhedraModel)

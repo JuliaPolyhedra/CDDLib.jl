@@ -87,18 +87,32 @@ function getsolution(sol::CDDLPSolution{Cdouble})
   solutiontmp[2:end]
 end
 
-function getreducedcosts(sol::CDDLPSolution{GMPRational})
+function getconstrduals(sol::CDDLPSolution{GMPRational})
   soldata = unsafe_load(sol.sol)
   # -1 because there is the objective
-  dualsolutiontmp = myconvert(Array, soldata.dsol, soldata.m-1)
-  dualsolution = Array{Rational{BigInt}}(dualsolutiontmp)
-  myfree(dualsolutiontmp)
-  dualsolution
+  nbindex = myconvert(Array, soldata.nbindex, soldata.d+1)
+  dsol = myconvert(Array, soldata.dsol, soldata.d+1)
+  dual = zeros(Rational{BigInt}, soldata.m-1)
+  for j in 2:soldata.d
+      if nbindex[j+1] > 0
+          dual[nbindex[j+1]] = dsol[j]
+      end
+  end
+  myfree(dsol)
+  dual
 end
-function getreducedcosts(sol::CDDLPSolution{Cdouble})
+function getconstrduals(sol::CDDLPSolution{Cdouble})
   soldata = unsafe_load(sol.sol)
   # -1 because there is the objective
-  myconvert(Array, soldata.dsol, soldata.m-1)
+  nbindex = myconvert(Array, soldata.nbindex, soldata.d+1)
+  dsol = myconvert(Array, soldata.dsol, soldata.d+1)
+  dual = zeros(Cdouble, soldata.m-1)
+  for j in 2:soldata.d
+      if nbindex[j+1] > 0
+          dual[nbindex[j+1]] = dsol[j]
+      end
+  end
+  dual
 end
 
 type Cdd_LPData{T<:MyType}

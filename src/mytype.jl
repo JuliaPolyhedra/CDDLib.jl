@@ -153,12 +153,8 @@ polytypefor{T <: AbstractFloat}(::Type{T}) = Cdouble
 polytypefor{T <: PolyType}(::Type{T})        = T
 
 # Used by mathprogbase.jl
-function myconvert(::Type{Array}, x::Ptr{Cdouble}, n)
-  y = Array{Cdouble, 1}(n)
-  for i = 1:n
-    y[i] = unsafe_load(x, i)
-  end
-  y
+function myconvert{T<:Union{Cdouble, Clong}}(::Type{Array}, x::Ptr{T}, n)
+  copy(unsafe_wrap(Array, x, n))
 end
 function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
   y = Array{GMPRationalMut, 1}(n)
