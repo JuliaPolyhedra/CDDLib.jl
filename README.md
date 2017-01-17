@@ -5,8 +5,9 @@
 | [![][pkg-0.5-img]][pkg-0.5-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] |
 | [![][pkg-0.6-img]][pkg-0.6-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
 
+CDDLib is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra](https://github.com/JuliaPolyhedra/Polyhedra.jl).
+CDDLib also includes the linear programming solver `CDDSolver` which can be used through [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl).
 
-CDDLib.jl is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra.jl](https://github.com/JuliaPolyhedra/Polyhedra.jl).
 I needed to fork cddlib to write the wrapper because it is interface is text file based.
 My changes are not upstream yet, the version used by CDDLib.jl can be found [here](https://github.com/blegat/cddlib).
 
