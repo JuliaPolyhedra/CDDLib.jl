@@ -73,13 +73,13 @@ function fillmatrix{T}(inequality::Bool, matrix::Ptr{Ptr{T}}, itr1, linset=IntSe
   linset
 end
 
-function initmatrix(inequality::Bool, itr1, itr2=nothing)
-  n = fulldim(itr1)+1
+function initmatrix{N, T}(inequality::Bool, itr1::AbstractRepIterator{N, T}, itr2=nothing)
+  n = N+1
   m = length(itr1)
   if !(itr2 === nothing)
     m += length(itr2)
   end
-  matrix = dd_creatematrix(mytype(eltype(itr1)), Cdd_rowrange(m), Cdd_colrange(n))
+  matrix = dd_creatematrix(mytype(T), Cdd_rowrange(m), Cdd_colrange(n))
   mat = unsafe_load(matrix)
   linset = fillmatrix(inequality, mat.matrix, itr1)
   if !(itr2 === nothing)
