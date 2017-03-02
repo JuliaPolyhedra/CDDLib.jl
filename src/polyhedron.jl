@@ -296,7 +296,13 @@ function Base.push!{N}(p::CDDPolyhedron{N}, ext::VRepresentation{N})
 end
 
 # TODO other solvers
-defaultLPsolverfor{N,T}(p::CDDPolyhedron{N,T}) = CDDSolver(exact=T == Rational{BigInt})
+function defaultLPsolverfor{N,T}(p::CDDPolyhedron{N,T}, solver=nothing)
+    if vrepiscomputed(p)
+        SimpleVRepSolver()
+    else
+        CDDSolver(exact=T == Rational{BigInt})
+    end
+end
 function ishredundant(p::CDDPolyhedron, i::Integer; strongly=false, cert=false, solver=defaultLPsolverfor(p))
   f = strongly ? sredundant : redundant
   ans = redundant(getine(p), i)
@@ -317,7 +323,7 @@ function isvredundant(p::CDDPolyhedron, i::Integer; strongly=false, cert=false, 
 end
 
 # Implementation of Polyhedron's optional interface
-function Base.isempty(p::CDDPolyhedron)
+function Base.isempty(p::CDDPolyhedron, solver::CDDSolver)
   lp = matrix2feasibility(getine(p))
   lpsolve(lp)
   # It is impossible to be unbounded since there is no objective
