@@ -139,8 +139,8 @@ function polyhedron(lib::CDDLibrary; eqs=nothing, ineqs=nothing, points=nothing,
   CDDPolyhedron{N, T}(eqs=eqs, ineqs=ineqs, points=points, rays=rays)
 end
 
-getlibraryfor{T<:Real}(::CDDPolyhedron, ::Type{T}) = CDDLibrary(:exact)
-getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, ::Type{T}) = CDDLibrary(:float)
+getlibraryfor{T<:Real}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary(:exact)
+getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary(:float)
 
 # need to specify to avoid ambiguïty
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
