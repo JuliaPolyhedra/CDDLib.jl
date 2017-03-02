@@ -29,6 +29,13 @@ As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/
 > programming problem, i.e. a problem of maximizing and minimizing
 > a linear function over P.
 
+##Installation
+
+On Unix, cddlib is build from source while on Windows, a binary is downloaded using [WinRPM](https://github.com/JuliaPackaging/WinRPM.jl).
+Therefore, on Unix, it is required that you have a working environment for compiling C programs and that you have the headers file of GMP installed (GMP is bundled with Julia but we still need the development files for compiling cddlib).
+On Linux, install `libgmp-dev` if you are on a Debian based Linux OS (such as Ubuntu), `libgmp-devel` or `gmp-devel` if you are on RedHat based Linux OS (such as Fedora) and `gmp` if you are on an ArchLinux based Linux OS (such as Antergos).
+On MacOS, `gmp` is automatically installed through [Homebrew](https://github.com/JuliaPackaging/Homebrew.jl).
+
 [pkg-0.5-img]: http://pkg.julialang.org/badges/CDDLib_0.5.svg
 [pkg-0.5-url]: http://pkg.julialang.org/?pkg=CDDLib
 [pkg-0.6-img]: http://pkg.julialang.org/badges/CDDLib_0.6.svg
