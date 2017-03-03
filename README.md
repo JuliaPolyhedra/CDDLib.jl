@@ -44,7 +44,7 @@ On MacOS, `gmp` is automatically installed through [Homebrew](https://github.com
 [build-img]: https://travis-ci.org/JuliaPolyhedra/CDDLib.jl.svg?branch=master
 [build-url]: https://travis-ci.org/JuliaPolyhedra/CDDLib.jl
 [winbuild-img]: https://ci.appveyor.com/api/projects/status/bfcfmeq2yxn3bj07?svg=true
-[winbuild-url]: https://ci.appveyor.com/project/blegat/cdd-jl/settings/badges)
+[winbuild-url]: https://ci.appveyor.com/project/blegat/cdd-jl
 [coveralls-img]: https://coveralls.io/repos/github/JuliaPolyhedra/CDDLib.jl/badge.svg?branch=master
 [coveralls-url]: https://coveralls.io/github/JuliaPolyhedra/CDDLib.jl?branch=master
 [codecov-img]: http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master
