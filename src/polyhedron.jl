@@ -195,15 +195,15 @@ end
 
 
 implementseliminationmethod(p::CDDPolyhedron, ::Type{Val{:FourierMotzkin}}) = true
-function eliminate(p::CDDPolyhedron, delset::IntSet, ::Type{Val{:FourierMotzkin}})
+function eliminate(p::CDDPolyhedron, delset, ::Type{Val{:FourierMotzkin}})
     eliminate(p, delset, :FourierMotzkin)
 end
 implementseliminationmethod(p::CDDPolyhedron, ::Type{Val{:BlockElimination}}) = true
-function eliminate(p::CDDPolyhedron, delset::IntSet, ::Type{Val{:BlockElimination}})
+function eliminate(p::CDDPolyhedron, delset, ::Type{Val{:BlockElimination}})
     eliminate(p, delset, :BlockElimination)
 end
 
-function eliminate(ine::CDDInequalityMatrix, delset::IntSet, method=:Auto)
+function eliminate(ine::CDDInequalityMatrix, delset, method=:Auto)
   if length(delset) > 0
     if method == :Auto
         fourier = false
@@ -232,7 +232,7 @@ function eliminate(ine::CDDInequalityMatrix, delset::IntSet, method=:Auto)
   end
 end
 
-function eliminate{N, T}(p::CDDPolyhedron{N, T}, delset::IntSet, method::Symbol=:Auto)
+function eliminate{N, T}(p::CDDPolyhedron{N, T}, delset, method::Symbol=:Auto)
   CDDPolyhedron{N-length(delset), T}(eliminate(getine(p), delset, method))
 end
 
