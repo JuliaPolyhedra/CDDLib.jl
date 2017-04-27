@@ -252,7 +252,7 @@ function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}}, delset::C
   myerror(err[])
   newmatrix
 end
-function blockelimination{N, T, S}(matrix::CDDInequalityMatrix{N, T, S}, delset::IntSet=IntSet([N]))
+function blockelimination{N, T, S}(matrix::CDDInequalityMatrix{N, T, S}, delset=IntSet([N]))
   if last(delset) > N
     error("Invalid variable to eliminate")
   end
@@ -260,7 +260,7 @@ function blockelimination{N, T, S}(matrix::CDDInequalityMatrix{N, T, S}, delset:
   # (indicating the linearity) so 2 is the first dimension
   CDDInequalityMatrix{N-length(delset), T, S}(dd_blockelimination(matrix.matrix, CDDSet(delset, N+1, 1).s))
 end
-function blockelimination(ine::HRepresentation, delset::IntSet=IntSet([fulldim(ine)]))
+function blockelimination(ine::HRepresentation, delset=IntSet([fulldim(ine)]))
   blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)
 end
 

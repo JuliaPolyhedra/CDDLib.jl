@@ -17,7 +17,7 @@ function dd_set_card(st::Cset_type)
   @cdd_ccall set_card Clong (Cset_type,) st
 end
 
-function dd_settype(st::Cset_type, s::IntSet, offset::Integer=0)
+function dd_settype(st::Cset_type, s, offset::Integer=0)
   for el in s
     dd_set_addelem(st, Clong(offset+el))
   end
@@ -30,12 +30,12 @@ type CDDSet
   maxel::Clong
 end
 
-function CDDSet(s::IntSet, maxel::Clong, offset::Integer=0)
+function CDDSet(s, maxel::Clong, offset::Integer)
   st = dd_set_initialize(maxel)
   dd_settype(st, s, offset)
   CDDSet(st, maxel)
 end
-CDDSet(s::IntSet, maxel, offset::Integer=0) = CDDSet(s, Clong(maxel), offset)
+CDDSet(s, maxel, offset::Integer) = CDDSet(s, Clong(maxel), offset)
 
 function Base.convert(::Type{IntSet}, st::CDDSet)
   s = IntSet()
