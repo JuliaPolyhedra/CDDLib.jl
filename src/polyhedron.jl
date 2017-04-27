@@ -223,8 +223,9 @@ function eliminate(ine::CDDInequalityMatrix, delset::IntSet, method=:Auto)
           if ds[i] != fulldim(ine)
               error("The CDD implementation of Fourier-Motzkin only support removing the last dimensions")
           end
-          fourierelimination(ine)
+          ine = fourierelimination(ine)
       end
+      ine
     else
       blockelimination(ine, delset)
     end
