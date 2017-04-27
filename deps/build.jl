@@ -2,7 +2,7 @@ using BinDeps
 
 @BinDeps.setup
 
-cddlib_commit = "5ff766051042f3413c534af8ffcbbe00f66b3ab1"
+cddlib_commit = "82409bb792a0be0a8d57805842a491baf504a3b4"
 #cddname = "cddlib-094h"
 cddname = "cddlib-$cddlib_commit"
 
@@ -47,7 +47,7 @@ end
 #CDD
 
 official_repo = "ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/$cddname.tar.gz"
-forked_repo = "https://github.com/blegat/cddlib/archive/$cddlib_commit.zip"
+forked_repo = "https://github.com/JuliaPolyhedra/cddlib/archive/$cddlib_commit.zip"
 @static if is_unix()
     libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit", "libcddgmp-0"])#, depends=[libgmpdev])
 end
