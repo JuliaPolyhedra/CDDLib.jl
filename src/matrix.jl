@@ -175,8 +175,8 @@ nhreps(matrix::CDDInequalityMatrix) = length(matrix)
 neqs(matrix::CDDInequalityMatrix) = dd_set_card(unsafe_load(matrix.matrix).linset)
 nineqs(matrix::CDDInequalityMatrix) = length(matrix) - neqs(matrix)
 
-function Base.copy{N, T}(matrix::CDDInequalityMatrix{N, T})
-  CDDInequalityMatrix{N, T}(dd_matrixcopy(matrix.matrix))
+function Base.copy{N, T, S}(matrix::CDDInequalityMatrix{N, T, S})
+  CDDInequalityMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
 function extractrow(mat::Cdd_MatrixData{Cdouble}, i)
@@ -281,8 +281,8 @@ CDDGeneratorMatrix{N,T}(rep::Rep{N,T}) = CDDGeneratorMatrix{N,polytypefor(T), my
 
 CDDGeneratorMatrix{T}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
 
-function Base.copy{N, T}(matrix::CDDGeneratorMatrix{N, T})
-  CDDGeneratorMatrix{N, T}(dd_matrixcopy(matrix.matrix))
+function Base.copy{N, T, S}(matrix::CDDGeneratorMatrix{N, T, S})
+  CDDGeneratorMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
 function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(it::VRepIterator{N, T})
