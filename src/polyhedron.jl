@@ -21,11 +21,11 @@ type CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
   noredundantinequality::Bool
   noredundantgenerator::Bool
 
-  function CDDPolyhedron(ine::CDDInequalityMatrix)
-    new(ine, nothing, nothing, false, false, false, false)
+  function CDDPolyhedron{N, T}(ine::CDDInequalityMatrix) where {N, T <: PolyType}
+    new{N, T}(ine, nothing, nothing, false, false, false, false)
   end
-  function CDDPolyhedron(ext::CDDGeneratorMatrix)
-    new(nothing, ext, nothing, false, false, false, false)
+  function CDDPolyhedron{N, T}(ext::CDDGeneratorMatrix) where {N, T <: PolyType}
+    new{N, T}(nothing, ext, nothing, false, false, false, false)
   end
 # function CDDPolyhedron(poly::CDDPolyhedra{T})
 #   new(nothing, nothing, poly)
