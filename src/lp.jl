@@ -43,7 +43,7 @@ end
 type CDDLPSolution{T<:MyType}
   sol::Ptr{Cdd_LPSolutionData{T}}
 
-  function (::Type{CDDLPSolution{T}}){T <: MyType}(sol::Ptr{Cdd_LPSolutionData{T}})
+  function CDDLPSolution{T}(sol::Ptr{Cdd_LPSolutionData{T}}) where {T <: MyType}
     s = new{T}(sol)
     finalizer(s, myfree)
     s
@@ -190,7 +190,7 @@ end
 type CDDLP{T<:MyType}
   lp::Ptr{Cdd_LPData{T}}
 
-  function (::Type{CDDLP{T}}){T <: MyType}(lp::Ptr{Cdd_LPData{T}})
+  function CDDLP{T}(lp::Ptr{Cdd_LPData{T}}) where {T <: MyType}
     l = new{T}(lp)
     finalizer(l, myfree)
     l

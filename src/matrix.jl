@@ -96,7 +96,7 @@ end
 type CDDInequalityMatrix{N, T <: PolyType, S <: MyType} <: HRepresentation{N, T}
   matrix::Ptr{Cdd_MatrixData{S}}
 
-  function (::Type{CDDInequalityMatrix{N, T, S}}){N, T <: PolyType, S <: MyType}(matrix::Ptr{Cdd_MatrixData{S}})
+  function CDDInequalityMatrix{N, T, S}(matrix::Ptr{Cdd_MatrixData{S}}) where {N, T <: PolyType, S <: MyType}
     @assert polytype(S) == T
     m = new{N, T, S}(matrix)
     finalizer(m, myfree)
@@ -112,7 +112,7 @@ decomposedfast(ine::CDDInequalityMatrix) = false
 type CDDGeneratorMatrix{N, T <: PolyType, S <: MyType} <: VRepresentation{N, T}
   matrix::Ptr{Cdd_MatrixData{S}}
 
-  function (::Type{CDDGeneratorMatrix{N, T, S}}){N, T <: PolyType, S <: MyType}(matrix::Ptr{Cdd_MatrixData{S}})
+  function CDDGeneratorMatrix{N, T, S}(matrix::Ptr{Cdd_MatrixData{S}}) where {N, T <: PolyType, S <: MyType}
     @assert polytype(S) == T
     m = new{N, T, S}(matrix)
     finalizer(m, myfree)
@@ -125,7 +125,7 @@ changefulldim{N, T, S}(::Type{CDDGeneratorMatrix{N, T, S}}, NewN) = CDDGenerator
 changeboth{N, T, S, NewT}(::Type{CDDGeneratorMatrix{N, T, S}}, NewN, ::Type{NewT}) = CDDGeneratorMatrix{NewN, NewT, mytype(NewT)}
 decomposedfast(ine::CDDGeneratorMatrix) = false
 
-@compat CDDMatrix{N, T, S} = Union{CDDInequalityMatrix{N, T, S}, CDDGeneratorMatrix{N, T, S}}
+const CDDMatrix{N, T, S} = Union{CDDInequalityMatrix{N, T, S}, CDDGeneratorMatrix{N, T, S}}
 (::Type{CDDMatrix{N, T}}){N, T}(rep) = CDDMatrix{N, T, mytype(T)}(rep)
 
 function linset(matrix::CDDMatrix)
