@@ -63,8 +63,8 @@ end"
     extf    = SimpleVRepresentation{3, Int}(round(extmf))
     inequality_simpletest(ineout, A, b, ls)
     inequality_simpletest(ineoutf, A, b, ls)
-    generator_simpletest(ext, V, Array(Int, 0, 3))
-    generator_simpletest(extf, V, Array(Int, 0, 3))
+    generator_simpletest(ext, V, Array{Int}(0, 3))
+    generator_simpletest(extf, V, Array{Int}(0, 3))
 
 
     # x1___x4____________1
@@ -115,6 +115,6 @@ end"
     # This does inexact error: WTF why ???
     #extunlift = Representation{3,Int}(copygenerators(polylift))
     #extunliftf = Representation{3,Int}(copygenerators(polyliftf))
-    generator_simpletest(extunlift, V, Array(Int, 0, 3))
-    generator_simpletest(extunliftf, V, Array(Int, 0, 3))
+    generator_simpletest(extunlift, V, Array{Int}(0, 3))
+    generator_simpletest(extunliftf, V, Array{Int}(0, 3))
 end

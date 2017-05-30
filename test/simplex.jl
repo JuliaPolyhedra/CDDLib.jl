@@ -98,8 +98,8 @@ generator_simpletest(ext::VRepresentation, V, R = Matrix{eltype(V)}(0, size(V, 2
     Rray = [1 0; 0 1]
     extray = SimpleVRepresentation(Matrix{Int}(0,2), Rray)
     extrayf = SimpleVRepresentation(Matrix{Float64}(0,2), Array{Float64}(Rray))
-    generator_simpletest(extray, Array(Int, 0, 2), Rray)
-    generator_simpletest(extrayf, Array(Int, 0, 2), Rray)
+    generator_simpletest(extray, Array{Int}(0, 2), Rray)
+    generator_simpletest(extrayf, Array{Int}(0, 2), Rray)
     polyray = CDDPolyhedra(extray)
     polyrayf = CDDPolyhedra(extrayf)
     Acut = [1 1]
@@ -116,6 +116,6 @@ generator_simpletest(ext::VRepresentation, V, R = Matrix{eltype(V)}(0, size(V, 2
     inequality_simpletest(ineout5f, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
     generator_simpletest(extout5, V)
     generator_simpletest(extout5f, V)
-    generator_simpletest(extout5, V, Array(Int, 0, 2))
-    generator_simpletest(extout5f, V, Array(Int, 0, 2))
+    generator_simpletest(extout5, V, Array{Int}(0, 2))
+    generator_simpletest(extout5f, V, Array{Int}(0, 2))
 end

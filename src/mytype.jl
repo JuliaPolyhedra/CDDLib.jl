@@ -137,8 +137,8 @@ promote_rule{T<:Integer}(::Type{GMPRational}, ::Type{T}) = GMPRational
 
 ==(x::GMPRational, y::GMPRational) = Rational(x) == Rational(y)
 
-typealias PolyType Union{Rational{BigInt}, Cdouble}
-typealias MyType Union{GMPRational, Cdouble}
+const PolyType = Union{Rational{BigInt}, Cdouble}
+const MyType = Union{GMPRational, Cdouble}
 
 mytype(::Type{Cdouble}) = Cdouble
 mytype(::Type{Rational{BigInt}}) = GMPRational
