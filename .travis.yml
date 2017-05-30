@@ -13,9 +13,10 @@ addons:
 notifications:
   email: false
 # uncomment the following lines to override the default test script
-#script:
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("cddlib"); Pkg.test("cddlib"; coverage=true)'
+script:
+ - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+ - julia -e 'Pkg.init(); Pkg.add("GeometryTypes"); Pkg.checkout("GeometryTypes")'
+ - julia -e 'Pkg.clone(pwd()); Pkg.build("cddlib"); Pkg.test("cddlib"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("CDDLib")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
