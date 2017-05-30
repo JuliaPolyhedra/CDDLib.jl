@@ -64,9 +64,9 @@ type CDDPolyhedra{N, T<:PolyType, S}
   poly::Ptr{Cdd_PolyhedraData{S}}
   inequality::Bool # The input type is inequality
 
-  function CDDPolyhedra(matrix::CDDMatrix{N, T})
+  function (::Type{CDDPolyhedra{N, T, S}}){N, T <: PolyType, S}(matrix::CDDMatrix{N, T})
     polyptr = dd_matrix2poly(matrix.matrix)
-    poly = new(polyptr, isaninequalityrepresentation(matrix))
+    poly = new{N, T, S}(polyptr, isaninequalityrepresentation(matrix))
     finalizer(poly, myfree)
     poly
   end
