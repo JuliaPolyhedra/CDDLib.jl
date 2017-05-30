@@ -68,7 +68,7 @@ function dd_redundant(matrix::Ptr{Cdd_MatrixData{GMPRational}}, i::Cdd_rowrange,
   found = (@dd_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix i certificateGMPRat err)
   myerror(err[])
   certificate = Array{Rational{BigInt}}(certificateGMPRat)
-  myfree(certificateGMPRat)
+  # myfree(certificateGMPRat)  # disabled due to https://github.com/JuliaPolyhedra/CDDLib.jl/issues/13
   (found, certificate)
 end
 function redundant(matrix::CDDMatrix, i::Integer)
@@ -117,7 +117,7 @@ function dd_sredundant(matrix::Ptr{Cdd_MatrixData{GMPRational}}, i::Cdd_rowrange
   found = (@dd_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix i certificateGMPRat err)
   myerror(err[])
   certificate = Array{Rational{BigInt}}(certificateGMPRat)
-  myfree(certificateGMPRat)
+  # myfree(certificateGMPRat)  # disabled due to https://github.com/JuliaPolyhedra/CDDLib.jl/issues/13
   (found, certificate)
 end
 function sredundant(matrix::CDDMatrix, i::Integer)
