@@ -12,14 +12,14 @@ const Cdd_rowindex = Ptr{Clong}
 const Cdd_rowflag = Ptr{Cint}
 const Cdd_colindex = Ptr{Clong}
 
-@compat Cdd_Amatrix{T} = Ptr{Ptr{T}}
-@compat Cdd_Arow{T} = Ptr{T}
+const Cdd_Amatrix{T} = Ptr{Ptr{T}}
+const Cdd_Arow{T} = Ptr{T}
 
 const Cdd_SetVector = Ptr{Cset_type}
-@compat Cdd_Bmatrix{T} = Ptr{Ptr{T}}
+const Cdd_Bmatrix{T} = Ptr{Ptr{T}}
 const Cdd_Aincidence = Ptr{Cset_type}
 
-@compat primitive type Cdd_DataFileType 2040 end # char[255]
+primitive type Cdd_DataFileType 2040 end # char[255]
 
 const Cdd_NumberType = Cint
 # dd_Unknown=0, dd_Real, dd_Rational, dd_Integer

@@ -3,7 +3,6 @@ __precompile__()
 module CDDLib
 
 using BinDeps
-using Compat: @compat
 importall Polyhedra
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
