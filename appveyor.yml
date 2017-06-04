@@ -28,7 +28,7 @@ build_script:
   - IF EXIST .git\shallow (git fetch --unshallow)
   - C:\projects\julia\bin\julia -e "versioninfo();
       Pkg.init(); Pkg.add(\"GeometryTypes\"); Pkg.checkout(\"GeometryTypes\");
-      Pkg.clone(\"https://github.com/JuliaPolyhedra/Polyhedra.jl\"); Pkg.checkout(\"Polyhedra\", \"fix-0.6\");
+      Pkg.clone(\"https://github.com/JuliaPolyhedra/Polyhedra.jl\"); Pkg.checkout(\"Polyhedra\");
       Pkg.clone(pwd(), \"CDDLib\"); Pkg.build(\"CDDLib\")"
 
 test_script:
