@@ -5,7 +5,6 @@ os:
   - osx
 julia:
   - 0.6
-  - nightly
 addons:
   apt_packages:
     - libgmp-dev
@@ -15,7 +14,7 @@ notifications:
 script:
  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
  - julia -e 'Pkg.init(); Pkg.add("GeometryTypes"); Pkg.checkout("GeometryTypes")'
-  - julia -e 'Pkg.clone("https://github.com/JuliaPolyhedra/Polyhedra.jl"); Pkg.checkout("Polyhedra", "fix-0.6"); Pkg.build("Polyhedra")'
+  - julia -e 'Pkg.clone("https://github.com/JuliaPolyhedra/Polyhedra.jl"); Pkg.checkout("Polyhedra", "fix-0.6")'
  - julia -e 'Pkg.clone(pwd()); Pkg.build("CDDLib"); Pkg.test("CDDLib"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
