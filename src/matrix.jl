@@ -167,8 +167,11 @@ CDDInequalityMatrix{T}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{uns
 function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(it::HRepIterator{N, T})
   CDDInequalityMatrix(initmatrix(true, it))
 end
+function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(eqs, ineqs)
+    CDDInequalityMatrix(initmatrix(true, eqs, ineqs))
+end
 function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(; eqs=nothing, ineqs=nothing)
-  CDDInequalityMatrix(initmatrix(true, eqs, ineqs))
+    CDDInequalityMatrix{N, T, S}(eqs, ineqs)
 end
 
 nhreps(matrix::CDDInequalityMatrix) = length(matrix)
@@ -288,8 +291,11 @@ end
 function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(it::VRepIterator{N, T})
   CDDGeneratorMatrix(initmatrix(false, it))
 end
+function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(points, rays)
+    CDDGeneratorMatrix(initmatrix(false, rays, points))
+end
 function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(; rays=nothing, points=nothing)
-  CDDGeneratorMatrix(initmatrix(false, rays, points))
+    CDDGeneratorMatrix{N, T, S}(points, rays)
 end
 
 nvreps(matrix::CDDGeneratorMatrix) = length(matrix)
