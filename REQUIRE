@@ -1,6 +1,6 @@
 julia 0.6
-BinDeps
-MathProgBase
+BinDeps 0.4.7
+MathProgBase 0.6
 Polyhedra 0.2 0.3
 @windows WinRPM
 @osx Homebrew
