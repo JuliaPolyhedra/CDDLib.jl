@@ -126,7 +126,7 @@ changeboth{N, T, S, NewT}(::Type{CDDGeneratorMatrix{N, T, S}}, NewN, ::Type{NewT
 decomposedfast(ine::CDDGeneratorMatrix) = false
 
 const CDDMatrix{N, T, S} = Union{CDDInequalityMatrix{N, T, S}, CDDGeneratorMatrix{N, T, S}}
-(::Type{CDDMatrix{N, T}}){N, T}(rep) = CDDMatrix{N, T, mytype(T)}(rep)
+CDDMatrix{N, T}(rep) where {N, T} = CDDMatrix{N, T, mytype(T)}(rep)
 
 function linset(matrix::CDDMatrix)
   mat = unsafe_load(matrix.matrix)
@@ -164,13 +164,13 @@ CDDInequalityMatrix{N,T}(rep::Rep{N,T}) = CDDInequalityMatrix{N,polytypefor(T), 
 
 CDDInequalityMatrix{T}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
 
-function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(it::HRepIterator{N, T})
+function CDDInequalityMatrix{N, T, S}(it::HRepIterator{N, T}) where {N, T, S}
   CDDInequalityMatrix(initmatrix(true, it))
 end
-function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(eqs, ineqs)
+function CDDInequalityMatrix{N, T, S}(eqs, ineqs) where {N, T, S}
     CDDInequalityMatrix(initmatrix(true, eqs, ineqs))
 end
-function (::Type{CDDInequalityMatrix{N, T, S}}){N,T,S}(; eqs=nothing, ineqs=nothing)
+function CDDInequalityMatrix{N, T, S}(; eqs=nothing, ineqs=nothing) where {N, T, S}
     CDDInequalityMatrix{N, T, S}(eqs, ineqs)
 end
 
@@ -288,13 +288,13 @@ function Base.copy{N, T, S}(matrix::CDDGeneratorMatrix{N, T, S})
   CDDGeneratorMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
-function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(it::VRepIterator{N, T})
+function CDDGeneratorMatrix{N,T,S}(it::VRepIterator{N, T}) where {N, T, S}
   CDDGeneratorMatrix(initmatrix(false, it))
 end
-function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(points, rays)
+function CDDGeneratorMatrix{N,T,S}(points, rays) where {N, T, S}
     CDDGeneratorMatrix(initmatrix(false, rays, points))
 end
-function (::Type{CDDGeneratorMatrix{N,T,S}}){N,T,S}(; rays=nothing, points=nothing)
+function CDDGeneratorMatrix{N,T,S}(; rays=nothing, points=nothing) where {N, T, S}
     CDDGeneratorMatrix{N, T, S}(points, rays)
 end
 

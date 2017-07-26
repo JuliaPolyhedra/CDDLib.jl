@@ -124,11 +124,11 @@ function polytypeforprecision(precision::Symbol)
   precision == :float ? Cdouble : Rational{BigInt}
 end
 
-function polyhedron{N}(repit::Union{Representation{N},HRepIterator{N},VRepIterator{N}}, lib::CDDLibrary)
+function Polyhedra.polyhedron{N}(repit::Union{Representation{N},HRepIterator{N},VRepIterator{N}}, lib::CDDLibrary)
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(repit)
 end
-function polyhedron(lib::CDDLibrary; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
+function Polyhedra.polyhedron(lib::CDDLibrary; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
   its = [eqs, ineqs, points, rays]
   i = findfirst(x -> !(x === nothing), its)
   if i == 0
@@ -146,8 +146,10 @@ getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
-(::Type{CDDPolyhedron{N, T}}){N, T}(it::HRepIterator{N,T}) = CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(it))
-(::Type{CDDPolyhedron{N, T}}){N, T}(it::VRepIterator{N,T}) = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N,T,mytype(T)}(it))
+CDDPolyhedron{N, T}(it::HRepIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(it))
+CDDPolyhedron{N, T}(eqs::EqIterator{N, T}, ineqs::IneqIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(eqs, ineqs))
+CDDPolyhedron{N, T}(it::VRepIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(it))
+CDDPolyhedron{N, T}(ps::PointIterator{N, T}, rs::RayIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(ps, rs))
 
 function (::Type{CDDPolyhedron{N, T}}){N, T}(; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
   noth = eqs === nothing && ineqs === nothing
