@@ -170,9 +170,6 @@ end
 function CDDInequalityMatrix{N, T, S}(eqs, ineqs) where {N, T, S}
     CDDInequalityMatrix(initmatrix(true, eqs, ineqs))
 end
-function CDDInequalityMatrix{N, T, S}(; eqs=nothing, ineqs=nothing) where {N, T, S}
-    CDDInequalityMatrix{N, T, S}(eqs, ineqs)
-end
 
 nhreps(matrix::CDDInequalityMatrix) = length(matrix)
 neqs(matrix::CDDInequalityMatrix) = dd_set_card(unsafe_load(matrix.matrix).linset)
@@ -293,9 +290,6 @@ function CDDGeneratorMatrix{N,T,S}(it::VRepIterator{N, T}) where {N, T, S}
 end
 function CDDGeneratorMatrix{N,T,S}(points, rays) where {N, T, S}
     CDDGeneratorMatrix(initmatrix(false, rays, points))
-end
-function CDDGeneratorMatrix{N,T,S}(; rays=nothing, points=nothing) where {N, T, S}
-    CDDGeneratorMatrix{N, T, S}(points, rays)
 end
 
 nvreps(matrix::CDDGeneratorMatrix) = length(matrix)
