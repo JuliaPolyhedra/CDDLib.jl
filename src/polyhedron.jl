@@ -128,6 +128,14 @@ function Polyhedra.polyhedron{N}(repit::Union{Representation{N},HRepIterator{N},
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(repit)
 end
+function Polyhedrapolyhedron{N}(hps::EqIterator{N}, hss::IneqIterator{N}, lib::CDDLibrary)
+  T = polytypeforprecision(lib.precision)
+  CDDPolyhedron{N, T}(hps, hss)
+end
+function Polyhedrapolyhedron{N}(ps::PointIterator{N}, rs::RayIterator{N}, lib::CDDLibrary)
+  T = polytypeforprecision(lib.precision)
+  CDDPolyhedron{N, T}(ps, rs)
+end
 function Polyhedra.polyhedron(lib::CDDLibrary; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
   its = [eqs, ineqs, points, rays]
   i = findfirst(x -> !(x === nothing), its)
