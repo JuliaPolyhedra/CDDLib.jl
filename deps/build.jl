@@ -54,8 +54,8 @@ end
 @static if is_windows()
     libcdd = library_dependency("libcddgmp", aliases=["libcddgmp-0"]) #, depends=[libgmp])
     using WinRPM
-    push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win32/openSUSE_13.2")
-    push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win64/openSUSE_13.2")
+    push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win32/openSUSE_Leap_42.2")
+    push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win64/openSUSE_Leap_42.2")
     WinRPM.update()
     provides(WinRPM.RPM, "libcdd-$(cddlib_commit[1:8])", [libcdd], os = :Windows)
 end
