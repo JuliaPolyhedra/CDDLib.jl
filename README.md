@@ -29,7 +29,7 @@ As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/
 > programming problem, i.e. a problem of maximizing and minimizing
 > a linear function over P.
 
-##Installation
+## Installation
 
 On Unix, cddlib is build from source while on Windows, a binary is downloaded using [WinRPM](https://github.com/JuliaPackaging/WinRPM.jl).
 Therefore, on Unix, it is required that you have a working environment for compiling C programs and that you have the headers file of GMP installed (GMP is bundled with Julia but we still need the development files for compiling cddlib).
