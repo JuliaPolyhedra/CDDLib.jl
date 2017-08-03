@@ -60,11 +60,12 @@ end"
     ineout  = SimpleHRepresentation{3, Int}(ineoutm)
     ineoutf = SimpleHRepresentation{3, Int}(ineoutmf)
     ext     = SimpleVRepresentation{3, Int}(extm)
-    extf    = SimpleVRepresentation{3, Int}(round(extmf))
+    extf    = SimpleVRepresentation(extmf)
     inequality_simpletest(ineout, A, b, ls)
     inequality_simpletest(ineoutf, A, b, ls)
-    generator_simpletest(ext, V, Array{Int}(0, 3))
-    generator_simpletest(extf, V, Array{Int}(0, 3))
+    R = Matrix{Int}(0, 3)
+    generator_simpletest(ext, V, R)
+    generator_simpletest(extf, V, R)
 
 
     # x1___x4____________1
@@ -111,10 +112,7 @@ end"
     polylift = CDDPolyhedra(inelift0)
     polyliftf = CDDPolyhedra(inelift0f)
     extunlift = SimpleVRepresentation{3,Int}(copygenerators(polylift))
-    extunliftf = SimpleVRepresentation{3,Int}(round(copygenerators(polyliftf)))
-    # This does inexact error: WTF why ???
-    #extunlift = Representation{3,Int}(copygenerators(polylift))
-    #extunliftf = Representation{3,Int}(copygenerators(polyliftf))
-    generator_simpletest(extunlift, V, Array{Int}(0, 3))
-    generator_simpletest(extunliftf, V, Array{Int}(0, 3))
+    extunliftf = SimpleVRepresentation(copygenerators(polyliftf))
+    generator_simpletest(extunlift, V, R)
+    generator_simpletest(extunliftf, V, R)
 end
