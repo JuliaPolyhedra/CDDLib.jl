@@ -25,7 +25,7 @@ end
 
 # CDDSet
 
-type CDDSet
+mutable struct CDDSet
   s::Cset_type
   maxel::Clong
 end

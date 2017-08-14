@@ -1,7 +1,7 @@
 import MathProgBase
 importall MathProgBase.SolverInterface
 
-type Cdd_LPSolutionData{T<:MyType}
+mutable struct Cdd_LPSolutionData{T<:MyType}
   filename::Cdd_DataFileType
   objective::Cdd_LPObjectiveType
   solver::Cdd_LPSolverType
@@ -40,7 +40,7 @@ function dd_freelpsolution(lp::Ptr{Cdd_LPSolutionData{GMPRational}})
   @dd_ccall FreeLPSolution Void (Ptr{Cdd_LPSolutionData{GMPRational}},) lp
 end
 
-type CDDLPSolution{T<:MyType}
+mutable struct CDDLPSolution{T<:MyType}
   sol::Ptr{Cdd_LPSolutionData{T}}
 
   function CDDLPSolution{T}(sol::Ptr{Cdd_LPSolutionData{T}}) where {T <: MyType}
@@ -50,7 +50,7 @@ type CDDLPSolution{T<:MyType}
   end
 end
 
-CDDLPSolution{T<:MyType}(sol::Ptr{Cdd_LPSolutionData{T}}) = CDDLPSolution{T}(sol)
+CDDLPSolution(sol::Ptr{Cdd_LPSolutionData{T}}) where {T<:MyType} = CDDLPSolution{T}(sol)
 
 function myfree(sol::CDDLPSolution)
   dd_freelpsolution(sol.sol)
@@ -115,7 +115,7 @@ function getconstrduals(sol::CDDLPSolution{Cdouble})
   dual
 end
 
-type Cdd_LPData{T<:MyType}
+mutable struct Cdd_LPData{T<:MyType}
   filename::Cdd_DataFileType
   objective::Cdd_LPObjectiveType
   solver::Cdd_LPSolverType
@@ -187,7 +187,7 @@ function dd_freelpdata(lp::Ptr{Cdd_LPData{GMPRational}})
   @dd_ccall FreeLPData Void (Ptr{Cdd_LPData{GMPRational}},) lp
 end
 
-type CDDLP{T<:MyType}
+mutable struct CDDLP{T<:MyType}
   lp::Ptr{Cdd_LPData{T}}
 
   function CDDLP{T}(lp::Ptr{Cdd_LPData{T}}) where {T <: MyType}
@@ -197,7 +197,7 @@ type CDDLP{T<:MyType}
   end
 end
 
-CDDLP{T<:MyType}(lp::Ptr{Cdd_LPData{T}}) = CDDLP{T}(lp)
+CDDLP(lp::Ptr{Cdd_LPData{T}}) where {T<:MyType} = CDDLP{T}(lp)
 
 function myfree(lp::CDDLP)
   dd_freelpdata(lp.lp)

@@ -1,6 +1,6 @@
 export CDDPolyhedraModel, CDDSolver
 
-type CDDPolyhedraModel <: AbstractPolyhedraModel
+mutable struct CDDPolyhedraModel <: AbstractPolyhedraModel
   solver_type::Symbol
   exact::Bool
 
@@ -14,7 +14,7 @@ type CDDPolyhedraModel <: AbstractPolyhedraModel
   infeasibilityray
 end
 
-type CDDSolver <: AbstractMathProgSolver
+mutable struct CDDSolver <: AbstractMathProgSolver
   solver_type::Symbol
   exact::Bool
 
@@ -31,7 +31,7 @@ function PolyhedraModel(s::CDDSolver)
 end
 LinearQuadraticModel(s::CDDSolver) = PolyhedraToLPQPBridge(PolyhedraModel(s))
 
-function loadproblem!{N}(lpm::CDDPolyhedraModel, rep::HRep{N}, obj, sense)
+function loadproblem!(lpm::CDDPolyhedraModel, rep::HRep{N}, obj, sense) where N
   T = lpm.exact ? Rational{BigInt} : Float64
   prob = CDDInequalityMatrix{N, T, mytype(T)}(rep)
   setobjective(prob, obj, sense)

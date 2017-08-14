@@ -1,4 +1,4 @@
-type Cdd_PolyhedraData{T<:MyType}
+mutable struct Cdd_PolyhedraData{T<:MyType}
   representation::Cdd_RepresentationType
   # given representation
   homogeneous::Cdd_boolean
@@ -60,7 +60,7 @@ function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   poly
 end
 
-type CDDPolyhedra{N, T<:PolyType, S}
+mutable struct CDDPolyhedra{N, T<:PolyType, S}
   poly::Ptr{Cdd_PolyhedraData{S}}
   inequality::Bool # The input type is inequality
 
@@ -73,14 +73,14 @@ type CDDPolyhedra{N, T<:PolyType, S}
 
 end
 
-function myfree{N}(poly::CDDPolyhedra{N, Cdouble})
+function myfree(poly::CDDPolyhedra{N, Cdouble}) where N
   @ddf_ccall FreePolyhedra Void (Ptr{Cdd_PolyhedraData{Cdouble}},) poly.poly
 end
-function myfree{N}(poly::CDDPolyhedra{N, Rational{BigInt}})
+function myfree(poly::CDDPolyhedra{N, Rational{BigInt}}) where N
   @dd_ccall FreePolyhedra Void (Ptr{Cdd_PolyhedraData{GMPRational}},) poly.poly
 end
 
-CDDPolyhedra{N, T, S}(matrix::CDDMatrix{N, T, S}) = CDDPolyhedra{N, T, S}(matrix)
+CDDPolyhedra(matrix::CDDMatrix{N, T, S}) where {N, T, S} = CDDPolyhedra{N, T, S}(matrix)
 CDDPolyhedra(rep::Representation) = CDDPolyhedra(CDDMatrix(rep))
 
 function Base.convert{N, T, S}(::Type{CDDPolyhedra{N, T, S}}, matrix::CDDMatrix{N, T, S})
