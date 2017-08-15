@@ -20,21 +20,21 @@ function dd_inputappend(poly::Ptr{Cdd_PolyhedraData{GMPRational}}, matrix::Ptr{C
   polyptr[]
 end
 
-function Base.push!{N, T<:PolyType}(poly::CDDPolyhedra{N, T}, ine::CDDInequalityMatrix{N, T})
+function Base.push!(poly::CDDPolyhedra{N, T}, ine::CDDInequalityMatrix{N, T}) where {N, T<:PolyType}
   if !poly.inequality
     switchinputtype!(poly)
   end
   poly.poly = dd_inputappend(poly.poly, ine.matrix)
 end
 
-function Base.push!{N, T<:PolyType}(poly::CDDPolyhedra{N, T}, ext::CDDGeneratorMatrix{N, T})
+function Base.push!(poly::CDDPolyhedra{N, T}, ext::CDDGeneratorMatrix{N, T}) where {N, T<:PolyType}
   if poly.inequality
     switchinputtype!(poly)
   end
   poly.poly = dd_inputappend(poly.poly, ext.matrix)
 end
 
-function Base.push!{N,T,S}(poly::CDDPolyhedra{N,T}, rep::Representation{N,S})
+function Base.push!(poly::CDDPolyhedra{N,T}, rep::Representation{N,S}) where {N,T,S}
   Base.push!(poly, cddmatrix(T, rep))
 end
 
@@ -44,13 +44,13 @@ end
 function dd_matrixappend(matrix1::Ptr{Cdd_MatrixData{GMPRational}}, matrix2::Ptr{Cdd_MatrixData{GMPRational}})
   @dd_ccall MatrixAppend Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ptr{Cdd_MatrixData{GMPRational}}) matrix1 matrix2
 end
-function matrixappend{N, T, S}(matrix1::CDDInequalityMatrix{N, T, S}, matrix2::CDDInequalityMatrix{N, T, S})
+function matrixappend(matrix1::CDDInequalityMatrix{N, T, S}, matrix2::CDDInequalityMatrix{N, T, S}) where {N, T, S}
   CDDInequalityMatrix{N, T, S}(dd_matrixappend(matrix1.matrix, matrix2.matrix))
 end
-function matrixappend{N, T, S}(matrix1::CDDGeneratorMatrix{N, T, S}, matrix2::CDDGeneratorMatrix{N, T, S})
+function matrixappend(matrix1::CDDGeneratorMatrix{N, T, S}, matrix2::CDDGeneratorMatrix{N, T, S}) where {N, T, S}
   CDDGeneratorMatrix{N, T, S}(dd_matrixappend(matrix1.matrix, matrix2.matrix))
 end
-function matrixappend{N, S, T}(matrix::CDDMatrix{N, T}, repr::Representation{N, S})
+function matrixappend(matrix::CDDMatrix{N, T}, repr::Representation{N, S}) where {N, S, T}
   matrixappend(matrix, cddmatrix(T, repr))
 end
 
@@ -231,7 +231,7 @@ function dd_fourierelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   myerror(err[])
   newmatrix
 end
-function fourierelimination{N, T, S}(matrix::CDDInequalityMatrix{N, T, S})
+function fourierelimination(matrix::CDDInequalityMatrix{N, T, S}) where {N, T, S}
   CDDInequalityMatrix{N-1, T, S}(dd_fourierelimination(matrix.matrix))
 end
 function fourierelimination(ine::HRepresentation)
@@ -252,7 +252,7 @@ function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}}, delset::C
   myerror(err[])
   newmatrix
 end
-function blockelimination{N, T, S}(matrix::CDDInequalityMatrix{N, T, S}, delset=IntSet([N]))
+function blockelimination(matrix::CDDInequalityMatrix{N, T, S}, delset=IntSet([N])) where {N, T, S}
   if last(delset) > N
     error("Invalid variable to eliminate")
   end

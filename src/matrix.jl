@@ -1,4 +1,4 @@
-type Cdd_MatrixData{T <: MyType}
+mutable struct Cdd_MatrixData{T <: MyType}
   rowsize::Cdd_rowrange
   linset::Cdd_rowset
   colsize::Cdd_colrange
@@ -60,7 +60,7 @@ function dd_matrixcopy(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   @dd_ccall MatrixCopy Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}},) matrix
 end
 
-function fillmatrix{T}(inequality::Bool, matrix::Ptr{Ptr{T}}, itr1, linset=IntSet(), offset=0)
+function fillmatrix(inequality::Bool, matrix::Ptr{Ptr{T}}, itr1, linset=IntSet(), offset=0) where T
   for (i, item) in enumerate(itr1)
     row = unsafe_load(matrix, offset+i)
     if islin(item)
@@ -73,7 +73,7 @@ function fillmatrix{T}(inequality::Bool, matrix::Ptr{Ptr{T}}, itr1, linset=IntSe
   linset
 end
 
-function initmatrix{N, T}(inequality::Bool, itr1::AbstractRepIterator{N, T}, itr2=nothing)
+function initmatrix(inequality::Bool, itr1::AbstractRepIterator{N, T}, itr2=nothing) where {N, T}
   n = N+1
   m = length(itr1)
   if !(itr2 === nothing)
@@ -93,7 +93,7 @@ end
 
 # Representation
 
-type CDDInequalityMatrix{N, T <: PolyType, S <: MyType} <: HRepresentation{N, T}
+mutable struct CDDInequalityMatrix{N, T <: PolyType, S <: MyType} <: HRepresentation{N, T}
   matrix::Ptr{Cdd_MatrixData{S}}
 
   function CDDInequalityMatrix{N, T, S}(matrix::Ptr{Cdd_MatrixData{S}}) where {N, T <: PolyType, S <: MyType}
@@ -109,7 +109,7 @@ changefulldim{N, T, S}(::Type{CDDInequalityMatrix{N, T, S}}, NewN) = CDDInequali
 changeboth{N, T, S, NewT}(::Type{CDDInequalityMatrix{N, T, S}}, NewN, ::Type{NewT}) = CDDInequalityMatrix{NewN, NewT, mytype(NewT)}
 decomposedfast(ine::CDDInequalityMatrix) = false
 
-type CDDGeneratorMatrix{N, T <: PolyType, S <: MyType} <: VRepresentation{N, T}
+mutable struct CDDGeneratorMatrix{N, T <: PolyType, S <: MyType} <: VRepresentation{N, T}
   matrix::Ptr{Cdd_MatrixData{S}}
 
   function CDDGeneratorMatrix{N, T, S}(matrix::Ptr{Cdd_MatrixData{S}}) where {N, T <: PolyType, S <: MyType}
@@ -142,7 +142,7 @@ cddmatrix{N,T}(::Type{T}, vrep::VRepresentation{N}) = CDDGeneratorMatrix{N,T,myt
 # Does not work
 #Base.convert{N,T,S}(::Type{CDDMatrix{N,T,S}}, vrep::VRepresentation{N}) = CDDGeneratorMatrix{N,T,S}(vrep)
 
-function Base.length{N}(matrix::CDDMatrix{N})
+function Base.length(matrix::CDDMatrix{N}) where N
   mat = unsafe_load(matrix.matrix)
   @assert Int(mat.colsize) == N+1
   Int(mat.rowsize)
@@ -160,9 +160,9 @@ end
 
 # H-representation
 
-CDDInequalityMatrix{N,T}(rep::Rep{N,T}) = CDDInequalityMatrix{N,polytypefor(T), mytypefor(T)}(rep)
+CDDInequalityMatrix(rep::Rep{N,T}) where {N,T} = CDDInequalityMatrix{N,polytypefor(T), mytypefor(T)}(rep)
 
-CDDInequalityMatrix{T}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
+CDDInequalityMatrix(matrix::Ptr{Cdd_MatrixData{T}}) where {T} = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
 
 function CDDInequalityMatrix{N, T, S}(it::HRepIterator{N, T}) where {N, T, S}
   CDDInequalityMatrix(initmatrix(true, it))
@@ -175,7 +175,7 @@ nhreps(matrix::CDDInequalityMatrix) = length(matrix)
 neqs(matrix::CDDInequalityMatrix) = dd_set_card(unsafe_load(matrix.matrix).linset)
 nineqs(matrix::CDDInequalityMatrix) = length(matrix) - neqs(matrix)
 
-function Base.copy{N, T, S}(matrix::CDDInequalityMatrix{N, T, S})
+function Base.copy(matrix::CDDInequalityMatrix{N, T, S}) where {N, T, S}
   CDDInequalityMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
@@ -213,7 +213,7 @@ function extractrow(ine::CDDInequalityMatrix, i)
     HalfSpace(a, β)
   end
 end
-function extractrow{N,T}(ext::CDDGeneratorMatrix{N,T}, i)
+function extractrow(ext::CDDGeneratorMatrix{N,T}, i) where {N,T}
   mat = unsafe_load(ext.matrix)
   b = extractrow(mat, i)
   ispoint = b[1]
@@ -233,7 +233,7 @@ function extractrow{N,T}(ext::CDDGeneratorMatrix{N,T}, i)
     end
   end
 end
-function isrowpoint{N,T}(ext::CDDGeneratorMatrix{N,T}, i)
+function isrowpoint(ext::CDDGeneratorMatrix{N,T}, i) where {N,T}
   mat = unsafe_load(ext.matrix)
   b = extractrow(unsafe_load(ext.matrix), i)
   ispoint = b[1]
@@ -269,7 +269,7 @@ function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
   true
 end
 
-function setobjective{N, T}(matrix::CDDInequalityMatrix{N, T}, c, sense)
+function setobjective(matrix::CDDInequalityMatrix{N, T}, c, sense) where {N, T}
   dd_setmatrixobjective(matrix.matrix, sense == :Max ? dd_LPmax : dd_LPmin)
   obj = [zero(T); Vector{T}(c)]
   dd_copyArow(unsafe_load(matrix.matrix).rowvec, obj)
@@ -277,11 +277,11 @@ end
 
 # V-representation
 
-CDDGeneratorMatrix{N,T}(rep::Rep{N,T}) = CDDGeneratorMatrix{N,polytypefor(T), mytypefor(T)}(rep)
+CDDGeneratorMatrix(rep::Rep{N,T}) where {N,T} = CDDGeneratorMatrix{N,polytypefor(T), mytypefor(T)}(rep)
 
-CDDGeneratorMatrix{T}(matrix::Ptr{Cdd_MatrixData{T}}) = CDDGeneratorMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
+CDDGeneratorMatrix(matrix::Ptr{Cdd_MatrixData{T}}) where {T} = CDDGeneratorMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
 
-function Base.copy{N, T, S}(matrix::CDDGeneratorMatrix{N, T, S})
+function Base.copy(matrix::CDDGeneratorMatrix{N, T, S}) where {N, T, S}
   CDDGeneratorMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
@@ -360,7 +360,7 @@ function extractA(mat::Cdd_MatrixData{GMPRational})
   Array{GMPRational}(A)
 end
 
-function Base.show{T}(io::IO, matrix::Cdd_MatrixData{T})
+function Base.show(io::IO, matrix::Cdd_MatrixData{T}) where T
   if matrix.representation == dd_Inequality
     println(io, "H-representation")
   else

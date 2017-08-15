@@ -2,13 +2,13 @@ import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero, Base.zeros
 
 # It is immutable so that it is stored by value in the structures
 # GMPRational and GMPRationalMut and not by reference
-immutable GMPInteger
+struct GMPInteger
   alloc::Cint
   size::Cint
   data::Ptr{UInt32}
 end
 
-type GMPRationalMut
+mutable struct GMPRationalMut
   num::GMPInteger
   den::GMPInteger
 
@@ -51,7 +51,7 @@ Base.zero(::Type{GMPRationalMut}) = GMPRationalMut(0)
 
 # I cannot have a finalizer for an immutable so you are responsibe to free it
 # if you use it using e.g. myfree define below
-immutable GMPRational <: Real
+struct GMPRational <: Real
   num::GMPInteger
   den::GMPInteger
   function GMPRational(m::GMPRationalMut)
@@ -73,7 +73,7 @@ Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
 
 GMPRational() = GMPRational(GMPRationalMut())
 
-GMPRational{T<:Integer,S<:Integer}(a::S, b::T) = GMPRational(GMPRationalMut(a, b))
+GMPRational(a::S, b::T) where {T<:Integer,S<:Integer} = GMPRational(GMPRationalMut(a, b))
 Base.convert{T<:Real}(::Type{GMPRational}, a::T) = GMPRational(GMPRationalMut(a))
 Base.convert(::Type{GMPRational}, a::GMPRational) = a
 
