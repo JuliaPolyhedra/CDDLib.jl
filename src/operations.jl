@@ -208,9 +208,7 @@ function dd_matrixredundancyremove(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   (found, matptr[], redset[], newpos[])
 end
 function redundancyremove!(matrix::CDDMatrix)
-  println("before $(matrix.matrix)")
   (found, matrix.matrix, redset, newpos) = dd_matrixredundancyremove(matrix.matrix)
-  println("after $(matrix.matrix)")
   if !Bool(found)
     error("Redundancy removal not found")
   end
