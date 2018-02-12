@@ -65,7 +65,8 @@ function optimize!(lpm::CDDPolyhedraModel)
   end
   # FIXME if A is GMPRational, check that no creation/leak
 
-  T = eltype(prob)
+  #T = eltype(prob) # FIXME how did it work, where is eltype defined for prob ?
+  T = typeof(lpm.objval)
 
   lpm.constrsolution = Vector{T}(nhreps(prob))
   lpm.infeasibilityray = zeros(T, nhreps(prob))

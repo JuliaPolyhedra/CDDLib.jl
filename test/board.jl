@@ -30,10 +30,10 @@
     ext  = Polyhedra.SimpleVRepresentation{9, Rational{Int}}(copygenerators(poly))
     target = ones(Int, 9) * (3 // 4)
     ok = false
-    for v in vreps(ext)
-      if v == target
-        ok = true
-      end
+    for v in points(ext)
+        if v == target
+            ok = true
+        end
     end
     @test ok
 
