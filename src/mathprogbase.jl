@@ -65,18 +65,18 @@ function optimize!(lpm::CDDPolyhedraModel)
   end
   # FIXME if A is GMPRational, check that no creation/leak
 
-  #T = eltype(prob) # FIXME how did it work, where is eltype defined for prob ?
-  T = typeof(lpm.objval)
+  T = Polyhedra.coefficienttype(prob)
 
   lpm.constrsolution = Vector{T}(nhreps(prob))
   lpm.infeasibilityray = zeros(T, nhreps(prob))
 
   eps = 1e-7
-  for (i,h) in enumerate(hreps(prob))
-    lpm.constrsolution[i] = dot(coord(h), lpm.solution)
-    if Polyhedra.mygt(lpm.constrsolution[i], h.β)
-      lpm.infeasibilityray[i] = -1
-    end
+  for i in 1:nhreps(prob)
+      a, β = extractrow(prob, i)
+      lpm.constrsolution[i] = dot(a, lpm.solution)
+      if Polyhedra.mygt(lpm.constrsolution[i], β)
+          lpm.infeasibilityray[i] = -1
+      end
   end
 
   # A and b free'd by ine
@@ -100,7 +100,7 @@ end
 
 function getreducedcosts(lpm::CDDPolyhedraModel)
   prob = get(lpm.prob)
-  spzeros(eltype(prob), fulldim(prob))
+  spzeros(Polyhedra.coefficienttype(prob), fulldim(prob))
 end
 
 function getconstrduals(lpm::CDDPolyhedraModel)

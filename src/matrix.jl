@@ -111,7 +111,7 @@ mutable struct CDDGeneratorMatrix{N, T <: PolyType, S <: MyType} <: Polyhedra.Mi
 
   function CDDGeneratorMatrix{N, T, S}(matrix::Ptr{Cdd_MatrixData{S}}) where {N, T <: PolyType, S <: MyType}
       @assert polytype(S) == T
-      cone = true
+      cone = !iszero(_length(matrix, N)) # If there is no ray and no point, it is empty so we should not add the origin
       for i in 1:_length(matrix, N)
           if isrowpoint(matrix, i, T)
               cone = false
@@ -171,9 +171,6 @@ CDDInequalityMatrix(rep::Rep{N,T}) where {N,T} = CDDInequalityMatrix{N,polytypef
 
 CDDInequalityMatrix(matrix::Ptr{Cdd_MatrixData{T}}) where {T} = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
 
-#function CDDInequalityMatrix{N, T, S}(it:HRepIterator{N, T}) where {N, T, S}
-#  CDDInequalityMatrix(initmatrix(true, it))
-#end
 function CDDInequalityMatrix{N, T, S}(eqs::Polyhedra.ElemIt{<:HyperPlane{N, T}}, ineqs::Polyhedra.ElemIt{<:HalfSpace{N, T}}) where {N, T, S}
     CDDInequalityMatrix(initmatrix(Polyhedra.FullDim{N}(), T, true, eqs, ineqs))
 end
@@ -267,9 +264,6 @@ function Base.copy(matrix::CDDGeneratorMatrix{N, T, S}) where {N, T, S}
   CDDGeneratorMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
-#function CDDGeneratorMatrix{N,T,S}(it::VRepIterator{N, T}) where {N, T, S}
-#  CDDGeneratorMatrix(initmatrix(false, it))
-#end
 function CDDGeneratorMatrix{N,T,S}(sympoints::Polyhedra.ElemIt{<:SymPoint{N, T}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N, T}}, lines::Polyhedra.ElemIt{<:Line{N, T}}, rays::Polyhedra.ElemIt{<:Ray{N, T}}) where {N, T, S}
     CDDGeneratorMatrix(initmatrix(Polyhedra.FullDim{N}(), T, false, lines, sympoints, rays, points))
 end
@@ -285,34 +279,7 @@ end
 
 Base.isvalid(vrep::CDDGeneratorMatrix{N, T}, idx::Polyhedra.VIndex{N, T}) where {N, T} = 0 < idx.value <= length(vrep) && Polyhedra.islin(vrep, idx) == islin(idx) && isrowpoint(vrep, idx.value) == ispoint(idx)
 
-#startvrep(ext::CDDGeneratorMatrix) = 1
-#donevrep(ext::CDDGeneratorMatrix, state) = state > length(ext)
-#nextvrep(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), state+1)
-#
-#function nextrayidx(ext::CDDGeneratorMatrix, i, n)
-#  while i <= n && isrowpoint(ext, i)
-#    i += 1
-#  end
-#  i
-#end
-#function nextpointidx(ext::CDDGeneratorMatrix, i, n)
-#  while i <= n && !isrowpoint(ext, i)
-#    i += 1
-#  end
-#  i
-#end
-
-#startray(ext::CDDGeneratorMatrix) = nextrayidx(ext, 1, length(ext))
-#doneray(ext::CDDGeneratorMatrix, state) = state > length(ext)
-#nextray(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), nextrayidx(ext, state+1, length(ext)))
-#
-#startpoint(ext::CDDGeneratorMatrix) = nextpointidx(ext, 1, length(ext))
-#donepoint(ext::CDDGeneratorMatrix, state) = state > length(ext)
-#nextpoint(ext::CDDGeneratorMatrix, state) = (extractrow(ext, state), nextpointidx(ext, state+1, length(ext)))
-
-function isaninequalityrepresentation(matrix::CDDGeneratorMatrix)
-  false
-end
+isaninequalityrepresentation(matrix::CDDGeneratorMatrix) = false
 
 function extractA(mat::Cdd_MatrixData{Cdouble})
   m = mat.rowsize
