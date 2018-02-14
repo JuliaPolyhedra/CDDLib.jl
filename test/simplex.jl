@@ -19,9 +19,9 @@
     generator_simpletest(extout1, V)
     generator_simpletest(extout1f, V)
 
-    Aalt = [1 0; -1 0; -1 -1]
-    balt = [1,0,-1]
-    linsetalt = IntSet([3])
+    Aalt = [-1 -1; 1 0; -1 0]
+    balt = [-1,1,0]
+    linsetalt = IntSet([1])
     ext = SimpleVRepresentation(V)
     extf = SimpleVRepresentation(Array{Float64}(V))
     poly2 = CDDPolyhedra(ext)
@@ -65,10 +65,10 @@
     generator_simpletest(extout4f, Vfull)
 
     Rray = [1 0; 0 1]
-    extray = SimpleVRepresentation(Matrix{Int}(0,2), Rray)
-    extrayf = SimpleVRepresentation(Matrix{Float64}(0,2), Array{Float64}(Rray))
-    generator_simpletest(extray, Array{Int}(0, 2), Rray)
-    generator_simpletest(extrayf, Array{Int}(0, 2), Rray)
+    extray = SimpleVRepresentation(zeros(Int, 1, 2), Rray)
+    extrayf = SimpleVRepresentation(zeros(Float64, 1, 2), Array{Float64}(Rray))
+    generator_simpletest(extray, zeros(Int, 1, 2), Rray)
+    generator_simpletest(extrayf, zeros(Int, 1, 2), Rray)
     polyray = CDDPolyhedra(extray)
     polyrayf = CDDPolyhedra(extrayf)
     Acut = [1 1]
@@ -81,8 +81,8 @@
     ineout5f = SimpleHRepresentation{2,Int}(copyinequalities(polyrayf))
     extout5 = SimpleVRepresentation{2,Int}(copygenerators(polyray))
     extout5f = SimpleVRepresentation{2,Int}(copygenerators(polyrayf))
-    inequality_simpletest(ineout5, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
-    inequality_simpletest(ineout5f, [-1 0; 0 -1; Acut], [0; 0; bcut], IntSet([3]))
+    inequality_simpletest(ineout5, [Acut; 0 0; -1 0; 0 -1], [bcut; 1; 0; 0], IntSet([1]))
+    inequality_simpletest(ineout5f, [Acut; 0 0; -1 0; 0 -1], [bcut; 1; 0; 0], IntSet([1]))
     generator_simpletest(extout5, V)
     generator_simpletest(extout5f, V)
     generator_simpletest(extout5, V, Array{Int}(0, 2))

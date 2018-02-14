@@ -31,12 +31,8 @@ mutable struct CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
 #   new(nothing, nothing, poly)
 # end
 end
-changeeltype{N, T, NewT}(::Type{CDDPolyhedron{N, T}}, ::Type{NewT}) = CDDPolyhedron{N, NewT}
-changefulldim{N, T}(::Type{CDDPolyhedron{N, T}}, NewN) = CDDPolyhedron{NewN, T}
-changeboth{N, T, NewT}(::Type{CDDPolyhedron{N, T}}, NewN, ::Type{NewT}) = CDDPolyhedron{NewN, NewT}
-
-decomposedhfast(p::CDDPolyhedron) = false
-decomposedvfast(p::CDDPolyhedron) = false
+Polyhedra.arraytype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Vector{T}
+Polyhedra.similar_type(::Type{<:CDDPolyhedron}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDPolyhedron{N, T}
 
 CDDPolyhedron(matrix::CDDMatrix{N, T}) where {N, T} = CDDPolyhedron{N, T}(matrix)
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::Representation{N, T}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
@@ -124,27 +120,17 @@ function polytypeforprecision(precision::Symbol)
   precision == :float ? Cdouble : Rational{BigInt}
 end
 
-function Polyhedra.polyhedron(repit::Union{Representation{N},HRepIterator{N},VRepIterator{N}}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(rep::Representation{N}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
-  CDDPolyhedron{N, T}(repit)
+  CDDPolyhedron{N, T}(rep)
 end
-function Polyhedrapolyhedron(hps::EqIterator{N}, hss::IneqIterator{N}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(hyperplanes::Polyhedra.ElemIt{<:HyperPlane{N}}, halfspaces::Polyhedra.ElemIt{<:HalfSpace{N}}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
-  CDDPolyhedron{N, T}(hps, hss)
+  CDDPolyhedron{N, T}(hyperplanes, halfspaces)
 end
-function Polyhedrapolyhedron(ps::PointIterator{N}, rs::RayIterator{N}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(sympoints::Polyhedra.ElemIt{<:SymPoint{N}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N}}, lines::Polyhedra.ElemIt{<:Line{N}}, rays::Polyhedra.ElemIt{<:Ray{N}}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
-  CDDPolyhedron{N, T}(ps, rs)
-end
-function Polyhedra.polyhedron(lib::CDDLibrary; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing)
-  its = [eqs, ineqs, points, rays]
-  i = findfirst(x -> !(x === nothing), its)
-  if i == 0
-    error("polyhedron should be given at least one iterator")
-  end
-  N = fulldim(its[i])
-  T = polytypeforprecision(lib.precision)
-  CDDPolyhedron{N, T}(eqs=eqs, ineqs=ineqs, points=points, rays=rays)
+  CDDPolyhedron{N, T}(sympoints, points, lines, rays)
 end
 
 getlibraryfor{T<:Real}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary(:exact)
@@ -154,25 +140,9 @@ getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
-CDDPolyhedron{N, T}(it::HRepIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(it))
-CDDPolyhedron{N, T}(eqs::EqIterator{N, T}, ineqs::IneqIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(eqs, ineqs))
-CDDPolyhedron{N, T}(it::VRepIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(it))
-CDDPolyhedron{N, T}(ps::PointIterator{N, T}, rs::RayIterator{N, T}) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(ps, rs))
-
-function CDDPolyhedron{N, T}(; eqs=nothing, ineqs=nothing, points=nothing, rays=nothing) where {N, T}
-  noth = eqs === nothing && ineqs === nothing
-  notv = points === nothing && rays === nothing
-  if noth && notv
-    error("CDDPolyhedron should have at least one iterator to be built")
-  end
-  if !noth && !notv
-    error("CDDPolyhedron constructed with a combination of eqs/ineqs with points/rays")
-  end
-  if notv
-    CDDPolyhedron{N, T}(CDDInequalityMatrix{N,T,mytype(T)}(eqs=eqs, ineqs=ineqs))
-  else
-    CDDPolyhedron{N, T}(CDDGeneratorMatrix{N,T,mytype(T)}(points=points, rays=rays))
-  end
+CDDPolyhedron{N, T}(hyperplanes::Polyhedra.ElemIt{<:HyperPlane{N, T}}, halfspaces::Polyhedra.ElemIt{<:HalfSpace{N, T}}) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(hyperplanes, halfspaces))
+function CDDPolyhedron{N, T}(sympoints::Polyhedra.ElemIt{<:SymPoint{N, T}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N, T}}, lines::Polyhedra.ElemIt{<:Line{N, T}}, rays::Polyhedra.ElemIt{<:Ray{N, T}}) where {N, T}
+    CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(sympoints, points, lines, rays))
 end
 
 function hrepiscomputed(p::CDDPolyhedron)
@@ -180,20 +150,6 @@ function hrepiscomputed(p::CDDPolyhedron)
 end
 function hrep(p::CDDPolyhedron{N, T}) where {N, T}
   getine(p)
-end
-
-for f in [:hashreps, :nhreps, :starthrep, :hasineqs, :nineqs, :startineq, :haseqs, :neqs, :starteq]
-    @eval $f(p::CDDPolyhedron) = $f(getine(p))
-end
-for f in [:donehrep, :nexthrep, :doneineq, :nextineq, :doneeq, :nexteq]
-    @eval $f(p::CDDPolyhedron, state) = $f(getine(p), state)
-end
-
-for f in [:hasvreps, :nvreps, :startvrep, :haspoints, :npoints, :startpoint, :hasrays, :nrays, :startray]
-    @eval $f(p::CDDPolyhedron) = $f(getext(p))
-end
-for f in [:donevrep, :nextvrep, :donepoint, :nextpoint, :doneray, :nextray]
-    @eval $f(p::CDDPolyhedron, state) = $f(getext(p), state)
 end
 
 function vrepiscomputed(p::CDDPolyhedron)
