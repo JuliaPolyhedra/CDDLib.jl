@@ -171,8 +171,8 @@ CDDInequalityMatrix(rep::Rep{N,T}) where {N,T} = CDDInequalityMatrix{N,polytypef
 
 CDDInequalityMatrix(matrix::Ptr{Cdd_MatrixData{T}}) where {T} = CDDInequalityMatrix{unsafe_load(matrix).colsize-1, polytype(T), T}(matrix)
 
-function CDDInequalityMatrix{N, T, S}(eqs::Polyhedra.ElemIt{<:HyperPlane{N, T}}, ineqs::Polyhedra.ElemIt{<:HalfSpace{N, T}}) where {N, T, S}
-    CDDInequalityMatrix(initmatrix(Polyhedra.FullDim{N}(), T, true, eqs, ineqs))
+function CDDInequalityMatrix{N, T, S}(hits::Polyhedra.HIt{N, T}...) where {N, T, S}
+    CDDInequalityMatrix(initmatrix(Polyhedra.FullDim{N}(), T, true, hits...))
 end
 
 nhreps(matrix::CDDInequalityMatrix) = length(matrix)
@@ -264,8 +264,8 @@ function Base.copy(matrix::CDDGeneratorMatrix{N, T, S}) where {N, T, S}
   CDDGeneratorMatrix{N, T, S}(dd_matrixcopy(matrix.matrix))
 end
 
-function CDDGeneratorMatrix{N,T,S}(sympoints::Polyhedra.ElemIt{<:SymPoint{N, T}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N, T}}, lines::Polyhedra.ElemIt{<:Line{N, T}}, rays::Polyhedra.ElemIt{<:Ray{N, T}}) where {N, T, S}
-    CDDGeneratorMatrix(initmatrix(Polyhedra.FullDim{N}(), T, false, lines, sympoints, rays, points))
+function CDDGeneratorMatrix{N,T,S}(vits::Polyhedra.VIt{N, T}...) where {N, T, S}
+    CDDGeneratorMatrix(initmatrix(Polyhedra.FullDim{N}(), T, false, vits...))
 end
 
 nvreps(matrix::CDDGeneratorMatrix) = length(matrix)

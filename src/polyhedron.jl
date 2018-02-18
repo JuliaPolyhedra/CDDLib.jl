@@ -128,7 +128,7 @@ function Polyhedra.polyhedron(hyperplanes::Polyhedra.ElemIt{<:HyperPlane{N}}, ha
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(hyperplanes, halfspaces)
 end
-function Polyhedra.polyhedron(sympoints::Polyhedra.ElemIt{<:SymPoint{N}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N}}, lines::Polyhedra.ElemIt{<:Line{N}}, rays::Polyhedra.ElemIt{<:Ray{N}}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(vits::Polyhedra.ElemIt{<:SymPoint{N}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N}}, lines::Polyhedra.ElemIt{<:Line{N}}, rays::Polyhedra.ElemIt{<:Ray{N}}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(sympoints, points, lines, rays)
 end
@@ -140,10 +140,8 @@ getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
-CDDPolyhedron{N, T}(hyperplanes::Polyhedra.ElemIt{<:HyperPlane{N, T}}, halfspaces::Polyhedra.ElemIt{<:HalfSpace{N, T}}) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(hyperplanes, halfspaces))
-function CDDPolyhedron{N, T}(sympoints::Polyhedra.ElemIt{<:SymPoint{N, T}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N, T}}, lines::Polyhedra.ElemIt{<:Line{N, T}}, rays::Polyhedra.ElemIt{<:Ray{N, T}}) where {N, T}
-    CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(sympoints, points, lines, rays))
-end
+CDDPolyhedron{N, T}(hits::Polyhedra.HIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(hits...))
+CDDPolyhedron{N, T}(vits::Polyhedra.VIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(vits...))
 
 function hrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ine)
