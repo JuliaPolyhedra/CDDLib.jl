@@ -1,7 +1,7 @@
 export CDDLibrary, CDDPolyhedron
 import Base.isempty, Base.push!
 
-mutable struct CDDLibrary <: PolyhedraLibrary
+struct CDDLibrary <: PolyhedraLibrary
   precision::Symbol
 
   function CDDLibrary(precision::Symbol=:float)
@@ -11,6 +11,8 @@ mutable struct CDDLibrary <: PolyhedraLibrary
     new(precision)
   end
 end
+Polyhedra.similar_library(::CDDLibrary, ::FullDim, ::Type{T}) where T<:Union{Integer,Rational} = CDDLibrary(:exact)
+Polyhedra.similar_library(::CDDLibrary, ::FullDim, ::Type{T}) where T<:AbstractFloat = CDDLibrary(:float)
 
 mutable struct CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
   ine::Nullable{CDDInequalityMatrix{N,T}}
@@ -31,6 +33,7 @@ mutable struct CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
 #   new(nothing, nothing, poly)
 # end
 end
+Polyhedra.library(::CDDPolyhedron{N, T}) where {N, T} = Polyhedra.similar_library(CDDLibrary(), FullDim{N}(), T)
 Polyhedra.arraytype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Vector{T}
 Polyhedra.similar_type(::Type{<:CDDPolyhedron}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDPolyhedron{N, T}
 
@@ -268,23 +271,16 @@ function defaultLPsolverfor(p::CDDPolyhedron{N,T}, solver=nothing) where {N,T}
         CDDSolver(exact=T == Rational{BigInt})
     end
 end
-function ishredundant(p::CDDPolyhedron, i::Integer; strongly=false, cert=false, solver=defaultLPsolverfor(p))
-  f = strongly ? sredundant : redundant
-  ans = redundant(getine(p), i)
-  if cert
-    ans
-  else
-    ans[1]
-  end
-end
-function isvredundant(p::CDDPolyhedron, i::Integer; strongly=false, cert=false, solver=defaultLPsolverfor(p))
-  f = strongly ? sredundant : redundant
-  ans = redundant(getine(p), i)
-  if cert
-    ans
-  else
-    ans[1]
-  end
+_getrepfor(p::CDDPolyhedron, ::Polyhedra.HIndex) = getine(p)
+_getrepfor(p::CDDPolyhedron, ::Polyhedra.VIndex) = getext(p)
+function Polyhedra.isredundant(p::CDDPolyhedron, idx::Polyhedra.HIndex; strongly=false, cert=false, solver=defaultLPsolverfor(p))
+    f = strongly ? sredundant : redundant
+    ans = f(_getrepfor(p, idx), idx.value)
+    if cert
+        ans
+    else
+        ans[1]
+    end
 end
 
 # Implementation of Polyhedron's optional interface
