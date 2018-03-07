@@ -25,9 +25,9 @@
     end
     A = [A1; A2; A3]
     b = [b1; b2; b3]
-    ine = Polyhedra.SimpleHRepresentation(A, b)
+    ine = hrep(A, b)
     poly = CDDPolyhedra(ine)
-    ext  = Polyhedra.SimpleVRepresentation{9, Rational{Int}}(copygenerators(poly))
+    ext  = Polyhedra.MixedMatVRep{9, Rational{Int}}(copygenerators(poly))
     target = ones(Int, 9) * (3 // 4)
     ok = false
     for v in points(ext)
@@ -41,7 +41,7 @@
     cutb = 6
     Acut = [cutA; A]
     bcut = [cutb; b]
-    inecut = Polyhedra.SimpleHRepresentation(Acut, bcut)
+    inecut = hrep(Acut, bcut)
     (isredundant, certificate) = redundant(inecut, 1)
     @test !isredundant
     @test Array{Rational{Int}}(certificate) == target

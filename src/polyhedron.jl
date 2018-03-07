@@ -127,11 +127,11 @@ function Polyhedra.polyhedron(rep::Representation{N}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(rep)
 end
-function Polyhedra.polyhedron(hyperplanes::Polyhedra.ElemIt{<:HyperPlane{N}}, halfspaces::Polyhedra.ElemIt{<:HalfSpace{N}}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(hyperplanes::Polyhedra.HyperPlaneIt{N}, halfspaces::Polyhedra.HalfSpaceIt{N}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(hyperplanes, halfspaces)
 end
-function Polyhedra.polyhedron(vits::Polyhedra.ElemIt{<:SymPoint{N}}, points::Polyhedra.ElemIt{<:Polyhedra.MyPoint{N}}, lines::Polyhedra.ElemIt{<:Line{N}}, rays::Polyhedra.ElemIt{<:Ray{N}}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(vits::Polyhedra.SymPointIt{N}, points::Polyhedra.PointIt{N}, lines::Polyhedra.LineIt{N}, rays::Polyhedra.RayIt{N}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(sympoints, points, lines, rays)
 end

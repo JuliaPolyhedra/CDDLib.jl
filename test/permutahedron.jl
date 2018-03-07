@@ -3,9 +3,9 @@
     b = [6, 3, 3, 3, -1, -1, -1]
     ls = IntSet([1])
     V = [2 3 1; 1 3 2; 3 1 2; 3 2 1; 2 1 3; 1 2 3]
-    ine = SimpleHRepresentation(A, b, ls)
+    ine = hrep(A, b, ls)
     #@test !isempty(ine)
-    inef = SimpleHRepresentation(Array{Float64}(A), Array{Float64}(b), ls)
+    inef = hrep(Array{Float64}(A), Array{Float64}(b), ls)
     #@test !isempty(inef)
     poly = CDDPolyhedra(ine)
     polyf = CDDPolyhedra(inef)
@@ -57,10 +57,10 @@ begin
  1.0 1.9999999999999991 1.0 2.9999999999999996
  1.0 0.9999999999999996 2.0 3.0
 end"
-    ineout  = SimpleHRepresentation{3, Int}(ineoutm)
-    ineoutf = SimpleHRepresentation{3, Int}(ineoutmf)
-    ext     = SimpleVRepresentation{3, Int}(extm)
-    extf    = SimpleVRepresentation(extmf)
+    ineout  = MixedMatHRep{3, Int}(ineoutm)
+    ineoutf = MixedMatHRep{3, Int}(ineoutmf)
+    ext     = MixedMatVRep{3, Int}(extm)
+    extf    = MixedMatVRep(extmf)
     inequality_simpletest(ineout, A, b, ls)
     inequality_simpletest(ineoutf, A, b, ls)
     R = Matrix{Int}(0, 3)
@@ -89,8 +89,8 @@ end"
               0  0  0  1  0  1]
     blift = [0; 0; 0; 0; 0; 0; -3; 3; -1; -1; -(1+2); (1+2)]
     linsetlift = IntSet()
-    inelift3 = SimpleHRepresentation(Alift, blift, linsetlift)
-    inelift3f = SimpleHRepresentation{6, Float64}(inelift3)
+    inelift3 = hrep(Alift, blift, linsetlift)
+    inelift3f = MixedMatHRep{6, Float64}(inelift3)
     inelift2 = fourierelimination(inelift3)
     inelift2f = fourierelimination(inelift3f)
     inelift1 = blockelimination(inelift2)
@@ -99,8 +99,8 @@ end"
     inelift0f = blockelimination(inelift1f, IntSet([fulldim(inelift1f)]))
     canonicalize!(inelift0)
     canonicalize!(inelift0f)
-    inelift0d = SimpleHRepresentation{3,Int}(inelift0)
-    inelift0df = SimpleHRepresentation{3,Int}(inelift0f)
+    inelift0d = MixedMatHRep{3,Int}(inelift0)
+    inelift0df = MixedMatHRep{3,Int}(inelift0f)
     @test inelift0d.linset == IntSet(1)
     @test length(inelift0d.b) == 7
     @test inelift0d.b[1] / sign(inelift0d.b[1]) == 6
@@ -111,8 +111,8 @@ end"
     @test vec(Array{Int}(inelift0df.A[1,:] / sign(inelift0df.b[1]))) == [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
     polylift = CDDPolyhedra(inelift0)
     polyliftf = CDDPolyhedra(inelift0f)
-    extunlift = SimpleVRepresentation{3,Int}(copygenerators(polylift))
-    extunliftf = SimpleVRepresentation(copygenerators(polyliftf))
+    extunlift = MixedMatVRep{3,Int}(copygenerators(polylift))
+    extunliftf = MixedMatVRep(copygenerators(polyliftf))
     generator_simpletest(extunlift, V, R)
     generator_simpletest(extunliftf, V, R)
 end
