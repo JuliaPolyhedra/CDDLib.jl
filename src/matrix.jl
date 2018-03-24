@@ -216,7 +216,7 @@ function extractrow(ine::CDDInequalityMatrix, i)
 end
 function extractrow(ext::CDDGeneratorMatrix{N,T}, i) where {N,T}
     if ext.cone && i == nvreps(ext)
-        a = zero(arraytype(ext))
+        a = Polyhedra.origin(Polyhedra.arraytype(ext), FullDim{N}())
     else
         mat = unsafe_load(ext.matrix)
         b = extractrow(mat, i)
