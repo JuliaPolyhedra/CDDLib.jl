@@ -153,6 +153,7 @@ function dd_matrixcanonicalize(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   (found, matptr[], impl_linset[], redset[], newpos[])
 end
 function canonicalize!(matrix::CDDMatrix)
+  iszero(length(matrix)) && return # See https://github.com/JuliaPolyhedra/CDDLib.jl/issues/24
   (found, matrix.matrix, impl_linset, redset, newpos) = dd_matrixcanonicalize(matrix.matrix)
   if !Bool(found)
     error("Canonicalization not found")
