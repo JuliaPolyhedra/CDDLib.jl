@@ -204,7 +204,6 @@ function dd_matrixredundancyremove(matrix::Ptr{Cdd_MatrixData{GMPRational}})
   err = Ref{Cdd_ErrorType}(0)
   found = (@dd_ccall MatrixRedundancyRemove Cdd_boolean (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr redset newpos err)
   myerror(err[])
-  println(matptr[])
   (found, matptr[], redset[], newpos[])
 end
 function redundancyremove!(matrix::CDDMatrix)
