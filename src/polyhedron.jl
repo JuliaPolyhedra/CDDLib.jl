@@ -204,9 +204,9 @@ function eliminate(p::CDDPolyhedron{N, T}, delset, method::Symbol=:Auto) where {
 end
 
 function detecthlinearities!(p::CDDPolyhedron)
-  if !p.vlinearitydetected
-    canonicalizelinearity!(getext(p))
-    p.vlinearitydetected = true
+  if !p.hlinearitydetected
+    canonicalizelinearity!(getine(p))
+    p.hlinearitydetected = true
     # getine(p.poly) would return bad inequalities.
     # If someone use the poly then ine will be invalidated
     # and if he asks the inequalities he will be surprised that the
@@ -216,9 +216,9 @@ function detecthlinearities!(p::CDDPolyhedron)
   end
 end
 function detectvlinearities!(p::CDDPolyhedron)
-  if !p.hlinearitydetected
-    canonicalizelinearity!(getine(p))
-    p.hlinearitydetected = true
+  if !p.vlinearitydetected
+    canonicalizelinearity!(getext(p))
+    p.vlinearitydetected = true
     # getext(p.poly) would return bad inequalities.
     # If someone use the poly then ext will be invalidated
     # and if he asks the generators he will be surprised that the
