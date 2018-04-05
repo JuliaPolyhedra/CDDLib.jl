@@ -130,13 +130,10 @@ function Polyhedra.polyhedron(hyperplanes::Polyhedra.HyperPlaneIt{N}, halfspaces
   T = polytypeforprecision(lib.precision)
   CDDPolyhedron{N, T}(hyperplanes, halfspaces)
 end
-function Polyhedra.polyhedron(vits::Polyhedra.SymPointIt{N}, points::Polyhedra.PointIt{N}, lines::Polyhedra.LineIt{N}, rays::Polyhedra.RayIt{N}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(points::Polyhedra.PointIt{N}, lines::Polyhedra.LineIt{N}, rays::Polyhedra.RayIt{N}, lib::CDDLibrary) where N
   T = polytypeforprecision(lib.precision)
-  CDDPolyhedron{N, T}(sympoints, points, lines, rays)
+  CDDPolyhedron{N, T}(points, lines, rays)
 end
-
-getlibraryfor{T<:Real}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary(:exact)
-getlibraryfor{T<:AbstractFloat}(::CDDPolyhedron, n::Int, ::Type{T}) = CDDLibrary(:float)
 
 # need to specify to avoid ambiguïty
 Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
@@ -145,110 +142,109 @@ Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPo
 CDDPolyhedron{N, T}(hits::Polyhedra.HIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(hits...))
 CDDPolyhedron{N, T}(vits::Polyhedra.VIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(vits...))
 
-function hrepiscomputed(p::CDDPolyhedron)
+function Polyhedra.hrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ine)
 end
-function hrep(p::CDDPolyhedron{N, T}) where {N, T}
+function Polyhedra.hrep(p::CDDPolyhedron{N, T}) where {N, T}
   getine(p)
 end
 
-function vrepiscomputed(p::CDDPolyhedron)
+function Polyhedra.vrepiscomputed(p::CDDPolyhedron)
   !isnull(p.ext)
 end
-function vrep(p::CDDPolyhedron{N, T}) where {N, T}
+function Polyhedra.vrep(p::CDDPolyhedron{N, T}) where {N, T}
   getext(p)
 end
 
 
-implementseliminationmethod(p::CDDPolyhedron, ::Type{Val{:FourierMotzkin}}) = true
-function eliminate(p::CDDPolyhedron, delset, ::Type{Val{:FourierMotzkin}})
-    eliminate(p, delset, :FourierMotzkin)
+Polyhedra.supportselimination(p::CDDPolyhedron, ::FourierMotzkin) = true
+function Polyhedra.eliminate(p::CDDPolyhedron{N, T}, delset, ::FourierMotzkin) where {N, T}
+    if iszero(length(delset))
+        p
+    else
+        ine = getine(p)
+        ds = collect(delset)
+        for i in length(ds):-1:1
+            if ds[i] != fulldim(ine)
+                error("The CDD implementation of Fourier-Motzkin only support removing the last dimensions")
+            end
+            ine = fourierelimination(ine)
+        end
+        CDDPolyhedron{N-length(delset), T}(ine)
+    end
 end
-implementseliminationmethod(p::CDDPolyhedron, ::Type{Val{:BlockElimination}}) = true
-function eliminate(p::CDDPolyhedron, delset, ::Type{Val{:BlockElimination}})
-    eliminate(p, delset, :BlockElimination)
+Polyhedra.supportselimination(p::CDDPolyhedron, ::BlockElimination) = true
+function Polyhedra.eliminate(p::CDDPolyhedron{N, T}, delset, ::BlockElimination) where {N, T}
+    if iszero(length(delset))
+        p
+    else
+        CDDPolyhedron{N-length(delset), T}(blockelimination(getine(p), delset))
+    end
 end
 
-function eliminate(ine::CDDInequalityMatrix, delset, method=:Auto)
-  if length(delset) > 0
-    if method == :Auto
+function Polyhedra.eliminate(p::CDDPolyhedron, delset, method::DefaultElimination)
+    if iszero(length(delset))
+        eliminate(p, delset, FourierMotzkin())
+    else
         fourier = false
-        if length(delset) == 1 && fulldim(ine) in delset
+        if length(delset) == 1 && fulldim(p) in delset
             # CDD's implementation of Fourier-Motzkin does not support linearity
-            canonicalizelinearity!(ine)
-            if neqs(ine) == 0
+            canonicalizelinearity!(getine(p))
+            if iszero(nhyperplanes(p))
                 fourier = true
             end
         end
-    else
-        fourier = method == :FourierMotzkin
+        eliminate(p, delset, fourier ? FourierMotzkin() : BlockElimination())
     end
-    if fourier
-      ds = collect(delset)
-      for i in length(ds):-1:1
-          if ds[i] != fulldim(ine)
-              error("The CDD implementation of Fourier-Motzkin only support removing the last dimensions")
-          end
-          ine = fourierelimination(ine)
-      end
-      ine
-    else
-      blockelimination(ine, delset)
-    end
-  end
 end
 
-function eliminate(p::CDDPolyhedron{N, T}, delset, method::Symbol=:Auto) where {N, T}
-  CDDPolyhedron{N-length(delset), T}(eliminate(getine(p), delset, method))
-end
-
-function detecthlinearities!(p::CDDPolyhedron)
-  if !p.hlinearitydetected
-    canonicalizelinearity!(getine(p))
-    p.hlinearitydetected = true
-    # getine(p.poly) would return bad inequalities.
-    # If someone use the poly then ine will be invalidated
-    # and if he asks the inequalities he will be surprised that the
-    # linearities are not detected properly
-    # However, the generators can be kept
-    p.poly = nothing
-  end
-end
-function detectvlinearities!(p::CDDPolyhedron)
-  if !p.vlinearitydetected
-    canonicalizelinearity!(getext(p))
-    p.vlinearitydetected = true
-    # getext(p.poly) would return bad inequalities.
-    # If someone use the poly then ext will be invalidated
-    # and if he asks the generators he will be surprised that the
-    # linearities are not detected properly
-    # However, the inequalities can be kept
-    p.poly = nothing
-  end
-end
-
-
-function removehredundancy!(p::CDDPolyhedron)
-  if !p.noredundantinequality
+function Polyhedra.detecthlinearity!(p::CDDPolyhedron)
     if !p.hlinearitydetected
-      canonicalize!(getine(p))
-      p.hlinearitydetected = true
-    else
-      redundancyremove!(getine(p))
+        canonicalizelinearity!(getine(p))
+        p.hlinearitydetected = true
+        # getine(p.poly) would return bad inequalities.
+        # If someone use the poly then ine will be invalidated
+        # and if he asks the inequalities he will be surprised that the
+        # linearity are not detected properly
+        # However, the generators can be kept
+        p.poly = nothing
     end
-    p.noredundantinequality = true
-    # See detectlinearities! for a discussion about the following line
-    p.poly = nothing
-  end
+end
+function Polyhedra.detectvlinearity!(p::CDDPolyhedron)
+    if !p.vlinearitydetected
+        canonicalizelinearity!(getext(p))
+        p.vlinearitydetected = true
+        # getext(p.poly) would return bad inequalities.
+        # If someone use the poly then ext will be invalidated
+        # and if he asks the generators he will be surprised that the
+        # linearity are not detected properly
+        # However, the inequalities can be kept
+        p.poly = nothing
+    end
 end
 
-function removevredundancy!(p::CDDPolyhedron)
-  if !p.noredundantgenerator
-    canonicalize!(getext(p))
-    p.noredundantgenerator = true
-    # See detecthlinearities! for a discussion about the following line
-    p.poly = nothing
-  end
+
+function Polyhedra.removehredundancy!(p::CDDPolyhedron)
+    if !p.noredundantinequality
+        if !p.hlinearitydetected
+            canonicalize!(getine(p))
+            p.hlinearitydetected = true
+        else
+            redundancyremove!(getine(p))
+        end
+        p.noredundantinequality = true
+        # See detectlinearity! for a discussion about the following line
+        p.poly = nothing
+    end
+end
+
+function Polyhedra.removevredundancy!(p::CDDPolyhedron)
+    if !p.noredundantgenerator
+        canonicalize!(getext(p))
+        p.noredundantgenerator = true
+        # See detecthlinearity! for a discussion about the following line
+        p.poly = nothing
+    end
 end
 
 function Base.intersect!(p::CDDPolyhedron{N}, ine::HRepresentation{N}) where N
@@ -262,17 +258,12 @@ function Polyhedra.convexhull!(p::CDDPolyhedron{N}, ext::VRepresentation{N}) whe
   #updatepoly!(p, getpoly(p)) # invalidate others
 end
 
-# TODO other solvers
-function defaultLPsolverfor(p::CDDPolyhedron{N,T}, solver=nothing) where {N,T}
-    if vrepiscomputed(p)
-        SimpleVRepSolver()
-    else
-        CDDSolver(exact=T == Rational{BigInt})
-    end
+function Polyhedra.default_solver(p::CDDPolyhedron{N, T}) where {N, T}
+    CDDSolver(exact = T == Rational{BigInt})
 end
 _getrepfor(p::CDDPolyhedron, ::Polyhedra.HIndex) = getine(p)
 _getrepfor(p::CDDPolyhedron, ::Polyhedra.VIndex) = getext(p)
-function Polyhedra.isredundant(p::CDDPolyhedron, idx::Polyhedra.HIndex; strongly=false, cert=false, solver=defaultLPsolverfor(p))
+function Polyhedra.isredundant(p::CDDPolyhedron, idx::Polyhedra.HIndex; strongly=false, cert=false, solver=Polyhedra.solver(p))
     f = strongly ? sredundant : redundant
     ans = f(_getrepfor(p, idx), idx.value)
     if cert

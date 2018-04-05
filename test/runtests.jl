@@ -3,7 +3,7 @@ using Polyhedra
 using Base.Test
 
 using JuMP
-lpsolver = JuMP.UnsetSolver()
+lpsolver = tuple()
 
 include("utils.jl")
 include("simplex.jl")
