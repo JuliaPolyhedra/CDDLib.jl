@@ -1,8 +1,7 @@
 const polyhedra_test = joinpath(Pkg.dir("Polyhedra"), "test")
 
 include(joinpath(polyhedra_test, "utils.jl"))
-include(joinpath(polyhedra_test, "alltests.jl"))
+include(joinpath(polyhedra_test, "polyhedra.jl"))
 @testset "Polyhedra tests with $arith arithmetic" for arith in [:float, :exact]
-    basicpolyhedrontests(CDDLibrary(arith))
-    runtests(CDDLibrary(arith))
+    polyhedratest(CDDLibrary(arith))
 end
