@@ -1,9 +1,9 @@
 # CDDLib
 
-| **PackageEvaluator** | **Build Status** |
-|:--------------------:|:----------------:|
-| [![][pkg-0.5-img]][pkg-0.5-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] |
-| [![][pkg-0.6-img]][pkg-0.6-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] |
+| **PackageEvaluator** | **Build Status** | **References to cite** |
+|:--------------------:|:----------------:|:----------------------:|
+| [![][pkg-0.5-img]][pkg-0.5-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] | [![DOI][zenodo-img]][zenodo-url] |
+| [![][pkg-0.6-img]][pkg-0.6-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
 
 CDDLib is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra](https://github.com/JuliaPolyhedra/Polyhedra.jl).
 CDDLib also includes the linear programming solver `CDDSolver` which can be used by [JuMP](https://github.com/JuliaOpt/JuMP.jl) or [Convex](https://github.com/JuliaOpt/Convex.jl) through [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl).
@@ -49,3 +49,6 @@ On MacOS, `gmp` is automatically installed through [Homebrew](https://github.com
 [coveralls-url]: https://coveralls.io/github/JuliaPolyhedra/CDDLib.jl?branch=master
 [codecov-img]: http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/JuliaPolyhedra/CDDLib.jl?branch=master
+
+[zenodo-url]: https://doi.org/10.5281/zenodo.1214581
+[zenodo-img]: https://zenodo.org/badge/DOI/10.5281/zenodo.1214581.svg
