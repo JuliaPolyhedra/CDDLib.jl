@@ -74,7 +74,7 @@ Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
 GMPRational() = GMPRational(GMPRationalMut())
 
 GMPRational(a::S, b::T) where {T<:Integer,S<:Integer} = GMPRational(GMPRationalMut(a, b))
-Base.convert{T<:Real}(::Type{GMPRational}, a::T) = GMPRational(GMPRationalMut(a))
+Base.convert(::Type{GMPRational}, a::T) where {T<:Real} = GMPRational(GMPRationalMut(a))
 Base.convert(::Type{GMPRational}, a::GMPRational) = a
 
 Base.zero(::Type{GMPRational}) = GMPRational(0)
@@ -129,11 +129,11 @@ function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
 end
 Base.convert(::Type{Rational}, r::GMPRational) = Base.convert(Rational{BigInt}, r)
 # I need to define the following conversion because of ambuity with Real -> Bool
-Base.convert{T<:Integer}(::Type{Rational{T}}, a::GMPRational) = Base.convert(Rational{T}, Rational(a))
+Base.convert(::Type{Rational{T}}, a::GMPRational) where {T<:Integer} = Base.convert(Rational{T}, Rational(a))
 Base.convert(::Type{Bool}, a::GMPRational) = Base.convert(Bool, Rational(a))
-Base.convert{T<:Integer}(::Type{T}, a::GMPRational) = Base.convert(T, Rational(a))
+Base.convert(::Type{T}, a::GMPRational) where {T<:Integer} = Base.convert(T, Rational(a))
 
-promote_rule{T<:Integer}(::Type{GMPRational}, ::Type{T}) = GMPRational
+promote_rule(::Type{GMPRational}, ::Type{T}) where {T<:Integer} = GMPRational
 
 ==(x::GMPRational, y::GMPRational) = Rational(x) == Rational(y)
 
@@ -145,15 +145,15 @@ mytype(::Type{Rational{BigInt}}) = GMPRational
 polytype(::Type{Cdouble}) = Cdouble
 polytype(::Type{GMPRational}) = Rational{BigInt}
 
-mytypefor{T <: Real}(::Type{T})          = GMPRational
-mytypefor{T <: AbstractFloat}(::Type{T}) = Cdouble
-mytypefor{T <: MyType}(::Type{T})        = T
-polytypefor{T <: Real}(::Type{T})          = Rational{BigInt}
-polytypefor{T <: AbstractFloat}(::Type{T}) = Cdouble
-polytypefor{T <: PolyType}(::Type{T})        = T
+mytypefor(::Type{T}) where {T <: Real}          = GMPRational
+mytypefor(::Type{T}) where {T <: AbstractFloat} = Cdouble
+mytypefor(::Type{T}) where {T <: MyType}        = T
+polytypefor(::Type{T}) where {T <: Real}          = Rational{BigInt}
+polytypefor(::Type{T}) where {T <: AbstractFloat} = Cdouble
+polytypefor(::Type{T}) where {T <: PolyType}        = T
 
 # Used by mathprogbase.jl
-function myconvert{T<:Union{Cdouble, Clong}}(::Type{Array}, x::Ptr{T}, n)
+function myconvert(::Type{Array}, x::Ptr{T}, n) where T<:Union{Cdouble, Clong}
   copy(unsafe_wrap(Array, x, n))
 end
 function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)

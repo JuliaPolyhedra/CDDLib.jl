@@ -83,10 +83,10 @@ end
 CDDPolyhedra(matrix::CDDMatrix{N, T, S}) where {N, T, S} = CDDPolyhedra{N, T, S}(matrix)
 CDDPolyhedra(rep::Representation) = CDDPolyhedra(CDDMatrix(rep))
 
-function Base.convert{N, T, S}(::Type{CDDPolyhedra{N, T, S}}, matrix::CDDMatrix{N, T, S})
+function Base.convert(::Type{CDDPolyhedra{N, T, S}}, matrix::CDDMatrix{N, T, S}) where {N, T, S}
   CDDPolyhedra{N, T, S}(matrix)
 end
-Base.convert{N, T, S}(::Type{CDDPolyhedra{N, T, S}}, repr::Representation{N, T}) = CDDPolyhedra(CDDMatrix(repr))
+Base.convert(::Type{CDDPolyhedra{N, T, S}}, repr::Representation{N, T}) where {N, T, S} = CDDPolyhedra(CDDMatrix(repr))
 
 function dd_copyinequalities(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
   @ddf_ccall CopyInequalities Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly

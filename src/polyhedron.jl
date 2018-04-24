@@ -37,7 +37,7 @@ Polyhedra.arraytype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) w
 Polyhedra.similar_type(::Type{<:CDDPolyhedron}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDPolyhedron{N, T}
 
 CDDPolyhedron(matrix::CDDMatrix{N, T}) where {N, T} = CDDPolyhedron{N, T}(matrix)
-Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::Representation{N, T}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
+Base.convert(::Type{CDDPolyhedron{N, T}}, rep::Representation{N, T}) where {N, T} = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
 # Helpers
 function getine(p::CDDPolyhedron)
@@ -136,8 +136,8 @@ function Polyhedra.polyhedron(points::Polyhedra.PointIt{N}, lines::Polyhedra.Lin
 end
 
 # need to specify to avoid ambiguïty
-Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
-Base.convert{N, T}(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) = CDDPolyhedron{N, T}(cddmatrix(T, rep))
+Base.convert(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) where {N, T} = CDDPolyhedron{N, T}(cddmatrix(T, rep))
+Base.convert(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) where {N, T} = CDDPolyhedron{N, T}(cddmatrix(T, rep))
 
 CDDPolyhedron{N, T}(hits::Polyhedra.HIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(hits...))
 CDDPolyhedron{N, T}(vits::Polyhedra.VIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(vits...))

@@ -137,8 +137,8 @@ end
 
 CDDMatrix(hrep::HRepresentation) = CDDInequalityMatrix(hrep)
 CDDMatrix(vrep::VRepresentation) = CDDGeneratorMatrix(vrep)
-cddmatrix{N,T}(::Type{T}, hrep::HRepresentation{N}) = CDDInequalityMatrix{N,T,mytype(T)}(hrep)
-cddmatrix{N,T}(::Type{T}, vrep::VRepresentation{N}) = CDDGeneratorMatrix{N,T,mytype(T)}(vrep)
+cddmatrix(::Type{T}, hrep::HRepresentation{N}) where {N,T} = CDDInequalityMatrix{N,T,mytype(T)}(hrep)
+cddmatrix(::Type{T}, vrep::VRepresentation{N}) where {N,T} = CDDGeneratorMatrix{N,T,mytype(T)}(vrep)
 #(::Type{CDDMatrix{N,T,S}}){N,T,S}(hrep::HRepresentation{N}) = CDDInequalityMatrix{N,T,S}(hrep)
 #(::Type{CDDMatrix{N,T,S}}){N,T,S}(vrep::VRepresentation{N}) = CDDGeneratorMatrix{N,T,S}(vrep)
 # Does not work
