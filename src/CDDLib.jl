@@ -37,7 +37,7 @@ function __init__()
   @dd_ccall set_global_constants Void ()
 end
 
-import Base.show, Base.convert, Base.push!, Base.eltype, Base.copy
+import Base.convert, Base.push!, Base.eltype, Base.copy
 
 include("cddtypes.jl")
 
