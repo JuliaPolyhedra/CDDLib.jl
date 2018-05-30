@@ -111,11 +111,11 @@ end
 
 # Debug
 function Base.show(io::IO, x::GMPInteger)
-  Base.show(io, (x.alloc, x.size, unsafe_load(x.data)))
+  show(io, (x.alloc, x.size, unsafe_load(x.data)))
 end
 
 function Base.show(io::IO, x::GMPRational)
-  Base.show(io, Rational(x))
+  show(io, Rational(x))
 end
 
 function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
