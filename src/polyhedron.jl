@@ -247,11 +247,13 @@ function Polyhedra.removevredundancy!(p::CDDPolyhedron)
     end
 end
 
+Base.intersect!(p::CDDPolyhedron{N}, h::HRepElement{N}) where N = intersect!(p, intersect(h))
 function Base.intersect!(p::CDDPolyhedron{N}, ine::HRepresentation{N}) where N
   updateine!(p, matrixappend(getine(p), ine))
   #push!(getpoly(p, true), ine) # too slow because it computes double description
   #updatepoly!(p, getpoly(p)) # invalidate others
 end
+Polyhedra.convexhull!(p::CDDPolyhedron{N}, v::VRepElement{N}) where N = convexhull!(p, convexhull(v))
 function Polyhedra.convexhull!(p::CDDPolyhedron{N}, ext::VRepresentation{N}) where N
   updateext!(p, matrixappend(getext(p), ext))
   #push!(getpoly(p, false), ext) # too slow because it computes double description
