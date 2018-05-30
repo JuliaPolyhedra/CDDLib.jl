@@ -352,6 +352,4 @@ function Base.show(io::IO, matrix::Cdd_MatrixData{T}) where T
 
 end
 
-Base.show(io::IO, matrix::CDDMatrix) = Base.show(io, unsafe_load(matrix.matrix))
-
 export CDDMatrix, CDDInequalityMatrix, CDDGeneratorMatrix, isaninequalityrepresentation

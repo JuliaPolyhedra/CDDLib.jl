@@ -13,7 +13,7 @@
     ineoutmf = copyinequalities(polyf)
     extm     = copygenerators(poly)
     extmf    = copygenerators(polyf)
-    @test string(ineoutm) == "H-representation
+    @test string(unsafe_load(ineoutm.matrix)) == "H-representation
 linearity 1 1
 begin
  7 4 rational
@@ -25,7 +25,7 @@ begin
  -1//1 0//1 1//1 0//1
  -1//1 0//1 0//1 1//1
 end"
-    @test string(ineoutmf) == "H-representation
+    @test string(unsafe_load(ineoutmf.matrix)) == "H-representation
 linearity 1 1
 begin
  7 4 real
@@ -37,7 +37,7 @@ begin
  -1.0 -0.0 1.0 -0.0
  -1.0 -0.0 -0.0 1.0
 end"
-    @test string(extm) == "V-representation
+    @test string(unsafe_load(extm.matrix)) == "V-representation
 begin
  6 4 rational
  1//1 2//1 3//1 1//1
@@ -47,7 +47,7 @@ begin
  1//1 2//1 1//1 3//1
  1//1 1//1 2//1 3//1
 end"
-    @test string(extmf) == "V-representation
+    @test string(unsafe_load(extmf.matrix)) == "V-representation
 begin
  6 4 real
  1.0 2.0 3.0 0.9999999999999998
