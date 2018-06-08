@@ -2,8 +2,8 @@
 
 | **PackageEvaluator** | **Build Status** | **References to cite** |
 |:--------------------:|:----------------:|:----------------------:|
-| [![][pkg-0.5-img]][pkg-0.5-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] | [![DOI][zenodo-img]][zenodo-url] |
-| [![][pkg-0.6-img]][pkg-0.6-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
+| [![][pkg-0.6-img]][pkg-0.6-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] | [![DOI][zenodo-img]][zenodo-url] |
+| [![][pkg-0.7-img]][pkg-0.7-url] | [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
 
 CDDLib is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra](https://github.com/JuliaPolyhedra/Polyhedra.jl).
 CDDLib also includes the linear programming solver `CDDSolver` which can be used by [JuMP](https://github.com/JuliaOpt/JuMP.jl) or [Convex](https://github.com/JuliaOpt/Convex.jl) through [MathProgBase](https://github.com/JuliaOpt/MathProgBase.jl).
@@ -36,10 +36,10 @@ Therefore, on Unix, it is required that you have a working environment for compi
 On Linux, install `libgmp-dev` if you are on a Debian based Linux OS (such as Ubuntu), `libgmp-devel` or `gmp-devel` if you are on RedHat based Linux OS (such as Fedora) and `gmp` if you are on an ArchLinux based Linux OS (such as Antergos).
 On MacOS, `gmp` is automatically installed through [Homebrew](https://github.com/JuliaPackaging/Homebrew.jl).
 
-[pkg-0.5-img]: http://pkg.julialang.org/badges/CDDLib_0.5.svg
-[pkg-0.5-url]: http://pkg.julialang.org/?pkg=CDDLib
 [pkg-0.6-img]: http://pkg.julialang.org/badges/CDDLib_0.6.svg
 [pkg-0.6-url]: http://pkg.julialang.org/?pkg=CDDLib
+[pkg-0.7-img]: http://pkg.julialang.org/badges/CDDLib_0.7.svg
+[pkg-0.7-url]: http://pkg.julialang.org/?pkg=CDDLib
 
 [build-img]: https://travis-ci.org/JuliaPolyhedra/CDDLib.jl.svg?branch=master
 [build-url]: https://travis-ci.org/JuliaPolyhedra/CDDLib.jl
