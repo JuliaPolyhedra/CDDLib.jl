@@ -7,21 +7,21 @@
     b3 = 3 * ones(Int, 9)
     i = 1
     for a = 1:3
-      for b = (a+1):3
-        for c = 1:3
-          for d = (c+1):3
-            ac = a + (c-1) * 3
-            ad = a + (d-1) * 3
-            bc = b + (c-1) * 3
-            bd = b + (d-1) * 3
-            A3[i, ac] = 1
-            A3[i, ad] = 1
-            A3[i, bc] = 1
-            A3[i, bd] = 1
-            i += 1
-          end
+        for b = (a+1):3
+            for c = 1:3
+                for d = (c+1):3
+                    ac = a + (c-1) * 3
+                    ad = a + (d-1) * 3
+                    bc = b + (c-1) * 3
+                    bd = b + (d-1) * 3
+                    A3[i, ac] = 1
+                    A3[i, ad] = 1
+                    A3[i, bc] = 1
+                    A3[i, bd] = 1
+                    i += 1
+                end
+            end
         end
-      end
     end
     A = [A1; A2; A3]
     b = [b1; b2; b3]
