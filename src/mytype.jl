@@ -3,46 +3,46 @@ import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero, Base.zeros
 # It is immutable so that it is stored by value in the structures
 # GMPRational and GMPRationalMut and not by reference
 struct GMPInteger
-  alloc::Cint
-  size::Cint
-  data::Ptr{UInt32}
+    alloc::Cint
+    size::Cint
+    data::Ptr{UInt32}
 end
 
 mutable struct GMPRationalMut
-  num::GMPInteger
-  den::GMPInteger
+    num::GMPInteger
+    den::GMPInteger
 
-  function GMPRationalMut()
-    m = new()
-    ccall((:__gmpq_init, :libgmp), Void, (Ptr{GMPRationalMut},), &m)
-    # No need to clear anything since the num and den are used by
-    # the GMPRational that is created
-    #finalizer(m, _mpq_clear_fn)
-    m
-  end
+    function GMPRationalMut()
+        m = new()
+        ccall((:__gmpq_init, :libgmp), Void, (Ptr{GMPRationalMut},), &m)
+        # No need to clear anything since the num and den are used by
+        # the GMPRational that is created
+        #finalizer(m, _mpq_clear_fn)
+        m
+    end
 end
 
 function Base.convert(::Type{GMPRationalMut}, a::Rational{BigInt})
-  m = GMPRationalMut()
-  ccall((:__gmpq_set_num, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.num)
-  ccall((:__gmpq_set_den, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.den)
-  m
+    m = GMPRationalMut()
+    ccall((:__gmpq_set_num, :libgmp), Void,
+          (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.num)
+    ccall((:__gmpq_set_den, :libgmp), Void,
+          (Ptr{GMPRationalMut}, Ptr{BigInt}), &m, &a.den)
+    m
 end
 Base.convert(::Type{GMPRationalMut}, a::Rational) = GMPRationalMut(Rational{BigInt}(a))
 Base.convert(::Type{GMPRationalMut}, a::AbstractFloat) = GMPRationalMut(Rational(a))
 
 # Can do it faster for Int
 function GMPRationalMut(a::Int, b::Int)
-  if b < 0
-    a = -a
-    b = -b
-  end
-  m = GMPRationalMut()
-  ccall((:__gmpq_set_si, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Clong, Culong), &m, a, b)
-  m
+    if b < 0
+        a = -a
+        b = -b
+    end
+    m = GMPRationalMut()
+    ccall((:__gmpq_set_si, :libgmp), Void,
+          (Ptr{GMPRationalMut}, Clong, Culong), &m, a, b)
+    m
 end
 Base.convert(::Type{GMPRationalMut}, a::Int) = GMPRationalMut(a, 1)
 Base.convert(::Type{GMPRationalMut}, a::Rational{Int}) = GMPRationalMut(a.num, a.den)
@@ -52,21 +52,21 @@ Base.zero(::Type{GMPRationalMut}) = GMPRationalMut(0)
 # I cannot have a finalizer for an immutable so you are responsibe to free it
 # if you use it using e.g. myfree define below
 struct GMPRational <: Real
-  num::GMPInteger
-  den::GMPInteger
-  function GMPRational(m::GMPRationalMut)
-    r = new(m.num, m.den)
-    r
-  end
+    num::GMPInteger
+    den::GMPInteger
+    function GMPRational(m::GMPRationalMut)
+        r = new(m.num, m.den)
+        r
+    end
 end
 
 function myfree(a::Array{Cdouble})
-  # nothing to free
+    # nothing to free
 end
 function myfree(a::Array{GMPRational})
-  for el in a
-    ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &el)
-  end
+    for el in a
+        ccall((:__gmpq_clear, :libgmp), Void, (Ptr{GMPRational},), &el)
+    end
 end
 
 Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
@@ -83,49 +83,49 @@ Base.zero(::Type{GMPRational}) = GMPRational(0)
 # so each element has the same data1 and data2 pointers...
 # This is why I need to redefine it
 function Base.zeros(::Type{GMPRational}, dims...)
-  ret = Array(GMPRational, dims...)
-  for i in eachindex(ret)
-    ret[i] = Base.zero(GMPRational)
-  end
-  ret
+    ret = Array(GMPRational, dims...)
+    for i in eachindex(ret)
+        ret[i] = Base.zero(GMPRational)
+    end
+    ret
 end
 
 function -(a::GMPRational)
-  m = GMPRationalMut()
-  ccall((:__gmpq_neg, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{GMPRational}), &m, &a)
-  GMPRational(m)
+    m = GMPRationalMut()
+    ccall((:__gmpq_neg, :libgmp), Void,
+          (Ptr{GMPRationalMut}, Ptr{GMPRational}), &m, &a)
+    GMPRational(m)
 end
 function *(a::GMPRational, b::GMPRational)
-  m = GMPRationalMut()
-  ccall((:__gmpq_mul, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), &m, &a, &b)
-  GMPRational(m)
+    m = GMPRationalMut()
+    ccall((:__gmpq_mul, :libgmp), Void,
+          (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), &m, &a, &b)
+    GMPRational(m)
 end
 function +(a::GMPRational, b::GMPRational)
-  m = GMPRationalMut()
-  ccall((:__gmpq_add, :libgmp), Void,
-  (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), &m, &a, &b)
-  GMPRational(m)
+    m = GMPRationalMut()
+    ccall((:__gmpq_add, :libgmp), Void,
+          (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), &m, &a, &b)
+    GMPRational(m)
 end
 
 # Debug
 function Base.show(io::IO, x::GMPInteger)
-  show(io, (x.alloc, x.size, unsafe_load(x.data)))
+    show(io, (x.alloc, x.size, unsafe_load(x.data)))
 end
 
 function Base.show(io::IO, x::GMPRational)
-  show(io, Rational(x))
+    show(io, Rational(x))
 end
 
 function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
-  a = BigInt()
-  ccall((:__gmpq_get_num, :libgmp), Void,
-  (Ptr{BigInt}, Ptr{GMPRational}), &a, &r)
-  b = BigInt()
-  ccall((:__gmpq_get_den, :libgmp), Void,
-  (Ptr{BigInt}, Ptr{GMPRational}), &b, &r)
-  a // b
+    a = BigInt()
+    ccall((:__gmpq_get_num, :libgmp), Void,
+          (Ptr{BigInt}, Ptr{GMPRational}), &a, &r)
+    b = BigInt()
+    ccall((:__gmpq_get_den, :libgmp), Void,
+          (Ptr{BigInt}, Ptr{GMPRational}), &b, &r)
+    a // b
 end
 Base.convert(::Type{Rational}, r::GMPRational) = Base.convert(Rational{BigInt}, r)
 # I need to define the following conversion because of ambuity with Real -> Bool
@@ -154,15 +154,15 @@ polytypefor(::Type{T}) where {T <: PolyType}        = T
 
 # Used by mathprogbase.jl
 function myconvert(::Type{Array}, x::Ptr{T}, n) where T<:Union{Cdouble, Clong}
-  copy(unsafe_wrap(Array, x, n))
+    copy(unsafe_wrap(Array, x, n))
 end
 function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
-  y = Array{GMPRationalMut, 1}(n)
-  for i = 1:n
-    y[i] = GMPRationalMut()
-    ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
-  end
-  Array{GMPRational}(y)
+    y = Array{GMPRationalMut, 1}(n)
+    for i = 1:n
+        y[i] = GMPRationalMut()
+        ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
+    end
+    Array{GMPRational}(y)
 end
 
 export MyType, GMPRational

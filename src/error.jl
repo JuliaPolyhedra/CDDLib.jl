@@ -17,9 +17,9 @@ error_message = [
   "LP cycling",
   "Numerically inconsistent"]
 function myerror(err::Cdd_ErrorType)
-  if err < 0 || err > 17
-    error("This should not happen, please report this bug")
-  elseif err < 17 # 17 means no error
-    error(error_message[err+1])
-  end
+    if err < 0 || err > 17
+        error("This should not happen, please report this bug")
+    elseif err < 17 # 17 means no error
+        error(error_message[err+1])
+    end
 end
