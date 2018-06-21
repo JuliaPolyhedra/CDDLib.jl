@@ -33,7 +33,8 @@ mutable struct CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
 # end
 end
 Polyhedra.library(::CDDPolyhedron{N, T}) where {N, T} = Polyhedra.similar_library(CDDLibrary(), FullDim{N}(), T)
-Polyhedra.arraytype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Vector{T}
+Polyhedra.hvectortype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Polyhedra.hvectortype(CDDInequalityMatrix{N, T})
+Polyhedra.vvectortype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Polyhedra.vvectortype(CDDGenerator{N, T})
 Polyhedra.similar_type(::Type{<:CDDPolyhedron}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDPolyhedron{N, T}
 
 CDDPolyhedron(matrix::CDDMatrix{N, T}) where {N, T} = CDDPolyhedron{N, T}(matrix)

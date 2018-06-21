@@ -126,7 +126,8 @@ end
 
 const CDDMatrix{N, T, S} = Union{CDDInequalityMatrix{N, T, S}, CDDGeneratorMatrix{N, T, S}}
 CDDMatrix{N, T}(rep) where {N, T} = CDDMatrix{N, T, mytype(T)}(rep)
-Polyhedra.arraytype(::Union{CDDMatrix{N, T}, Type{<:CDDMatrix{N, T}}}) where {N, T} = Vector{T}
+Polyhedra.hvectortype(::Union{CDDInequalityMatrix{N, T}, Type{<:CDDInequalityMatrix{N, T}}}) where {N, T} = Vector{T}
+Polyhedra.vvectortype(::Union{CDDGeneratorMatrix{N, T}, Type{<:CDDGeneratorMatrix{N, T}}}) where {N, T} = Vector{T}
 Polyhedra.similar_type(::Type{<:CDDInequalityMatrix}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDInequalityMatrix{N, T, mytype(T)}
 Polyhedra.similar_type(::Type{<:CDDGeneratorMatrix}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDGeneratorMatrix{N, T, mytype(T)}
 
@@ -216,7 +217,7 @@ function extractrow(ine::CDDInequalityMatrix, i)
 end
 function extractrow(ext::CDDGeneratorMatrix{N,T}, i) where {N,T}
     if ext.cone && i == nvreps(ext)
-        a = Polyhedra.origin(Polyhedra.arraytype(ext), FullDim{N}())
+        a = Polyhedra.origin(Polyhedra.vvectortype(ext), FullDim{N}())
     else
         mat = unsafe_load(ext.matrix)
         b = extractrow(mat, i)
