@@ -7,7 +7,7 @@ mutable struct Cdd_PolyhedraData{T<:MyType}
     A::Cdd_Amatrix{T}
     # Inequality System:  m times d matrix
     numbtype::Cdd_NumberType
-    child::Ptr{Void} # dd_ConePtr
+    child::Ptr{Nothing} # dd_ConePtr
     # pointing to the homogenized cone data
     m_alloc::Cdd_rowrange
     # allocated row size of matrix A
@@ -74,10 +74,10 @@ mutable struct CDDPolyhedra{N, T<:PolyType, S}
 end
 
 function myfree(poly::CDDPolyhedra{N, Cdouble}) where N
-    @ddf_ccall FreePolyhedra Void (Ptr{Cdd_PolyhedraData{Cdouble}},) poly.poly
+    @ddf_ccall FreePolyhedra Nothing (Ptr{Cdd_PolyhedraData{Cdouble}},) poly.poly
 end
 function myfree(poly::CDDPolyhedra{N, Rational{BigInt}}) where N
-    @dd_ccall FreePolyhedra Void (Ptr{Cdd_PolyhedraData{GMPRational}},) poly.poly
+    @dd_ccall FreePolyhedra Nothing (Ptr{Cdd_PolyhedraData{GMPRational}},) poly.poly
 end
 
 CDDPolyhedra(matrix::CDDMatrix{N, T, S}) where {N, T, S} = CDDPolyhedra{N, T, S}(matrix)

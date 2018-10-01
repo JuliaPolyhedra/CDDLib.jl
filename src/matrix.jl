@@ -17,42 +17,42 @@ function dd_creatematrix(::Type{GMPRational}, m::Cdd_rowrange, n::Cdd_colrange)
 end
 
 # function dd_copyAmatrixvectorizedbycolumn(mat::Cdd_Amatrix{Cdouble}, M::Matrix{Cdouble}, m::Cdd_rowrange, n::Cdd_colrange)
-#   @ddf_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{Cdouble}, Ptr{Cdouble}, Cdd_rowrange, Cdd_colrange) mat M m n
+#   @ddf_ccall CopyAmatrixVectorizedByColumn Nothing (Cdd_Amatrix{Cdouble}, Ptr{Cdouble}, Cdd_rowrange, Cdd_colrange) mat M m n
 # end
 # function dd_copyAmatrixvectorizedbycolumn(mat::Cdd_Amatrix{GMPRational}, M::Matrix{GMPRational}, m::Cdd_rowrange, n::Cdd_colrange)
-#   @dd_ccall CopyAmatrixVectorizedByColumn Void (Cdd_Amatrix{GMPRational}, Ptr{GMPRational}, Cdd_rowrange, Cdd_colrange) mat M m n
+#   @dd_ccall CopyAmatrixVectorizedByColumn Nothing (Cdd_Amatrix{GMPRational}, Ptr{GMPRational}, Cdd_rowrange, Cdd_colrange) mat M m n
 # end
 
 function dd_copyArow(acopy::Cdd_Arow{Cdouble}, a::Vector{Cdouble})
-    @ddf_ccall CopyArow Void (Cdd_Arow{Cdouble}, Cdd_Arow{Cdouble}, Cdd_colrange) acopy a length(a)
+    @ddf_ccall CopyArow Nothing (Cdd_Arow{Cdouble}, Cdd_Arow{Cdouble}, Cdd_colrange) acopy a length(a)
 end
 function dd_copyArow(acopy::Cdd_Arow{GMPRational}, a::Vector{Rational{BigInt}})
     b = Vector{GMPRational}(a)
-    @dd_ccall CopyArow Void (Cdd_Arow{GMPRational}, Cdd_Arow{GMPRational}, Cdd_colrange) acopy b length(b)
+    @dd_ccall CopyArow Nothing (Cdd_Arow{GMPRational}, Cdd_Arow{GMPRational}, Cdd_colrange) acopy b length(b)
     myfree(b)
 end
 
 dd_copyArow(acopy::Cdd_Arow, a::AbstractVector) = dd_copyArow(acopy, collect(a)) # e.g. for sparse a
 
 function dd_setmatrixobjective(matrix::Ptr{Cdd_MatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
-    @ddf_ccall SetMatrixObjective Void (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
+    @ddf_ccall SetMatrixObjective Nothing (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
 end
 function dd_setmatrixobjective(matrix::Ptr{Cdd_MatrixData{GMPRational}}, objective::Cdd_LPObjectiveType)
-    @dd_ccall SetMatrixObjective Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
+    @dd_ccall SetMatrixObjective Nothing (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_LPObjectiveType) matrix objective
 end
 
 function dd_setmatrixnumbertype(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    @ddf_ccall SetMatrixNumberType Void (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_NumberType) matrix dd_Real
+    @ddf_ccall SetMatrixNumberType Nothing (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_NumberType) matrix dd_Real
 end
 function dd_setmatrixnumbertype(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    @dd_ccall SetMatrixNumberType Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_NumberType) matrix dd_Rational
+    @dd_ccall SetMatrixNumberType Nothing (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_NumberType) matrix dd_Rational
 end
 
 function dd_setmatrixrepresentationtype(matrix::Ptr{Cdd_MatrixData{Cdouble}}, inequality::Bool)
-    @ddf_ccall SetMatrixRepresentationType Void (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
+    @ddf_ccall SetMatrixRepresentationType Nothing (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
 end
 function dd_setmatrixrepresentationtype(matrix::Ptr{Cdd_MatrixData{GMPRational}}, inequality::Bool)
-    @dd_ccall SetMatrixRepresentationType Void (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
+    @dd_ccall SetMatrixRepresentationType Nothing (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_RepresentationType) matrix (inequality ? dd_Inequality : dd_Generator)
 end
 
 function dd_matrixcopy(matrix::Ptr{Cdd_MatrixData{Cdouble}})
@@ -154,10 +154,10 @@ Base.length(matrix::CDDInequalityMatrix{N}) where N = _length(matrix.matrix, N)
 Base.length(matrix::CDDGeneratorMatrix{N}) where N = _length(matrix.matrix, N) + matrix.cone
 
 function dd_freematrix(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    @ddf_ccall FreeMatrix Void (Ptr{Cdd_MatrixData{Cdouble}},) matrix
+    @ddf_ccall FreeMatrix Nothing (Ptr{Cdd_MatrixData{Cdouble}},) matrix
 end
 function dd_freematrix(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    @dd_ccall FreeMatrix Void (Ptr{Cdd_MatrixData{GMPRational}},) matrix
+    @dd_ccall FreeMatrix Nothing (Ptr{Cdd_MatrixData{GMPRational}},) matrix
 end
 function myfree(matrix::CDDMatrix)
     dd_freematrix(matrix.matrix)
@@ -203,7 +203,7 @@ function extractrow(mat::Cdd_MatrixData{GMPRational}, i)
     row = unsafe_load(mat.matrix, i)
     for j = 1:n
         b[j] = GMPRationalMut()
-        ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(b[j]), row + ((j-1)*sizeof(GMPRational)))
+        ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(b[j]), row + ((j-1)*sizeof(GMPRational)))
     end
     Array{Rational{BigInt}}(Array{GMPRational}(b))
 end
@@ -308,7 +308,7 @@ function extractA(mat::Cdd_MatrixData{GMPRational})
         row = unsafe_load(mat.matrix, i)
         for j = 1:n
             A[i, j] = GMPRationalMut()
-            ccall((:__gmpq_set, :libgmp), Void, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(A[i,j]), row + ((j-1)*sizeof(GMPRational)))
+            ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(A[i,j]), row + ((j-1)*sizeof(GMPRational)))
         end
     end
     Array{GMPRational}(A)

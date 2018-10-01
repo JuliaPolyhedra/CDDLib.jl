@@ -1,11 +1,11 @@
 function dd_set_initialize(maxel::Clong)
     x = Ref{Cset_type}(0)
-    @cdd_ccall set_initialize Void (Ref{Ptr{Culong}}, Clong) x maxel
+    @cdd_ccall set_initialize Nothing (Ref{Ptr{Culong}}, Clong) x maxel
     x[]
 end
 
 function dd_set_addelem(st::Cset_type, el::Clong)
-    @cdd_ccall set_addelem Void (Cset_type, Clong) st convert(Clong, el)
+    @cdd_ccall set_addelem Nothing (Cset_type, Clong) st convert(Clong, el)
 end
 
 function dd_set_member(st::Cset_type, el::Clong)
