@@ -1,7 +1,7 @@
 @testset "Low-level permutahedron tests" begin
     A = [1 1 1; 1 0 0; 0 1 0; 0 0 1; -1 0 0; 0 -1 0; 0 0 -1]
     b = [6, 3, 3, 3, -1, -1, -1]
-    ls = IntSet([1])
+    ls = BitSet([1])
     V = [2 3 1; 1 3 2; 3 1 2; 3 2 1; 2 1 3; 1 2 3]
     ine = hrep(A, b, ls)
     #@test !isempty(ine)
@@ -88,24 +88,24 @@ end"
               0  0  0 -1  0 -1;
               0  0  0  1  0  1]
     blift = [0; 0; 0; 0; 0; 0; -3; 3; -1; -1; -(1+2); (1+2)]
-    linsetlift = IntSet()
+    linsetlift = BitSet()
     inelift3 = hrep(Alift, blift, linsetlift)
     inelift3f = MixedMatHRep{6, Float64}(inelift3)
     inelift2 = fourierelimination(inelift3)
     inelift2f = fourierelimination(inelift3f)
     inelift1 = blockelimination(inelift2)
     inelift1f = blockelimination(inelift2f)
-    inelift0 = blockelimination(inelift1, IntSet([fulldim(inelift1)]))
-    inelift0f = blockelimination(inelift1f, IntSet([fulldim(inelift1f)]))
+    inelift0 = blockelimination(inelift1, BitSet([fulldim(inelift1)]))
+    inelift0f = blockelimination(inelift1f, BitSet([fulldim(inelift1f)]))
     canonicalize!(inelift0)
     canonicalize!(inelift0f)
     inelift0d = MixedMatHRep{3,Int}(inelift0)
     inelift0df = MixedMatHRep{3,Int}(inelift0f)
-    @test inelift0d.linset == IntSet(1)
+    @test inelift0d.linset == BitSet(1)
     @test length(inelift0d.b) == 7
     @test inelift0d.b[1] / sign(inelift0d.b[1]) == 6
     @test vec(Array{Int}(inelift0d.A[1,:] / sign(inelift0d.b[1]))) == [1; 1; 1] # Array{Int} cast and vec are for julia 0.4
-    @test inelift0df.linset == IntSet(1)
+    @test inelift0df.linset == BitSet(1)
     @test length(inelift0df.b) == 7
     @test inelift0df.b[1] / sign(inelift0df.b[1]) == 6
     @test vec(Array{Int}(inelift0df.A[1,:] / sign(inelift0df.b[1]))) == [1; 1; 1] # Array{Int} cast and vec are for julia 0.4

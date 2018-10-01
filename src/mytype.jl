@@ -17,7 +17,7 @@ mutable struct GMPRationalMut
         ccall((:__gmpq_init, :libgmp), Nothing, (Ptr{GMPRationalMut},), Ref(m))
         # No need to clear anything since the num and den are used by
         # the GMPRational that is created
-        #finalizer(m, _mpq_clear_fn)
+        #finalizer(_mpq_clear_fn, m)
         m
     end
 end
@@ -74,7 +74,7 @@ Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
 GMPRational() = GMPRational(GMPRationalMut())
 
 GMPRational(a::S, b::T) where {T<:Integer,S<:Integer} = GMPRational(GMPRationalMut(a, b))
-Base.convert(::Type{GMPRational}, a::T) where {T<:Real} = GMPRational(GMPRationalMut(a))
+Base.convert(::Type{GMPRational}, a::T) where {T<:Real} = convert(GMPRational, convert(GMPRationalMut, a))
 Base.convert(::Type{GMPRational}, a::GMPRational) = a
 
 Base.zero(::Type{GMPRational}) = GMPRational(0)

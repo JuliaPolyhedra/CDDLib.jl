@@ -46,7 +46,7 @@
     @test !isredundant
     @test Array{Rational{Int}}(certificate) == target
     redundantrows(inecut)
-    @test IntSet() == redundantrows(inecut)
+    @test BitSet() == redundantrows(inecut)
     (issredundant, scertificate) = sredundant(inecut, 1)
     @test !issredundant
     @test Array{Rational{Int}}(scertificate) == target

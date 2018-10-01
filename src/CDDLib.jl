@@ -2,7 +2,6 @@ __precompile__()
 
 module CDDLib
 
-using Compat
 using BinDeps
 using Polyhedra
 

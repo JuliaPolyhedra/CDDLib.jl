@@ -1,6 +1,6 @@
 using CDDLib
 using Polyhedra
-using Base.Test
+using Test
 
 using JuMP
 lpsolver = tuple()

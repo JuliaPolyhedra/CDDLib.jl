@@ -60,33 +60,33 @@ function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     poly
 end
 
-mutable struct CDDPolyhedra{N, T<:PolyType, S}
+mutable struct CDDPolyhedra{T<:PolyType, S}
     poly::Ptr{Cdd_PolyhedraData{S}}
     inequality::Bool # The input type is inequality
 
-    function CDDPolyhedra{N, T, S}(matrix::CDDMatrix{N, T}) where {N, T <: PolyType, S}
+    function CDDPolyhedra{T, S}(matrix::CDDMatrix{T}) where {T <: PolyType, S}
         polyptr = dd_matrix2poly(matrix.matrix)
-        poly = new{N, T, S}(polyptr, isaninequalityrepresentation(matrix))
-        finalizer(poly, myfree)
+        poly = new{T, S}(polyptr, isaninequalityrepresentation(matrix))
+        finalizer(myfree, poly)
         poly
     end
 
 end
 
-function myfree(poly::CDDPolyhedra{N, Cdouble}) where N
+function myfree(poly::CDDPolyhedra{Cdouble})
     @ddf_ccall FreePolyhedra Nothing (Ptr{Cdd_PolyhedraData{Cdouble}},) poly.poly
 end
-function myfree(poly::CDDPolyhedra{N, Rational{BigInt}}) where N
+function myfree(poly::CDDPolyhedra{Rational{BigInt}})
     @dd_ccall FreePolyhedra Nothing (Ptr{Cdd_PolyhedraData{GMPRational}},) poly.poly
 end
 
-CDDPolyhedra(matrix::CDDMatrix{N, T, S}) where {N, T, S} = CDDPolyhedra{N, T, S}(matrix)
+CDDPolyhedra(matrix::CDDMatrix{T, S}) where {T, S} = CDDPolyhedra{T, S}(matrix)
 CDDPolyhedra(rep::Representation) = CDDPolyhedra(CDDMatrix(rep))
 
-function Base.convert(::Type{CDDPolyhedra{N, T, S}}, matrix::CDDMatrix{N, T, S}) where {N, T, S}
-    CDDPolyhedra{N, T, S}(matrix)
+function Base.convert(::Type{CDDPolyhedra{T, S}}, matrix::CDDMatrix{T, S}) where {T, S}
+    CDDPolyhedra{T, S}(matrix)
 end
-Base.convert(::Type{CDDPolyhedra{N, T, S}}, repr::Representation{N, T}) where {N, T, S} = CDDPolyhedra(CDDMatrix(repr))
+Base.convert(::Type{CDDPolyhedra{T, S}}, repr::Representation{T}) where {T, S} = CDDPolyhedra(CDDMatrix(repr))
 
 function dd_copyinequalities(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
     @ddf_ccall CopyInequalities Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
