@@ -34,10 +34,10 @@ mutable struct Cdd_LPSolutionData{T<:MyType}
 end
 
 function dd_freelpsolution(lp::Ptr{Cdd_LPSolutionData{Cdouble}})
-    @ddf_ccall FreeLPSolution Void (Ptr{Cdd_LPSolutionData{Cdouble}},) lp
+    @ddf_ccall FreeLPSolution Nothing (Ptr{Cdd_LPSolutionData{Cdouble}},) lp
 end
 function dd_freelpsolution(lp::Ptr{Cdd_LPSolutionData{GMPRational}})
-    @dd_ccall FreeLPSolution Void (Ptr{Cdd_LPSolutionData{GMPRational}},) lp
+    @dd_ccall FreeLPSolution Nothing (Ptr{Cdd_LPSolutionData{GMPRational}},) lp
 end
 
 mutable struct CDDLPSolution{T<:MyType}
@@ -181,10 +181,10 @@ mutable struct Cdd_LPData{T<:MyType}
 end
 
 function dd_freelpdata(lp::Ptr{Cdd_LPData{Cdouble}})
-    @ddf_ccall FreeLPData Void (Ptr{Cdd_LPData{Cdouble}},) lp
+    @ddf_ccall FreeLPData Nothing (Ptr{Cdd_LPData{Cdouble}},) lp
 end
 function dd_freelpdata(lp::Ptr{Cdd_LPData{GMPRational}})
-    @dd_ccall FreeLPData Void (Ptr{Cdd_LPData{GMPRational}},) lp
+    @dd_ccall FreeLPData Nothing (Ptr{Cdd_LPData{GMPRational}},) lp
 end
 
 mutable struct CDDLP{T<:MyType}

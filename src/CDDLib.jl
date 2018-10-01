@@ -2,6 +2,7 @@ __precompile__()
 
 module CDDLib
 
+using Compat
 using BinDeps
 using Polyhedra
 
@@ -34,7 +35,7 @@ macro cdd_ccall(f, args...)
 end
 
 function __init__()
-    @dd_ccall set_global_constants Void ()
+    @dd_ccall set_global_constants Nothing ()
 end
 
 import Base.convert, Base.push!, Base.eltype, Base.copy
