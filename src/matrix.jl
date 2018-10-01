@@ -62,7 +62,7 @@ function dd_matrixcopy(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     @dd_ccall MatrixCopy Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}},) matrix
 end
 
-function fillmatrix(inequality::Bool, matrix::Ptr{Ptr{T}}, itr, linset::IntSet, offset) where T
+function fillmatrix(inequality::Bool, matrix::Ptr{Ptr{T}}, itr, linset::BitSet, offset) where T
     for (i, item) in enumerate(itr)
         row = unsafe_load(matrix, offset+i)
         if islin(item)
@@ -83,7 +83,7 @@ function initmatrix(::Polyhedra.FullDim{N}, ::Type{T}, inequality::Bool, itr::Po
     offset = [0; cs[1:end-1]]
     matrix = dd_creatematrix(mytype(T), Cdd_rowrange(m), Cdd_colrange(n))
     mat = unsafe_load(matrix)
-    linset = IntSet()
+    linset = BitSet()
     fillmatrix.(inequality, mat.matrix, itr, linset, offset)
     dd_settype(mat.linset, linset)
     dd_setmatrixnumbertype(matrix)
@@ -133,7 +133,7 @@ Polyhedra.similar_type(::Type{<:CDDGeneratorMatrix}, ::FullDim{N}, ::Type{T}) wh
 
 function linset(matrix::CDDMatrix)
     mat = unsafe_load(matrix.matrix)
-    Base.convert(IntSet, CDDSet(mat.linset, mat.rowsize))
+    Base.convert(BitSet, CDDSet(mat.linset, mat.rowsize))
 end
 
 CDDMatrix(hrep::HRepresentation) = CDDInequalityMatrix(hrep)
