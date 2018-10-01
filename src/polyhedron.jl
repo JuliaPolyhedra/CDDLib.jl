@@ -171,7 +171,7 @@ function Polyhedra.eliminate(p::CDDPolyhedron{T}, delset, ::FourierMotzkin) wher
             end
             ine = fourierelimination(ine)
         end
-        CDDPolyhedron{fulldim(p)-length(delset), T}(ine)
+        CDDPolyhedron{T}(ine)
     end
 end
 Polyhedra.supportselimination(p::CDDPolyhedron, ::BlockElimination) = true
@@ -179,7 +179,7 @@ function Polyhedra.eliminate(p::CDDPolyhedron{T}, delset, ::BlockElimination) wh
     if iszero(length(delset))
         p
     else
-        CDDPolyhedron{fulldim(p)-length(delset), T}(blockelimination(getine(p), delset))
+        CDDPolyhedron{T}(blockelimination(getine(p), delset))
     end
 end
 

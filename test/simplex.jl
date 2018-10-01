@@ -85,6 +85,6 @@
     inequality_simpletest(ineout5f, [Acut; 0 0; -1 0; 0 -1], [bcut; 1; 0; 0], BitSet([1]))
     generator_simpletest(extout5, V)
     generator_simpletest(extout5f, V)
-    generator_simpletest(extout5, V, Array{Int}(0, 2))
-    generator_simpletest(extout5f, V, Array{Int}(0, 2))
+    generator_simpletest(extout5, V, Array{Int}(undef, 0, 2))
+    generator_simpletest(extout5f, V, Array{Int}(undef, 0, 2))
 end

@@ -1,4 +1,4 @@
-import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero, Base.zeros
+import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero
 
 # It is immutable so that it is stored by value in the structures
 # GMPRational and GMPRationalMut and not by reference
@@ -77,13 +77,13 @@ GMPRational(a::S, b::T) where {T<:Integer,S<:Integer} = GMPRational(GMPRationalM
 Base.convert(::Type{GMPRational}, a::T) where {T<:Real} = convert(GMPRational, convert(GMPRationalMut, a))
 Base.convert(::Type{GMPRational}, a::GMPRational) = a
 
-Base.zero(::Type{GMPRational}) = GMPRational(0)
+Base.zero(::Type{GMPRational}) = convert(GMPRational, 0)
 
 # The default zeros uses the same rational for each element
 # so each element has the same data1 and data2 pointers...
 # This is why I need to redefine it
-function Base.zeros(::Type{GMPRational}, dims...)
-    ret = Array(GMPRational, dims...)
+function Base.zeros(::Type{GMPRational}, dims::Union{Integer, AbstractUnitRange}...)
+    ret = Array{GMPRational}(undef, dims...)
     for i in eachindex(ret)
         ret[i] = Base.zero(GMPRational)
     end
@@ -115,7 +115,7 @@ function Base.show(io::IO, x::GMPInteger)
 end
 
 function Base.show(io::IO, x::GMPRational)
-    show(io, Rational(x))
+    show(io, convert(Rational, x))
 end
 
 function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)

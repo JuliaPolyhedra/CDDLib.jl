@@ -97,7 +97,7 @@ function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     redundant_list
 end
 function redundantrows(matrix::CDDMatrix)
-    Base.convert(IntSet, CDDSet(dd_redundantrows(matrix.matrix), length(matrix)))
+    Base.convert(BitSet, CDDSet(dd_redundantrows(matrix.matrix), length(matrix)))
 end
 function redundantrows(repr::Representation)
     redundantrows(CDDMatrix(repr))
@@ -230,7 +230,7 @@ function dd_fourierelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     newmatrix
 end
 function fourierelimination(matrix::CDDInequalityMatrix{T, S}) where {T, S}
-    CDDInequalityMatrix{fulldim(matrix)-1, T, S}(dd_fourierelimination(matrix.matrix))
+    CDDInequalityMatrix{T, S}(dd_fourierelimination(matrix.matrix))
 end
 function fourierelimination(ine::HRepresentation)
     fourierelimination(CDDInequalityMatrix(ine))
@@ -250,15 +250,15 @@ function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}}, delset::C
     myerror(err[])
     newmatrix
 end
-function blockelimination(matrix::CDDInequalityMatrix{T, S}, delset=IntSet([fulldim(matrix)])) where {T, S}
+function blockelimination(matrix::CDDInequalityMatrix{T, S}, delset=BitSet([fulldim(matrix)])) where {T, S}
     if last(delset) > fulldim(matrix)
         error("Invalid variable to eliminate")
     end
     # offset of 1 because 1 is for the first column of the matrix
     # (indicating the linearity) so 2 is the first dimension
-    CDDInequalityMatrix{fulldim(matrix)-length(delset), T, S}(dd_blockelimination(matrix.matrix, CDDSet(delset, fulldim(matrix)+1, 1).s))
+    CDDInequalityMatrix{T, S}(dd_blockelimination(matrix.matrix, CDDSet(delset, fulldim(matrix)+1, 1).s))
 end
-function blockelimination(ine::HRepresentation, delset=IntSet([fulldim(ine)]))
+function blockelimination(ine::HRepresentation, delset=BitSet([fulldim(ine)]))
     blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)
 end
 

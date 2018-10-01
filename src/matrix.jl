@@ -138,8 +138,8 @@ end
 
 CDDMatrix(hrep::HRepresentation) = CDDInequalityMatrix(hrep)
 CDDMatrix(vrep::VRepresentation) = CDDGeneratorMatrix(vrep)
-cddmatrix(::Type{T}, hrep::HRepresentation) where {T} = CDDInequalityMatrix{T, mytype(T)}(hrep)
-cddmatrix(::Type{T}, vrep::VRepresentation) where {T} = CDDGeneratorMatrix{T, mytype(T)}(vrep)
+cddmatrix(::Type{T}, hrep::HRepresentation) where {T} = convert(CDDInequalityMatrix{T, mytype(T)}, hrep)
+cddmatrix(::Type{T}, vrep::VRepresentation) where {T} = convert(CDDGeneratorMatrix{T, mytype(T)}, vrep)
 #(::Type{CDDMatrix{T,S}}){T,S}(hrep::HRepresentation) = CDDInequalityMatrix{T,S}(hrep)
 #(::Type{CDDMatrix{T,S}}){T,S}(vrep::VRepresentation) = CDDGeneratorMatrix{T,S}(vrep)
 # Does not work
@@ -187,7 +187,7 @@ end
 function extractrow(mat::Cdd_MatrixData{Cdouble}, i)
     @assert 1 <= i <= mat.rowsize
     n = mat.colsize
-    b = Vector{Cdouble}(n)
+    b = Vector{Cdouble}(undef, n)
     row = unsafe_load(mat.matrix, i)
     for j = 1:n
         b[j] = unsafe_load(row, j)
@@ -264,7 +264,7 @@ function Base.copy(matrix::CDDGeneratorMatrix{T, S}) where {T, S}
     CDDGeneratorMatrix{T, S}(dd_matrixcopy(matrix.matrix))
 end
 
-function CDDGeneratorMatrix{T,S}(d, vits::Polyhedra.VIt{T}...) where {T, S}
+function CDDGeneratorMatrix{T,S}(d::Polyhedra.FullDim, vits::Polyhedra.VIt{T}...) where {T, S}
     CDDGeneratorMatrix(initmatrix(d, T, false, vits...))
 end
 
@@ -289,7 +289,7 @@ isaninequalityrepresentation(matrix::CDDGeneratorMatrix) = false
 function extractA(mat::Cdd_MatrixData{Cdouble})
     m = mat.rowsize
     n = mat.colsize
-    A = Array{Cdouble, 2}(m, n)
+    A = Array{Cdouble, 2}(undef, m, n)
     for i = 1:m
         row = unsafe_load(mat.matrix, i)
         for j = 1:n
@@ -302,7 +302,7 @@ end
 function extractA(mat::Cdd_MatrixData{GMPRational})
     m = mat.rowsize
     n = mat.colsize
-    A = Array{GMPRationalMut, 2}(m, n)
+    A = Array{GMPRationalMut, 2}(undef, m, n)
     for i = 1:m
         row = unsafe_load(mat.matrix, i)
         for j = 1:n
