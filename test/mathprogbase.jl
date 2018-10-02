@@ -1,7 +1,7 @@
 @test_throws ErrorException CDDSolver(;solver_type=:Simplex)
 
 import MathProgBase
-const mathprogbase_test = joinpath(dirname(dirname(MathProgBase)), "test")
+const mathprogbase_test = joinpath(dirname(dirname(pathof(MathProgBase))), "test")
 
 include(joinpath(mathprogbase_test, "linproginterface.jl"))
 linprogsolvertest(CDDSolver())

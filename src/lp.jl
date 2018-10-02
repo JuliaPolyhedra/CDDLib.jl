@@ -68,7 +68,7 @@ function simplestatus(sol::CDDLPSolution)
 end
 
 function MPB.getobjval(sol::CDDLPSolution{GMPRational})
-    Rational{Int}(unsafe_load(sol.sol).optvalue)
+    convert(Rational{Int}, unsafe_load(sol.sol).optvalue)
 end
 function MPB.getobjval(sol::CDDLPSolution{Cdouble})
     unsafe_load(sol.sol).optvalue

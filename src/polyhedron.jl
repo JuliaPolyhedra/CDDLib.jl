@@ -32,6 +32,7 @@ mutable struct CDDPolyhedron{T<:PolyType} <: Polyhedron{T}
     #   new(nothing, nothing, poly)
     # end
 end
+Polyhedra.FullDim(p::CDDPolyhedron{T}) where {T} = Polyhedra.FullDim_rep(p.ine, p.ext)
 Polyhedra.library(p::CDDPolyhedron{T}) where {T} = Polyhedra.similar_library(CDDLibrary(), Polyhedra.FullDim(p), T)
 Polyhedra.hvectortype(::Union{CDDPolyhedron{T}, Type{<:CDDPolyhedron{T}}}) where {T} = Polyhedra.hvectortype(CDDInequalityMatrix{T})
 Polyhedra.vvectortype(::Union{CDDPolyhedron{T}, Type{<:CDDPolyhedron{T}}}) where {T} = Polyhedra.vvectortype(CDDGenerator{T})
@@ -125,7 +126,7 @@ end
 
 function Polyhedra.polyhedron(rep::Representation, lib::CDDLibrary)
     T = polytypeforprecision(lib.precision)
-    CDDPolyhedron{T}(rep)
+    convert(CDDPolyhedron{T}, rep)
 end
 function Polyhedra.polyhedron(hyperplanes::Polyhedra.HyperPlaneIt, halfspaces::Polyhedra.HalfSpaceIt, lib::CDDLibrary)
     T = polytypeforprecision(lib.precision)

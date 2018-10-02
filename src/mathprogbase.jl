@@ -33,7 +33,7 @@ MPB.LinearQuadraticModel(s::CDDSolver) = Polyhedra.PolyhedraToLPQPBridge(Polyhed
 
 function MPB.loadproblem!(lpm::CDDPolyhedraModel, rep::HRep, obj, sense)
     T = lpm.exact ? Rational{BigInt} : Float64
-    prob = CDDInequalityMatrix{T, mytype(T)}(rep)
+    prob = convert(CDDInequalityMatrix{T, mytype(T)}, rep)
     setobjective(prob, obj, sense)
     lpm.prob = prob
 end
@@ -52,10 +52,10 @@ function MPB.optimize!(lpm::CDDPolyhedraModel)
     # We have just called lpsolve so it shouldn't be Undecided
     # if no error occured
     lpm.status == :Undecided && (lpm.status = :Error)
-    lpm.objval = getobjval(sol)
-    lpm.solution = getsolution(sol)
+    lpm.objval = MPB.getobjval(sol)
+    lpm.solution = MPB.getsolution(sol)
 
-    lpm.constrduals = getconstrduals(sol)
+    lpm.constrduals = MPB.getconstrduals(sol)
     # if A has equalities, cddlib splits them as 2 inequalities
     m = nhreps(prob)
     if length(lpm.constrduals) > m
@@ -65,9 +65,9 @@ function MPB.optimize!(lpm::CDDPolyhedraModel)
     end
     # FIXME if A is GMPRational, check that no creation/leak
 
-    T = Polyhedra.coefficienttype(prob)
+    T = Polyhedra.coefficient_type(prob)
 
-    lpm.constrsolution = Vector{T}(nhreps(prob))
+    lpm.constrsolution = Vector{T}(undef, nhreps(prob))
     lpm.infeasibilityray = zeros(T, nhreps(prob))
 
     eps = 1e-7

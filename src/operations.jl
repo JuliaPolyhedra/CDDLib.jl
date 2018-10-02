@@ -57,7 +57,7 @@ end
 # Redundant
 function dd_redundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
     err = Ref{Cdd_ErrorType}(0)
-    certificate = Array{Cdouble, 1}(len)
+    certificate = Vector{Cdouble}(undef, len)
     found = (@ddf_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix  i certificate err)
     myerror(err[])
     (found, certificate)
@@ -106,7 +106,7 @@ end
 # Strictly redundant
 function dd_sredundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
     err = Ref{Cdd_ErrorType}(0)
-    certificate = Array{Cdouble, 1}(len)
+    certificate = Vector{Cdouble1}(undef, len)
     found = (@ddf_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix  i certificate err)
     myerror(err[])
     (found, certificate)

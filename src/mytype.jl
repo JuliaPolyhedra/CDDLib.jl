@@ -129,9 +129,9 @@ function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
 end
 Base.convert(::Type{Rational}, r::GMPRational) = Base.convert(Rational{BigInt}, r)
 # I need to define the following conversion because of ambuity with Real -> Bool
-Base.convert(::Type{Rational{T}}, a::GMPRational) where {T<:Integer} = Base.convert(Rational{T}, Rational(a))
-Base.convert(::Type{Bool}, a::GMPRational) = Base.convert(Bool, Rational(a))
-Base.convert(::Type{T}, a::GMPRational) where {T<:Integer} = Base.convert(T, Rational(a))
+Base.convert(::Type{Rational{T}}, a::GMPRational) where {T<:Integer} = Base.convert(Rational{T}, convert(Rational, a))
+Base.convert(::Type{Bool}, a::GMPRational) = Base.convert(Bool, convert(Rational, a))
+Base.convert(::Type{T}, a::GMPRational) where {T<:Integer} = Base.convert(T, convert(Rational, a))
 
 promote_rule(::Type{GMPRational}, ::Type{T}) where {T<:Integer} = GMPRational
 
@@ -157,12 +157,12 @@ function myconvert(::Type{Array}, x::Ptr{T}, n) where T<:Union{Cdouble, Clong}
     copy(unsafe_wrap(Array, x, n))
 end
 function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
-    y = Array{GMPRationalMut, 1}(n)
+    y = Vector{GMPRationalMut}(undef, n)
     for i = 1:n
         y[i] = GMPRationalMut()
         ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
     end
-    Array{GMPRational}(y)
+    Vector{GMPRational}(y)
 end
 
 export MyType, GMPRational
