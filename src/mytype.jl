@@ -1,4 +1,4 @@
-import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero, Base.zeros
+import Base.+, Base.-, Base.*, Base.promote_rule, Base.==, Base.zero
 
 # It is immutable so that it is stored by value in the structures
 # GMPRational and GMPRationalMut and not by reference
@@ -17,7 +17,7 @@ mutable struct GMPRationalMut
         ccall((:__gmpq_init, :libgmp), Nothing, (Ptr{GMPRationalMut},), Ref(m))
         # No need to clear anything since the num and den are used by
         # the GMPRational that is created
-        #finalizer(m, _mpq_clear_fn)
+        #finalizer(_mpq_clear_fn, m)
         m
     end
 end
@@ -74,16 +74,16 @@ Base.convert(::Type{GMPRational}, x::GMPRationalMut) = GMPRational(x)
 GMPRational() = GMPRational(GMPRationalMut())
 
 GMPRational(a::S, b::T) where {T<:Integer,S<:Integer} = GMPRational(GMPRationalMut(a, b))
-Base.convert(::Type{GMPRational}, a::T) where {T<:Real} = GMPRational(GMPRationalMut(a))
+Base.convert(::Type{GMPRational}, a::T) where {T<:Real} = convert(GMPRational, convert(GMPRationalMut, a))
 Base.convert(::Type{GMPRational}, a::GMPRational) = a
 
-Base.zero(::Type{GMPRational}) = GMPRational(0)
+Base.zero(::Type{GMPRational}) = convert(GMPRational, 0)
 
 # The default zeros uses the same rational for each element
 # so each element has the same data1 and data2 pointers...
 # This is why I need to redefine it
-function Base.zeros(::Type{GMPRational}, dims...)
-    ret = Array(GMPRational, dims...)
+function Base.zeros(::Type{GMPRational}, dims::Union{Integer, AbstractUnitRange}...)
+    ret = Array{GMPRational}(undef, dims...)
     for i in eachindex(ret)
         ret[i] = Base.zero(GMPRational)
     end
@@ -115,7 +115,7 @@ function Base.show(io::IO, x::GMPInteger)
 end
 
 function Base.show(io::IO, x::GMPRational)
-    show(io, Rational(x))
+    show(io, convert(Rational, x))
 end
 
 function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
@@ -129,9 +129,9 @@ function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
 end
 Base.convert(::Type{Rational}, r::GMPRational) = Base.convert(Rational{BigInt}, r)
 # I need to define the following conversion because of ambuity with Real -> Bool
-Base.convert(::Type{Rational{T}}, a::GMPRational) where {T<:Integer} = Base.convert(Rational{T}, Rational(a))
-Base.convert(::Type{Bool}, a::GMPRational) = Base.convert(Bool, Rational(a))
-Base.convert(::Type{T}, a::GMPRational) where {T<:Integer} = Base.convert(T, Rational(a))
+Base.convert(::Type{Rational{T}}, a::GMPRational) where {T<:Integer} = Base.convert(Rational{T}, convert(Rational, a))
+Base.convert(::Type{Bool}, a::GMPRational) = Base.convert(Bool, convert(Rational, a))
+Base.convert(::Type{T}, a::GMPRational) where {T<:Integer} = Base.convert(T, convert(Rational, a))
 
 promote_rule(::Type{GMPRational}, ::Type{T}) where {T<:Integer} = GMPRational
 
@@ -157,12 +157,12 @@ function myconvert(::Type{Array}, x::Ptr{T}, n) where T<:Union{Cdouble, Clong}
     copy(unsafe_wrap(Array, x, n))
 end
 function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
-    y = Array{GMPRationalMut, 1}(n)
+    y = Vector{GMPRationalMut}(undef, n)
     for i = 1:n
         y[i] = GMPRationalMut()
         ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
     end
-    Array{GMPRational}(y)
+    Vector{GMPRational}(y)
 end
 
 export MyType, GMPRational

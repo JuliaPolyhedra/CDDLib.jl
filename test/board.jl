@@ -1,7 +1,9 @@
+using LinearAlgebra
+
 @testset "Low-level board tests" begin
-    A1 = -eye(Int, 9) # x >= 0
+    A1 = -Matrix(1I, 9, 9) # x >= 0
     b1 = zeros(Int, 9)
-    A2 = eye(Int, 9) # x <= 1
+    A2 = Matrix(1I, 9, 9) # x <= 1
     b2 = ones(Int, 9)
     A3 = zeros(Int, 9, 9)
     b3 = 3 * ones(Int, 9)
@@ -27,7 +29,7 @@
     b = [b1; b2; b3]
     ine = hrep(A, b)
     poly = CDDPolyhedra(ine)
-    ext  = Polyhedra.MixedMatVRep{9, Rational{Int}}(copygenerators(poly))
+    ext  = Polyhedra.MixedMatVRep{Rational{Int}}(copygenerators(poly))
     target = ones(Int, 9) * (3 // 4)
     ok = false
     for v in points(ext)
@@ -46,7 +48,7 @@
     @test !isredundant
     @test Array{Rational{Int}}(certificate) == target
     redundantrows(inecut)
-    @test IntSet() == redundantrows(inecut)
+    @test BitSet() == redundantrows(inecut)
     (issredundant, scertificate) = sredundant(inecut, 1)
     @test !issredundant
     @test Array{Rational{Int}}(scertificate) == target

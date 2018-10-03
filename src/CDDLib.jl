@@ -2,7 +2,7 @@ __precompile__()
 
 module CDDLib
 
-using Compat
+using LinearAlgebra
 using BinDeps
 using Polyhedra
 

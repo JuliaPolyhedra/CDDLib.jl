@@ -1,5 +1,5 @@
 import MathProgBase
-importall MathProgBase.SolverInterface
+const MPB = MathProgBase.SolverInterface
 
 mutable struct Cdd_LPSolutionData{T<:MyType}
     filename::Cdd_DataFileType
@@ -45,7 +45,7 @@ mutable struct CDDLPSolution{T<:MyType}
 
     function CDDLPSolution{T}(sol::Ptr{Cdd_LPSolutionData{T}}) where {T <: MyType}
         s = new{T}(sol)
-        finalizer(s, myfree)
+        finalizer(myfree, s)
         s
     end
 end
@@ -56,7 +56,7 @@ function myfree(sol::CDDLPSolution)
     dd_freelpsolution(sol.sol)
 end
 
-function status(sol::CDDLPSolution)
+function MPB.status(sol::CDDLPSolution)
     [:Undecided, :Optimal, :Inconsistent,
      :DualInconsistent, :StructInconsistent, :StructDualInconsistent,
      :Unbounded, :DualUnbounded][unsafe_load(sol.sol).LPS+1]
@@ -67,27 +67,27 @@ function simplestatus(sol::CDDLPSolution)
      :Unbounded, :Infeasible][unsafe_load(sol.sol).LPS+1]
 end
 
-function getobjval(sol::CDDLPSolution{GMPRational})
-    Rational{Int}(unsafe_load(sol.sol).optvalue)
+function MPB.getobjval(sol::CDDLPSolution{GMPRational})
+    convert(Rational{Int}, unsafe_load(sol.sol).optvalue)
 end
-function getobjval(sol::CDDLPSolution{Cdouble})
+function MPB.getobjval(sol::CDDLPSolution{Cdouble})
     unsafe_load(sol.sol).optvalue
 end
 
-function getsolution(sol::CDDLPSolution{GMPRational})
+function MPB.getsolution(sol::CDDLPSolution{GMPRational})
     soldata = unsafe_load(sol.sol)
     solutiontmp = myconvert(Array, soldata.sol, soldata.d)
     solution = Array{Rational{BigInt}}(solutiontmp)[2:end]
     myfree(solutiontmp)
     solution
 end
-function getsolution(sol::CDDLPSolution{Cdouble})
+function MPB.getsolution(sol::CDDLPSolution{Cdouble})
     soldata = unsafe_load(sol.sol)
     solutiontmp = myconvert(Array, soldata.sol, soldata.d)
     solutiontmp[2:end]
 end
 
-function getconstrduals(sol::CDDLPSolution{GMPRational})
+function MPB.getconstrduals(sol::CDDLPSolution{GMPRational})
     soldata = unsafe_load(sol.sol)
     # -1 because there is the objective
     nbindex = myconvert(Array, soldata.nbindex, soldata.d+1)
@@ -101,7 +101,7 @@ function getconstrduals(sol::CDDLPSolution{GMPRational})
     myfree(dsol)
     dual
 end
-function getconstrduals(sol::CDDLPSolution{Cdouble})
+function MPB.getconstrduals(sol::CDDLPSolution{Cdouble})
     soldata = unsafe_load(sol.sol)
     # -1 because there is the objective
     nbindex = myconvert(Array, soldata.nbindex, soldata.d+1)
@@ -192,7 +192,7 @@ mutable struct CDDLP{T<:MyType}
 
     function CDDLP{T}(lp::Ptr{Cdd_LPData{T}}) where {T <: MyType}
         l = new{T}(lp)
-        finalizer(l, myfree)
+        finalizer(myfree, l)
         l
     end
 end

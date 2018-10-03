@@ -1,10 +1,10 @@
 export CDDPolyhedraModel, CDDSolver
 
-mutable struct CDDPolyhedraModel <: AbstractPolyhedraModel
+mutable struct CDDPolyhedraModel <: Polyhedra.AbstractPolyhedraModel
     solver_type::Symbol
     exact::Bool
 
-    prob::Nullable{CDDInequalityMatrix}
+    prob::Union{Nothing, CDDInequalityMatrix}
 
     status
     objval
@@ -14,7 +14,7 @@ mutable struct CDDPolyhedraModel <: AbstractPolyhedraModel
     infeasibilityray
 end
 
-mutable struct CDDSolver <: AbstractMathProgSolver
+mutable struct CDDSolver <: MPB.AbstractMathProgSolver
     solver_type::Symbol
     exact::Bool
 
@@ -26,25 +26,25 @@ mutable struct CDDSolver <: AbstractMathProgSolver
     end
 end
 
-function PolyhedraModel(s::CDDSolver)
+function Polyhedra.PolyhedraModel(s::CDDSolver)
     CDDPolyhedraModel(s.solver_type, s.exact, nothing, :Undefined, 0, [], [], [], [])
 end
-LinearQuadraticModel(s::CDDSolver) = PolyhedraToLPQPBridge(PolyhedraModel(s))
+MPB.LinearQuadraticModel(s::CDDSolver) = Polyhedra.PolyhedraToLPQPBridge(Polyhedra.PolyhedraModel(s))
 
-function loadproblem!(lpm::CDDPolyhedraModel, rep::HRep{N}, obj, sense) where N
+function MPB.loadproblem!(lpm::CDDPolyhedraModel, rep::HRep, obj, sense)
     T = lpm.exact ? Rational{BigInt} : Float64
-    prob = CDDInequalityMatrix{N, T, mytype(T)}(rep)
+    prob = convert(CDDInequalityMatrix{T, mytype(T)}, rep)
     setobjective(prob, obj, sense)
     lpm.prob = prob
 end
 
 nonnull(x) = (x != nothing && !isempty(x))
 
-function optimize!(lpm::CDDPolyhedraModel)
-    if isnull(lpm.prob)
+function MPB.optimize!(lpm::CDDPolyhedraModel)
+    if lpm.prob === nothing
         error("Problem not loaded")
     end
-    prob = get(lpm.prob)
+    prob = lpm.prob
     lp = matrix2lp(prob)
     lpsolve(lp, lpm.solver_type)
     sol = copylpsolution(lp)
@@ -52,10 +52,10 @@ function optimize!(lpm::CDDPolyhedraModel)
     # We have just called lpsolve so it shouldn't be Undecided
     # if no error occured
     lpm.status == :Undecided && (lpm.status = :Error)
-    lpm.objval = getobjval(sol)
-    lpm.solution = getsolution(sol)
+    lpm.objval = MPB.getobjval(sol)
+    lpm.solution = MPB.getsolution(sol)
 
-    lpm.constrduals = getconstrduals(sol)
+    lpm.constrduals = MPB.getconstrduals(sol)
     # if A has equalities, cddlib splits them as 2 inequalities
     m = nhreps(prob)
     if length(lpm.constrduals) > m
@@ -65,9 +65,9 @@ function optimize!(lpm::CDDPolyhedraModel)
     end
     # FIXME if A is GMPRational, check that no creation/leak
 
-    T = Polyhedra.coefficienttype(prob)
+    T = Polyhedra.coefficient_type(prob)
 
-    lpm.constrsolution = Vector{T}(nhreps(prob))
+    lpm.constrsolution = Vector{T}(undef, nhreps(prob))
     lpm.infeasibilityray = zeros(T, nhreps(prob))
 
     eps = 1e-7
@@ -82,35 +82,35 @@ function optimize!(lpm::CDDPolyhedraModel)
     # A and b free'd by ine
 end
 
-function status(lpm::CDDPolyhedraModel)
+function MPB.status(lpm::CDDPolyhedraModel)
     lpm.status
 end
 
-function getobjval(lpm::CDDPolyhedraModel)
+function MPB.getobjval(lpm::CDDPolyhedraModel)
     lpm.objval
 end
 
-function getsolution(lpm::CDDPolyhedraModel)
+function MPB.getsolution(lpm::CDDPolyhedraModel)
     copy(lpm.solution)
 end
 
-function getconstrsolution(lpm::CDDPolyhedraModel)
+function MPB.getconstrsolution(lpm::CDDPolyhedraModel)
     copy(lpm.constrsolution)
 end
 
-function getreducedcosts(lpm::CDDPolyhedraModel)
-    prob = get(lpm.prob)
+function MPB.getreducedcosts(lpm::CDDPolyhedraModel)
+    prob = lpm.prob
     spzeros(Polyhedra.coefficienttype(prob), fulldim(prob))
 end
 
-function getconstrduals(lpm::CDDPolyhedraModel)
+function MPB.getconstrduals(lpm::CDDPolyhedraModel)
     copy(lpm.constrduals)
 end
 
-function getinfeasibilityray(lpm::CDDPolyhedraModel)
+function MPB.getinfeasibilityray(lpm::CDDPolyhedraModel)
     copy(lpm.infeasibilityray)
 end
 
-function getunboundedray(lpm::CDDPolyhedraModel)
+function MPB.getunboundedray(lpm::CDDPolyhedraModel)
     copy(lpm.solution)
 end

@@ -10,62 +10,63 @@ struct CDDLibrary <: PolyhedraLibrary
         new(precision)
     end
 end
-Polyhedra.similar_library(::CDDLibrary, ::FullDim, ::Type{T}) where T<:Union{Integer,Rational} = CDDLibrary(:exact)
-Polyhedra.similar_library(::CDDLibrary, ::FullDim, ::Type{T}) where T<:AbstractFloat = CDDLibrary(:float)
+Polyhedra.similar_library(::CDDLibrary, ::Polyhedra.FullDim, ::Type{T}) where T<:Union{Integer,Rational} = CDDLibrary(:exact)
+Polyhedra.similar_library(::CDDLibrary, ::Polyhedra.FullDim, ::Type{T}) where T<:AbstractFloat = CDDLibrary(:float)
 
-mutable struct CDDPolyhedron{N, T<:PolyType} <: Polyhedron{N, T}
-    ine::Nullable{CDDInequalityMatrix{N,T}}
-    ext::Nullable{CDDGeneratorMatrix{N,T}}
-    poly::Nullable{CDDPolyhedra{N,T}}
+mutable struct CDDPolyhedron{T<:PolyType} <: Polyhedron{T}
+    ine::Union{Nothing, CDDInequalityMatrix{T}}
+    ext::Union{Nothing, CDDGeneratorMatrix{T}}
+    poly::Union{Nothing, CDDPolyhedra{T}}
     hlinearitydetected::Bool
     vlinearitydetected::Bool
     noredundantinequality::Bool
     noredundantgenerator::Bool
 
-    function CDDPolyhedron{N, T}(ine::CDDInequalityMatrix) where {N, T <: PolyType}
-        new{N, T}(ine, nothing, nothing, false, false, false, false)
+    function CDDPolyhedron{T}(ine::CDDInequalityMatrix) where {T <: PolyType}
+        new{T}(ine, nothing, nothing, false, false, false, false)
     end
-    function CDDPolyhedron{N, T}(ext::CDDGeneratorMatrix) where {N, T <: PolyType}
-        new{N, T}(nothing, ext, nothing, false, false, false, false)
+    function CDDPolyhedron{T}(ext::CDDGeneratorMatrix) where {T <: PolyType}
+        new{T}(nothing, ext, nothing, false, false, false, false)
     end
     # function CDDPolyhedron(poly::CDDPolyhedra{T})
     #   new(nothing, nothing, poly)
     # end
 end
-Polyhedra.library(::CDDPolyhedron{N, T}) where {N, T} = Polyhedra.similar_library(CDDLibrary(), FullDim{N}(), T)
-Polyhedra.hvectortype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Polyhedra.hvectortype(CDDInequalityMatrix{N, T})
-Polyhedra.vvectortype(::Union{CDDPolyhedron{N, T}, Type{<:CDDPolyhedron{N, T}}}) where {N, T} = Polyhedra.vvectortype(CDDGenerator{N, T})
-Polyhedra.similar_type(::Type{<:CDDPolyhedron}, ::FullDim{N}, ::Type{T}) where {N, T} = CDDPolyhedron{N, T}
+Polyhedra.FullDim(p::CDDPolyhedron{T}) where {T} = Polyhedra.FullDim_rep(p.ine, p.ext)
+Polyhedra.library(p::CDDPolyhedron{T}) where {T} = Polyhedra.similar_library(CDDLibrary(), Polyhedra.FullDim(p), T)
+Polyhedra.hvectortype(::Union{CDDPolyhedron{T}, Type{<:CDDPolyhedron{T}}}) where {T} = Polyhedra.hvectortype(CDDInequalityMatrix{T})
+Polyhedra.vvectortype(::Union{CDDPolyhedron{T}, Type{<:CDDPolyhedron{T}}}) where {T} = Polyhedra.vvectortype(CDDGenerator{T})
+Polyhedra.similar_type(::Type{<:CDDPolyhedron}, ::Polyhedra.FullDim, ::Type{T}) where {T} = CDDPolyhedron{T}
 
-CDDPolyhedron(matrix::CDDMatrix{N, T}) where {N, T} = CDDPolyhedron{N, T}(matrix)
-Base.convert(::Type{CDDPolyhedron{N, T}}, rep::Representation{N, T}) where {N, T} = CDDPolyhedron{N, T}(cddmatrix(T, rep))
+CDDPolyhedron(matrix::CDDMatrix{T}) where {T} = CDDPolyhedron{T}(matrix)
+Base.convert(::Type{CDDPolyhedron{T}}, rep::Representation{T}) where {T} = CDDPolyhedron{T}(cddmatrix(T, rep))
 
 # Helpers
 function getine(p::CDDPolyhedron)
-    if isnull(p.ine)
+    if p.ine === nothing
         p.ine = copyinequalities(getpoly(p))
     end
-    get(p.ine)
+    p.ine
 end
 function getext(p::CDDPolyhedron)
-    if isnull(p.ext)
+    if p.ext === nothing
         p.ext = copygenerators(getpoly(p))
     end
-    get(p.ext)
+    p.ext
 end
 function getpoly(p::CDDPolyhedron, inepriority=true)
-    if isnull(p.poly)
-        if !inepriority && !isnull(p.ext)
-            p.poly = CDDPolyhedra(get(p.ext))
-        elseif !isnull(p.ine)
-            p.poly = CDDPolyhedra(get(p.ine))
-        elseif !isnull(p.ext)
-            p.poly = CDDPolyhedra(get(p.ext))
+    if p.poly === nothing
+        if !inepriority && p.ext !== nothing
+            p.poly = CDDPolyhedra(p.ext)
+        elseif p.ine !== nothing
+            p.poly = CDDPolyhedra(p.ine)
+        elseif p.ext !== nothing
+            p.poly = CDDPolyhedra(p.ext)
         else
             error("Please report this bug")
         end
     end
-    get(p.poly)
+    p.poly
 end
 
 function clearfield!(p::CDDPolyhedron)
@@ -77,35 +78,35 @@ function clearfield!(p::CDDPolyhedron)
     p.noredundantinequality = false
     p.noredundantgenerator = false
 end
-function updateine!(p::CDDPolyhedron{N}, ine::CDDInequalityMatrix{N}) where N
+function updateine!(p::CDDPolyhedron, ine::CDDInequalityMatrix)
     clearfield!(p)
     p.ine = ine
 end
-function updateext!(p::CDDPolyhedron{N}, ext::CDDGeneratorMatrix{N}) where N
+function updateext!(p::CDDPolyhedron, ext::CDDGeneratorMatrix)
     clearfield!(p)
     p.ext = ext
 end
-function updatepoly!(p::CDDPolyhedron{N}, poly::CDDPolyhedra{N}) where N
+function updatepoly!(p::CDDPolyhedron, poly::CDDPolyhedra)
     clearfield!(p)
     p.poly = poly
 end
 
-function Base.copy(p::CDDPolyhedron{N, T}) where {N, T}
+function Base.copy(p::CDDPolyhedron{T}) where {T}
     pcopy = nothing
-    if !isnull(p.ine)
-        pcopy = CDDPolyhedron{N, T}(copy(get(p.ine)))
+    if p.ine !== nothing
+        pcopy = CDDPolyhedron{T}(copy(p.ine))
     end
-    if !isnull(p.ext)
-        if pcopy == nothing
-            pcopy = CDDPolyhedron{N, T}(copy(get(p.ext)))
+    if p.ext !== nothing
+        if pcopy === nothing
+            pcopy = CDDPolyhedron{T}(copy(p.ext))
         else
-            pcopy.ext = copy(get(p.ext))
+            pcopy.ext = copy(p.ext)
         end
     end
-    if pcopy == nothing
+    if pcopy === nothing
         # copy of ine and ext may be not necessary here
         # but I do it to be sure
-        pcopy = CDDPolyhedron{N, T}(copy(getine(p)))
+        pcopy = CDDPolyhedron{T}(copy(getine(p)))
         pcopy.ext = copy(getext(p))
     end
     pcopy.hlinearitydetected     = p.hlinearitydetected
@@ -123,43 +124,43 @@ function polytypeforprecision(precision::Symbol)
     precision == :float ? Cdouble : Rational{BigInt}
 end
 
-function Polyhedra.polyhedron(rep::Representation{N}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(rep::Representation, lib::CDDLibrary)
     T = polytypeforprecision(lib.precision)
-    CDDPolyhedron{N, T}(rep)
+    convert(CDDPolyhedron{T}, rep)
 end
-function Polyhedra.polyhedron(hyperplanes::Polyhedra.HyperPlaneIt{N}, halfspaces::Polyhedra.HalfSpaceIt{N}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(hyperplanes::Polyhedra.HyperPlaneIt, halfspaces::Polyhedra.HalfSpaceIt, lib::CDDLibrary)
     T = polytypeforprecision(lib.precision)
-    CDDPolyhedron{N, T}(hyperplanes, halfspaces)
+    CDDPolyhedron{T}(hyperplanes, halfspaces)
 end
-function Polyhedra.polyhedron(points::Polyhedra.PointIt{N}, lines::Polyhedra.LineIt{N}, rays::Polyhedra.RayIt{N}, lib::CDDLibrary) where N
+function Polyhedra.polyhedron(points::Polyhedra.PointIt, lines::Polyhedra.LineIt, rays::Polyhedra.RayIt, lib::CDDLibrary)
     T = polytypeforprecision(lib.precision)
-    CDDPolyhedron{N, T}(points, lines, rays)
+    CDDPolyhedron{T}(points, lines, rays)
 end
 
 # need to specify to avoid ambiguïty
-Base.convert(::Type{CDDPolyhedron{N, T}}, rep::HRepresentation{N}) where {N, T} = CDDPolyhedron{N, T}(cddmatrix(T, rep))
-Base.convert(::Type{CDDPolyhedron{N, T}}, rep::VRepresentation{N}) where {N, T} = CDDPolyhedron{N, T}(cddmatrix(T, rep))
+Base.convert(::Type{CDDPolyhedron{T}}, rep::HRepresentation) where {T} = CDDPolyhedron{T}(cddmatrix(T, rep))
+Base.convert(::Type{CDDPolyhedron{T}}, rep::VRepresentation) where {T} = CDDPolyhedron{T}(cddmatrix(T, rep))
 
-CDDPolyhedron{N, T}(hits::Polyhedra.HIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDInequalityMatrix{N, T, mytype(T)}(hits...))
-CDDPolyhedron{N, T}(vits::Polyhedra.VIt{N, T}...) where {N, T} = CDDPolyhedron{N, T}(CDDGeneratorMatrix{N, T, mytype(T)}(vits...))
+CDDPolyhedron{T}(d::Polyhedra.FullDim, hits::Polyhedra.HIt{T}...) where {T} = CDDPolyhedron{T}(CDDInequalityMatrix{T, mytype(T)}(d, hits...))
+CDDPolyhedron{T}(d::Polyhedra.FullDim, vits::Polyhedra.VIt{T}...) where {T} = CDDPolyhedron{T}(CDDGeneratorMatrix{T, mytype(T)}(d, vits...))
 
 function Polyhedra.hrepiscomputed(p::CDDPolyhedron)
-    !isnull(p.ine)
+    p.ine !== nothing
 end
-function Polyhedra.hrep(p::CDDPolyhedron{N, T}) where {N, T}
+function Polyhedra.hrep(p::CDDPolyhedron{T}) where {T}
     getine(p)
 end
 
 function Polyhedra.vrepiscomputed(p::CDDPolyhedron)
-    !isnull(p.ext)
+    p.ext !== nothing
 end
-function Polyhedra.vrep(p::CDDPolyhedron{N, T}) where {N, T}
+function Polyhedra.vrep(p::CDDPolyhedron{T}) where {T}
     getext(p)
 end
 
 
 Polyhedra.supportselimination(p::CDDPolyhedron, ::FourierMotzkin) = true
-function Polyhedra.eliminate(p::CDDPolyhedron{N, T}, delset, ::FourierMotzkin) where {N, T}
+function Polyhedra.eliminate(p::CDDPolyhedron{T}, delset, ::FourierMotzkin) where {T}
     if iszero(length(delset))
         p
     else
@@ -171,15 +172,15 @@ function Polyhedra.eliminate(p::CDDPolyhedron{N, T}, delset, ::FourierMotzkin) w
             end
             ine = fourierelimination(ine)
         end
-        CDDPolyhedron{N-length(delset), T}(ine)
+        CDDPolyhedron{T}(ine)
     end
 end
 Polyhedra.supportselimination(p::CDDPolyhedron, ::BlockElimination) = true
-function Polyhedra.eliminate(p::CDDPolyhedron{N, T}, delset, ::BlockElimination) where {N, T}
+function Polyhedra.eliminate(p::CDDPolyhedron{T}, delset, ::BlockElimination) where {T}
     if iszero(length(delset))
         p
     else
-        CDDPolyhedron{N-length(delset), T}(blockelimination(getine(p), delset))
+        CDDPolyhedron{T}(blockelimination(getine(p), delset))
     end
 end
 
@@ -248,20 +249,20 @@ function Polyhedra.removevredundancy!(p::CDDPolyhedron)
     end
 end
 
-Base.intersect!(p::CDDPolyhedron{N}, h::HRepElement{N}) where N = intersect!(p, intersect(h))
-function Base.intersect!(p::CDDPolyhedron{N}, ine::HRepresentation{N}) where N
+Base.intersect!(p::CDDPolyhedron, h::HRepElement) = intersect!(p, intersect(h))
+function Base.intersect!(p::CDDPolyhedron, ine::HRepresentation)
     updateine!(p, matrixappend(getine(p), ine))
     #push!(getpoly(p, true), ine) # too slow because it computes double description
     #updatepoly!(p, getpoly(p)) # invalidate others
 end
-Polyhedra.convexhull!(p::CDDPolyhedron{N}, v::VRepElement{N}) where N = convexhull!(p, convexhull(v))
-function Polyhedra.convexhull!(p::CDDPolyhedron{N}, ext::VRepresentation{N}) where N
+Polyhedra.convexhull!(p::CDDPolyhedron, v::VRepElement) = convexhull!(p, convexhull(v))
+function Polyhedra.convexhull!(p::CDDPolyhedron, ext::VRepresentation)
     updateext!(p, matrixappend(getext(p), ext))
     #push!(getpoly(p, false), ext) # too slow because it computes double description
     #updatepoly!(p, getpoly(p)) # invalidate others
 end
 
-function Polyhedra.default_solver(p::CDDPolyhedron{N, T}) where {N, T}
+function Polyhedra.default_solver(p::CDDPolyhedron{T}) where {T}
     CDDSolver(exact = T == Rational{BigInt})
 end
 _getrepfor(p::CDDPolyhedron, ::Polyhedra.HIndex) = getine(p)
@@ -292,8 +293,8 @@ function getvredundantindices(p::CDDPolyhedron)
     redundantrows(getext(p))
 end
 
-# type CDDLPPolyhedron{N, T} <: LPPolyhedron{N, T}
-#   ine::CDDInequalityMatrix{N}
+# type CDDLPPolyhedron{T} <: LPPolyhedron{T}
+#   ine::CDDInequalityMatrix
 #   has_objective::Bool
 #
 #   objval
@@ -301,8 +302,8 @@ end
 #   status
 # end
 #
-# function LinearQuadraticModel{N, T}(p::CDDPolyhedron{N, T})
-#   CDDLPPolyhedron{N, T}(getine(p), false, nothing, nothing, nothing)
+# function LinearQuadraticModel{T}(p::CDDPolyhedron{T})
+#   CDDLPPolyhedron{T}(getine(p), false, nothing, nothing, nothing)
 # end
 # function loadproblem!(lpm::CDDLPPolyhedron, obj, sense)
 #   if sum(abs(obj)) != 0

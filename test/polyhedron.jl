@@ -1,4 +1,5 @@
-const polyhedra_test = joinpath(Pkg.dir("Polyhedra"), "test")
+import Polyhedra
+const polyhedra_test = joinpath(dirname(dirname(pathof(Polyhedra))), "test")
 
 include(joinpath(polyhedra_test, "utils.jl"))
 include(joinpath(polyhedra_test, "polyhedra.jl"))

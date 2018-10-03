@@ -15,7 +15,7 @@ cddname = "cddlib-$cddlib_commit"
 #libgmpdev = library_dependency("libgmp-dev", aliases=["libgmp"])
 
 #GMP
-@static if is_linux()
+@static if Sys.islinux()
   const has_apt = try success(`apt-get -v`) catch e false end
   const has_yum = try success(`yum --version`) catch e false end
   const has_pacman = try success(`pacman -Qq`) catch e false end
@@ -33,11 +33,11 @@ cddname = "cddlib-$cddlib_commit"
     println("\$ sudo $pkgman install $pkgname")
   end
 end
-@static if is_apple()
+@static if Sys.isapple()
     using Homebrew
     Homebrew.add("gmp")
 end
-@static if is_windows()
+@static if Sys.iswindows()
     using WinRPM
     #libgmp = library_dependency("libgmp", aliases=["libgmp-10"])
     #provides(WinRPM.RPM, "libgmp10", [libgmp], os = :Windows)
@@ -48,10 +48,10 @@ end
 
 official_repo = "ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/$cddname.tar.gz"
 forked_repo = "https://github.com/JuliaPolyhedra/cddlib/archive/$cddlib_commit.zip"
-@static if is_unix()
+@static if Sys.isunix()
     libcdd = library_dependency("libcddgmp", aliases=["libcdd-$cddlib_commit", "libcddgmp-0"])#, depends=[libgmpdev])
 end
-@static if is_windows()
+@static if Sys.iswindows()
     libcdd = library_dependency("libcddgmp", aliases=["libcddgmp-0"]) #, depends=[libgmp])
     using WinRPM
     push!(WinRPM.sources, "https://cache.julialang.org/http://download.opensuse.org/repositories/home:/blegat:/branches:/windows:/mingw:/win32/openSUSE_Leap_42.2")
@@ -69,7 +69,7 @@ libsrcgmp_dir = joinpath(src_dir, "lib-src-gmp")
 
 includedirs = AbstractString[libsrc_dir, libsrcgmp_dir]
 targetdirs = AbstractString["lib-src-gmp/libcddgmp.la","lib-src-gmp/.libs/libcddgmp.la"]
-@static if is_apple()
+@static if Sys.isapple()
     homebrew_includedir = joinpath(Homebrew.brew_prefix, "include")
     configureopts = AbstractString["CPPFLAGS=-DGMPRATIONAL -I$(libsrc_dir) -I$(libsrcgmp_dir) -I$(homebrew_includedir)"]
     homebrew_libdir = joinpath(Homebrew.brew_prefix, "lib")
