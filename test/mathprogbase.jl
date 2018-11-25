@@ -20,3 +20,21 @@ linprogsolvertest(CDDSolver(; solver_type=:DualSimplex, exact=true))
 
 linprogsolvertest(CDDSolver(; solver_type=:CrissCross))
 linprogsolvertest(CDDSolver(; solver_type=:CrissCross, exact=true))
+
+# Issue #31
+@testset "CDDSolver: exact solution" begin
+    A = [7//3 1//3]
+    sense = '<'
+    b = 1//2
+    c = [-1//1, 0]
+
+    val = -3//14
+    x = [3//14, 0//1]
+
+    for solver_type in [:DualSimplex, :CrissCross]
+        lp_solver = CDDSolver(solver_type=solver_type, exact=true)
+        sol = MathProgBase.linprog(c, A, '<', b, lp_solver)
+        @test sol.objval == val
+        @test sol.sol == x
+    end
+end

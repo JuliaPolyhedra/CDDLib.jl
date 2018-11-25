@@ -1,3 +1,5 @@
+using SparseArrays
+
 export CDDPolyhedraModel, CDDSolver
 
 mutable struct CDDPolyhedraModel <: Polyhedra.AbstractPolyhedraModel
@@ -29,6 +31,12 @@ end
 function Polyhedra.PolyhedraModel(s::CDDSolver)
     CDDPolyhedraModel(s.solver_type, s.exact, nothing, :Undefined, 0, [], [], [], [])
 end
+
+function Polyhedra.PolyhedraToLPQPBridge(lpm::CDDPolyhedraModel)
+    T = lpm.exact ? Rational{BigInt} : Float64
+    Polyhedra.PolyhedraToLPQPBridge(lpm, sparse(Int[],Int[],T[]), T[], T[], T[], T[], T[], :Min, nothing, nothing)
+end
+
 MPB.LinearQuadraticModel(s::CDDSolver) = Polyhedra.PolyhedraToLPQPBridge(Polyhedra.PolyhedraModel(s))
 
 function MPB.loadproblem!(lpm::CDDPolyhedraModel, rep::HRep, obj, sense)
