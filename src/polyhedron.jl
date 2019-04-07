@@ -260,12 +260,12 @@ function Polyhedra.convexhull!(p::Polyhedron, ext::VRepresentation)
     #updatepoly!(p, getpoly(p)) # invalidate others
 end
 
-function Polyhedra.default_solver(p::Polyhedron{T}) where {T}
-    CDDSolver(exact = T == Rational{BigInt})
+function Polyhedra.default_solver(p::Polyhedron{S}; T=S) where {S}
+    return with_optimizer(Optimizer{T})
 end
 _getrepfor(p::Polyhedron, ::Polyhedra.HIndex) = getine(p)
 _getrepfor(p::Polyhedron, ::Polyhedra.VIndex) = getext(p)
-function Polyhedra.isredundant(p::Polyhedron, idx::Polyhedra.HIndex; strongly=false, cert=false, solver=Polyhedra.solver(p))
+function Polyhedra.isredundant(p::Polyhedron, idx::Polyhedra.HIndex; strongly=false, cert=false, solver=nothing)
     f = strongly ? sredundant : redundant
     ans = f(_getrepfor(p, idx), idx.value)
     if cert
@@ -276,12 +276,14 @@ function Polyhedra.isredundant(p::Polyhedron, idx::Polyhedra.HIndex; strongly=fa
 end
 
 # Implementation of Polyhedron's optional interface
-function Base.isempty(p::Polyhedron, solver::CDDSolver)
+# TODO use the following once OptimizerFactory is typed
+#function Base.isempty(p::Polyhedron{T}, solver::JuMP.OptimizerFactory{typeof(Optimizer{T})}) where T
+function Base.isempty(p::Polyhedron)
     lp = matrix2feasibility(getine(p))
     lpsolve(lp)
     # It is impossible to be unbounded since there is no objective
     # Note that `status` would also work
-    simplestatus(copylpsolution(lp)) != :Optimal
+    return MOI.get(copylpsolution(lp), MOI.TerminationStatus()) != MOI.OPTIMAL
 end
 
 function gethredundantindices(p::Polyhedron)

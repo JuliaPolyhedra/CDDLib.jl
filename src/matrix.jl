@@ -248,9 +248,9 @@ function isaninequalityrepresentation(matrix::CDDInequalityMatrix)
     true
 end
 
-function setobjective(matrix::CDDInequalityMatrix{T}, c, sense) where {T}
-    dd_setmatrixobjective(matrix.matrix, sense == :Max ? dd_LPmax : dd_LPmin)
-    obj = [zero(T); Vector{T}(c)]
+function setobjective(matrix::CDDInequalityMatrix{T}, c, max_sense) where {T}
+    dd_setmatrixobjective(matrix.matrix, max_sense ? dd_LPmax : dd_LPmin)
+    obj = [zero(T); convert(Vector{T}, c)]
     dd_copyArow(unsafe_load(matrix.matrix).rowvec, obj)
 end
 

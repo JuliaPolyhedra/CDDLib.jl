@@ -4,7 +4,6 @@ os:
   - linux
   - osx
 julia:
-  - 0.7
   - 1.0
   - 1.1
 addons:
@@ -12,6 +11,8 @@ addons:
     - libgmp-dev
 notifications:
   email: false
+before_script:
+  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Polyhedra", rev="master"))'
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("CDDLib")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'

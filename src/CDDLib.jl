@@ -1,5 +1,3 @@
-__precompile__()
-
 module CDDLib
 
 using LinearAlgebra
@@ -41,23 +39,17 @@ end
 import Base.convert, Base.push!, Base.eltype, Base.copy
 
 include("cddtypes.jl")
-
 include("error.jl")
-
 include("mytype.jl")
-
 include("settype.jl")
 
 include("matrix.jl")
-
 include("polyhedra.jl")
-
 include("operations.jl")
-
 include("lp.jl")
 
-include("mathprogbase.jl")
-
+using JuMP
+include("MOI_wrapper.jl")
 include("polyhedron.jl")
 
 end # module
