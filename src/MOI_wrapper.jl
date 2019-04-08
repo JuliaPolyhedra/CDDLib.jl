@@ -67,7 +67,14 @@ function MOI.optimize!(lpm::Optimizer{T}) where T
         lpm.feasible_set = lpm.rep
     end
     prob = convert(CDDInequalityMatrix{T, mytype(T)}, lpm.feasible_set)
-    setobjective(prob, lpm.objective_func, lpm.objective_sense == MOI.MAX_SENSE)
+    if lpm.objective_sense == MOI.FEASIBILITY_SENSE
+        @assert lpm.objective_func === nothing
+        # Otherwise CDD throws the error "No LP objective"
+        setobjective(prob, zeros(T, fulldim(lpm.feasible_set)), true)
+    else
+        @assert lpm.objective_func !== nothing
+        setobjective(prob, lpm.objective_func, lpm.objective_sense == MOI.MAX_SENSE)
+    end
     lp = matrix2lp(prob)
     lpsolve(lp, lpm.solver_type)
     lpm.sol = copylpsolution(lp)
@@ -94,7 +101,11 @@ end
 function MOI.get(lpm::Optimizer,
                  attr::Union{MOI.RawStatusString,
                              MOI.TerminationStatus})
-    return MOI.get(lpm.sol, attr)
+    if lpm.sol === nothing
+        return MOI.OPTIMIZE_NOT_CALLED
+    else
+        return MOI.get(lpm.sol, attr)
+    end
 end
 
 function MOI.get(sol::CDDLPSolution{Cdouble}, ::MOI.ObjectiveValue)
@@ -114,9 +125,10 @@ function MOI.get(lpm::Optimizer, ::MOI.ResultCount)
 end
 
 function MOI.get(lpm::Optimizer, ::MOI.PrimalStatus)
-    if lpm.status == MOI.OPTIMAL
+    term = MOI.get(lpm, MOI.TerminationStatus())
+    if term == MOI.OPTIMAL
         return MOI.FEASIBLE_POINT
-    elseif lpm.status == MOI.DUAL_INFEASIBLE
+    elseif term == MOI.DUAL_INFEASIBLE
         return MOI.INFEASIBILITY_CERTIFICATE
     else
         return MOI.NO_SOLUTION
