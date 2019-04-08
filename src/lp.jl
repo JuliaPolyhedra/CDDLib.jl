@@ -1,6 +1,3 @@
-import MathProgBase
-const MPB = MathProgBase.SolverInterface
-
 mutable struct Cdd_LPSolutionData{T<:MyType}
     filename::Cdd_DataFileType
     objective::Cdd_LPObjectiveType
@@ -56,38 +53,20 @@ function myfree(sol::CDDLPSolution)
     dd_freelpsolution(sol.sol)
 end
 
-function MPB.status(sol::CDDLPSolution)
-    [:Undecided, :Optimal, :Inconsistent,
-     :DualInconsistent, :StructInconsistent, :StructDualInconsistent,
-     :Unbounded, :DualUnbounded][unsafe_load(sol.sol).LPS+1]
-end
-function simplestatus(sol::CDDLPSolution)
-    [:Undecided, :Optimal, :Infeasible,
-     :Unbounded, :Infeasible, :Unbounded,
-     :Unbounded, :Infeasible][unsafe_load(sol.sol).LPS+1]
-end
-
-function MPB.getobjval(sol::CDDLPSolution{GMPRational})
-    convert(Rational{Int}, unsafe_load(sol.sol).optvalue)
-end
-function MPB.getobjval(sol::CDDLPSolution{Cdouble})
-    unsafe_load(sol.sol).optvalue
-end
-
-function MPB.getsolution(sol::CDDLPSolution{GMPRational})
+function getsolution(sol::CDDLPSolution{GMPRational})
     soldata = unsafe_load(sol.sol)
     solutiontmp = myconvert(Array, soldata.sol, soldata.d)
     solution = Array{Rational{BigInt}}(solutiontmp)[2:end]
     myfree(solutiontmp)
     solution
 end
-function MPB.getsolution(sol::CDDLPSolution{Cdouble})
+function getsolution(sol::CDDLPSolution{Cdouble})
     soldata = unsafe_load(sol.sol)
     solutiontmp = myconvert(Array, soldata.sol, soldata.d)
     solutiontmp[2:end]
 end
 
-function MPB.getconstrduals(sol::CDDLPSolution{GMPRational})
+function getconstrduals(sol::CDDLPSolution{GMPRational})
     soldata = unsafe_load(sol.sol)
     # -1 because there is the objective
     nbindex = myconvert(Array, soldata.nbindex, soldata.d+1)
@@ -101,7 +80,7 @@ function MPB.getconstrduals(sol::CDDLPSolution{GMPRational})
     myfree(dsol)
     dual
 end
-function MPB.getconstrduals(sol::CDDLPSolution{Cdouble})
+function getconstrduals(sol::CDDLPSolution{Cdouble})
     soldata = unsafe_load(sol.sol)
     # -1 because there is the objective
     nbindex = myconvert(Array, soldata.nbindex, soldata.d+1)
