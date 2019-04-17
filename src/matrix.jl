@@ -212,26 +212,36 @@ function extractrow(ine::CDDInequalityMatrix, i)
     b = extractrow(mat, i)
     β = b[1]
     a = -b[2:end]
-    a, β
+    return a, β
 end
 function extractrow(ext::CDDGeneratorMatrix{T}, i) where {T}
     if ext.cone && i == nvreps(ext)
         a = Polyhedra.origin(Polyhedra.vvectortype(ext), fulldim(ext))
     else
         mat = unsafe_load(ext.matrix)
-        b = extractrow(mat, i)
-        ispoint = b[1]
-        @assert ispoint == zero(T) || ispoint == one(T)
-        a = b[2:end]
+        row = extractrow(mat, i)
+        a = row[2:end]
     end
-    (a,) # Needs to be a tuple, see Base.get(::CDDMatrix, ...)
+    return (a,) # Needs to be a tuple, see Base.get(::CDDMatrix, ...)
+end
+function _row_is_point(row::Vector)
+    is_point = row[1]
+    if iszero(row[1])
+        return false
+    elseif isone(row[1])
+        return true
+    elseif abs(row[1]) < 1e-10
+        # Close to zero so we will assume it is zero.
+        # See https://github.com/JuliaPolyhedra/CDDLib.jl/issues/38
+        return false
+    else
+        error("The first entry of the row of a CDD V-representation should either be 0 if the rest of the row is a ray or 1 if it is a point but it is `$(b[1])`, please report this.")
+    end
 end
 function isrowpoint(matrix::Ptr{Cdd_MatrixData{S}}, i, ::Type{T}) where {S, T}
     mat = unsafe_load(matrix)
     b = extractrow(mat, i)
-    ispoint = b[1]
-    @assert ispoint == zero(T) || ispoint == one(T) # FIXME should we use S ?
-    ispoint == one(T)
+    return _row_is_point(b)
 end
 function isrowpoint(ext::CDDGeneratorMatrix{T}, i) where {T}
     (ext.cone && i == nvreps(ext)) || isrowpoint(ext.matrix, i, T)
