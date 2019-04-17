@@ -1,0 +1,29 @@
+name = "CDDLib"
+uuid = "3391f64e-dcde-5f30-b752-e11513730f60"
+repo = "https://github.com/JuliaPolyhedra/CDDLib.jl.git"
+version = "0.4.1"
+
+[deps]
+BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
+Homebrew = "d9be37ee-ecc9-5288-90f1-b9ca67657a75"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Polyhedra = "67491407-f73d-577b-9b50-8179a7c68029"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+WinRPM = "c17dfb99-b4f7-5aad-8812-456da1ad7187"
+
+[compat]
+JuMP = "0.19"
+Polyhedra = "0.5"
+julia = "1"
+
+[extras]
+Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Combinatorics", "LinearAlgebra", "Test", "JuMP"]
