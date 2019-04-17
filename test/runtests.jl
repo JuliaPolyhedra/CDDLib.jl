@@ -1,6 +1,7 @@
-using CDDLib
-using Polyhedra
 using Test
+using CDDLib
+
+include("polyhedral_function.jl")
 
 using JuMP
 lpsolver = tuple()
