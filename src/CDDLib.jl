@@ -2,13 +2,15 @@ module CDDLib
 
 using LinearAlgebra
 using BinDeps
-using Polyhedra
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
     include("../deps/deps.jl")
 else
     error("CDDLib not properly installed. Please run Pkg.build(\"CDDLib\")")
 end
+
+import Reexport
+Reexport.@reexport using Polyhedra
 
 macro dd_ccall(f, args...)
     quote
