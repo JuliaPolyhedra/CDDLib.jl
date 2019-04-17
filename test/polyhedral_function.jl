@@ -1,4 +1,5 @@
 using Test
+using Polyhedra
 using CDDLib
 
 @testset "Polyhedral Function #38" begin

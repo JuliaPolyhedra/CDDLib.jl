@@ -1,4 +1,5 @@
 using Test
+using Polyhedra
 using CDDLib
 
 include("polyhedral_function.jl")
