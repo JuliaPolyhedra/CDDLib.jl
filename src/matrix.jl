@@ -235,7 +235,7 @@ function _row_is_point(row::Vector)
         # See https://github.com/JuliaPolyhedra/CDDLib.jl/issues/38
         return false
     else
-        error("The first entry of the row of a CDD V-representation should either be 0 if the rest of the row is a ray or 1 if it is a point but it is `$(b[1])`, please report this.")
+        error("The first entry of the row of a CDD V-representation should either be 0 if the rest of the row is a ray or 1 if it is a point but it is `$(row[1])`, please report this.")
     end
 end
 function isrowpoint(matrix::Ptr{Cdd_MatrixData{S}}, i, ::Type{T}) where {S, T}
