@@ -230,7 +230,7 @@ function _row_is_point(row::Vector)
         return false
     elseif isone(row[1])
         return true
-    elseif abs(row[1]) < 1e-10
+    elseif abs(row[1]) < 1e-9
         # Close to zero so we will assume it is zero.
         # See https://github.com/JuliaPolyhedra/CDDLib.jl/issues/38
         return false
