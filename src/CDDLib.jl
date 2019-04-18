@@ -9,8 +9,7 @@ else
     error("CDDLib not properly installed. Please run Pkg.build(\"CDDLib\")")
 end
 
-import Reexport
-Reexport.@reexport using Polyhedra
+using Polyhedra
 
 macro dd_ccall(f, args...)
     quote
