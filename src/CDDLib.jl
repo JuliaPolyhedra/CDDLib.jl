@@ -13,14 +13,14 @@ using Polyhedra
 
 macro dd_ccall(f, args...)
     quote
-        ret = ccall(($"dd_$f", libcdd), $(map(esc,args)...))
+        ret = ccall(($"dd_$f", libcddgmp), $(map(esc,args)...))
         ret
     end
 end
 
 macro ddf_ccall(f, args...)
     quote
-        ret = ccall(($"ddf_$f", libcdd), $(map(esc,args)...))
+        ret = ccall(($"ddf_$f", libcddgmp), $(map(esc,args)...))
         ret
     end
 end
@@ -28,7 +28,7 @@ end
 
 macro cdd_ccall(f, args...)
     quote
-        ret = ccall(($"$f", libcdd), $(map(esc,args)...))
+        ret = ccall(($"$f", libcddgmp), $(map(esc,args)...))
         ret
     end
 end
