@@ -8,6 +8,9 @@ using Polyhedra
 using CDDLib
 
 @testset "Continuous Linear problems with CDDLib.Optimizer" begin
+    @testset "coefficient_type $T" for T in [Rational{BigInt}, Float64]
+        @test Polyhedra.coefficient_type(CDDLib.Optimizer{T}()) == T
+    end
     optimizer = CDDLib.Optimizer{Float64}()
     @testset "SolverName" begin
         @test MOI.get(optimizer, MOI.SolverName()) == "CDD"

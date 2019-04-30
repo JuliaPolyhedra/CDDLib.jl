@@ -32,7 +32,7 @@ mutable struct Optimizer{T} <: Polyhedra.AbstractPolyhedraOptimizer{T}
     end
 end
 
-coefficient_type(::Optimizer{T}) where {T} = T
+Polyhedra.coefficient_type(::Optimizer{T}) where {T} = T
 MOI.get(::Optimizer, ::MOI.SolverName) = "CDD"
 
 function MOI.empty!(lpm::Optimizer{T}) where T
