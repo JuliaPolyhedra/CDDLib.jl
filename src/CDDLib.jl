@@ -1,7 +1,6 @@
 module CDDLib
 
 using LinearAlgebra
-using BinDeps
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
     include("../deps/deps.jl")
