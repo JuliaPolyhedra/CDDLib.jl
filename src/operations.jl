@@ -103,7 +103,7 @@ function redundantrows(repr::Representation)
     redundantrows(CDDMatrix(repr))
 end
 
-# Strictly redundant
+# Strongly redundant
 function dd_sredundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
     err = Ref{Cdd_ErrorType}(0)
     certificate = Vector{Cdouble1}(undef, len)
