@@ -41,6 +41,7 @@ end
 # trying to install is not itself installed) then load it up!
 if unsatisfied || !isinstalled(dl_info...; prefix=prefix)
     # Download and install binaries
+    evalfile("build_GMP.v6.1.2.jl")  # We do not check for already installed GMP libraries
     install(dl_info...; prefix=prefix, force=true, verbose=verbose)
 end
 
