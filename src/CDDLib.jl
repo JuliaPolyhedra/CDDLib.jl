@@ -33,6 +33,7 @@ macro cdd_ccall(f, args...)
 end
 
 function __init__()
+    check_deps()
     @dd_ccall set_global_constants Nothing ()
 end
 
