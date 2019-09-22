@@ -33,7 +33,7 @@ function dd_copyArow(acopy::Cdd_Arow{GMPRational}, a::Vector{Rational{BigInt}})
 end
 
 function dd_copyArow(acopy::Cdd_Arow{T}, a::AbstractVector) where T
-    return dd_copyArow(acopy, convert(Vector{T}, a)) # e.g. for sparse a
+    return dd_copyArow(acopy, convert(Vector{polytype(T)}, a)) # e.g. for sparse a
 end
 
 function dd_setmatrixobjective(matrix::Ptr{Cdd_MatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
