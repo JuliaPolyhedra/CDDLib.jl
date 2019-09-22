@@ -32,7 +32,9 @@ function dd_copyArow(acopy::Cdd_Arow{GMPRational}, a::Vector{Rational{BigInt}})
     myfree(b)
 end
 
-dd_copyArow(acopy::Cdd_Arow, a::AbstractVector) = dd_copyArow(acopy, collect(a)) # e.g. for sparse a
+function dd_copyArow(acopy::Cdd_Arow{T}, a::AbstractVector) where T
+    return dd_copyArow(acopy, convert(Vector{T}, a)) # e.g. for sparse a
+end
 
 function dd_setmatrixobjective(matrix::Ptr{Cdd_MatrixData{Cdouble}}, objective::Cdd_LPObjectiveType)
     @ddf_ccall SetMatrixObjective Nothing (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_LPObjectiveType) matrix objective
