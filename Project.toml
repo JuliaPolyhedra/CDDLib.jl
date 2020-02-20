@@ -1,7 +1,7 @@
 name = "CDDLib"
 uuid = "3391f64e-dcde-5f30-b752-e11513730f60"
 repo = "https://github.com/JuliaPolyhedra/CDDLib.jl.git"
-version = "0.5.3"
+version = "0.6.0"
 
 [deps]
 BinaryProvider = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
@@ -13,10 +13,10 @@ Polyhedra = "67491407-f73d-577b-9b50-8179a7c68029"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-BinaryProvider = ">= 0.3"
-JuMP = "0.20"
+BinaryProvider = "0.3, 0.4, 0.5"
+JuMP = "0.21"
 MathOptInterface = "0.9.3"
-Polyhedra = "0.5.4"
+Polyhedra = "0.6"
 julia = "1"
 
 [extras]

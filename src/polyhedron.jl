@@ -261,7 +261,7 @@ function Polyhedra.convexhull!(p::Polyhedron, ext::VRepresentation)
 end
 
 function Polyhedra.default_solver(p::Polyhedron{S}; T=S) where {S}
-    return with_optimizer(Optimizer{T})
+    return Optimizer{T}
 end
 _getrepfor(p::Polyhedron, ::Polyhedra.HIndex) = getine(p)
 _getrepfor(p::Polyhedron, ::Polyhedra.VIndex) = getext(p)
