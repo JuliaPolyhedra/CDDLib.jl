@@ -198,7 +198,10 @@ function Polyhedra.eliminate(p::Polyhedron, delset, method::DefaultElimination)
     end
 end
 
-function Polyhedra.detecthlinearity!(p::Polyhedron)
+# FIXME `hchebyshevcenter` needs a floating point solver so it may give
+# `Optimizer{Cdouble}` here for `Polyhedron{Rational{BigInt}}` but we are just
+# going to use `Optimizer{Rational{BigInt}}` instead.
+function Polyhedra.detecthlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}) where T
     if !p.hlinearitydetected
         canonicalizelinearity!(getine(p))
         p.hlinearitydetected = true
@@ -210,7 +213,7 @@ function Polyhedra.detecthlinearity!(p::Polyhedron)
         p.poly = nothing
     end
 end
-function Polyhedra.detectvlinearity!(p::Polyhedron)
+function Polyhedra.detectvlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}) where T
     if !p.vlinearitydetected
         canonicalizelinearity!(getext(p))
         p.vlinearitydetected = true
