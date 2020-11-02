@@ -21,10 +21,10 @@ julia = "1"
 
 [extras]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
-GeometryTypes = "4d00f742-c7ba-57c2-abde-4428a4b178cb"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Combinatorics", "GeometryTypes", "RecipesBase", "StaticArrays"]
+test = ["Test", "Combinatorics", "GeometryBasics", "RecipesBase", "StaticArrays"]
