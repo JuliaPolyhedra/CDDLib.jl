@@ -1,4 +1,4 @@
-error_message = [
+const error_message = [
   "Dimension too large",
   "Improper input format",
   "Negative matrix size",
@@ -15,7 +15,9 @@ error_message = [
   "Row index out of range",
   "Col index out of range",
   "LP cycling",
-  "Numerically inconsistent"]
+  "Numerically inconsistent",
+]
+
 function myerror(err::Cdd_ErrorType)
     if err < 0 || err > 17
         error("This should not happen, please report this bug")
