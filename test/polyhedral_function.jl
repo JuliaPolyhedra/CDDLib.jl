@@ -9,3 +9,10 @@ using CDDLib
     @test nrays(p) == 1
     @test nlines(p) == 0
 end
+@testset "Another tricky one #38" begin
+    pf = HalfSpace([-1.0, 0.0, 0.0], 10.0) ∩ HalfSpace([1.0, 0.0, 0.0], -6.0) ∩ HalfSpace([0.0, -1.0, 0.0], 5.0) ∩ HalfSpace([0.0, 1.0, 0.0], 2.0) ∩ HalfSpace([0.0, 0.0, -1.0], -1.0) ∩ HalfSpace([-0.418649200578628, -0.4999999988700277, -1.0], 0.9397722384772047) ∩ HalfSpace([-0.4659572920302226, -0.4999999971144193, -1.0], 0.9837823697735852)
+    v = vrep(polyhedron(pf, CDDLib.Library()))
+    @test npoints(v) == 7
+    @test nrays(v) == 1
+    @test nlines(v) == 0
+end
