@@ -2,8 +2,8 @@
 
 | **Build Status** | **References to cite** |
 |:----------------:|:----------------------:|
-| [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] | [![DOI][zenodo-img]][zenodo-url] |
-| [![Coveralls branch][coveralls-img]][coveralls-url] [![Codecov branch][codecov-img]][codecov-url] | |
+| [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
+| [![Codecov branch][codecov-img]][codecov-url] | |
 
 CDDLib is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). This module can either be used in a "lower level" using the API of cdd or using the higher level interface of [Polyhedra](https://github.com/JuliaPolyhedra/Polyhedra.jl).
 CDDLib also includes the linear programming solver `CDDLib.Optimizer` which can be used by [JuMP](https://github.com/JuliaOpt/JuMP.jl) through [MathOptInterface](https://github.com/JuliaOpt/MathOptInterface.jl).
@@ -29,12 +29,8 @@ As written in the [README of cddlib](ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/
 > programming problem, i.e. a problem of maximizing and minimizing
 > a linear function over P.
 
-[build-img]: https://travis-ci.org/JuliaPolyhedra/CDDLib.jl.svg?branch=master
-[build-url]: https://travis-ci.org/JuliaPolyhedra/CDDLib.jl
-[winbuild-img]: https://ci.appveyor.com/api/projects/status/s03l5r1o96l9acha?svg=true
-[winbuild-url]: https://ci.appveyor.com/project/JuliaPolyhedra/cddlib-jl
-[coveralls-img]: https://coveralls.io/repos/github/JuliaPolyhedra/CDDLib.jl/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/JuliaPolyhedra/CDDLib.jl?branch=master
+[build-img]: https://github.com/JuliaPolyhedra/CDDLib.jl/workflows/CI/badge.svg?branch=master
+[build-url]: https://github.com/JuliaPolyhedra/CDDLib.jl/actions?query=workflow%3ACI
 [codecov-img]: http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master
 [codecov-url]: http://codecov.io/github/JuliaPolyhedra/CDDLib.jl?branch=master
 
