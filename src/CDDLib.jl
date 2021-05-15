@@ -72,9 +72,13 @@ macro cdd_ccall(f, args...)
     end
 end
 
-if VERSION < v"1.3"
+@static if VERSION < v"1.3"
     function __init__()
         check_deps()
+        @dd_ccall set_global_constants Nothing ()
+    end
+else
+    function __init__()
         @dd_ccall set_global_constants Nothing ()
     end
 end
