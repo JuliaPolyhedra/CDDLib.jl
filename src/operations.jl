@@ -1,8 +1,12 @@
 function dd_inputappend(poly::Ptr{Cdd_PolyhedraData{Cdouble}}, matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    err = Ref{Cdd_ErrorType}(0)
     polyptr = Ref{Ptr{Cdd_PolyhedraData{Cdouble}}}(poly)
-    found = (@ddf_ccall DDInputAppend Cdd_boolean (Ref{Ptr{Cdd_PolyhedraData{Cdouble}}}, Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) polyptr matrix err)
-    myerror(err[])
+    found = @ddf_ccall_error(
+        DDInputAppend,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_PolyhedraData{Cdouble}}}, Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        polyptr,
+        matrix,
+    )
     if !Bool(found)
         println("Double description not found")
     end
@@ -10,10 +14,14 @@ function dd_inputappend(poly::Ptr{Cdd_PolyhedraData{Cdouble}}, matrix::Ptr{Cdd_M
 end
 
 function dd_inputappend(poly::Ptr{Cdd_PolyhedraData{GMPRational}}, matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    err = Ref{Cdd_ErrorType}(0)
     polyptr = Ref{Ptr{Cdd_PolyhedraData{GMPRational}}}(poly)
-    found = (@dd_ccall DDInputAppend Cdd_boolean (Ref{Ptr{Cdd_PolyhedraData{GMPRational}}}, Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) polyptr matrix err)
-    myerror(err[])
+    found = @dd_ccall_error(
+        DDInputAppend,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_PolyhedraData{GMPRational}}}, Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        polyptr,
+        matrix,
+    )
     if !Bool(found)
         println("Double description not found") # FIXME
     end
@@ -56,17 +64,27 @@ end
 
 # Redundant
 function dd_redundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
-    err = Ref{Cdd_ErrorType}(0)
     certificate = Vector{Cdouble}(undef, len)
-    found = (@ddf_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix  i certificate err)
-    myerror(err[])
+    found = @ddf_ccall_error(
+        Redundant,
+        Cdd_boolean,
+        (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}),
+        matrix,
+        i,
+        certificate,
+    )
     (found, certificate)
 end
 function dd_redundant(matrix::Ptr{Cdd_MatrixData{GMPRational}}, i::Cdd_rowrange, len::Int)
-    err = Ref{Cdd_ErrorType}(0)
     certificateGMPRat = zeros(GMPRational, len)
-    found = (@dd_ccall Redundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix i certificateGMPRat err)
-    myerror(err[])
+    found = @dd_ccall_error(
+        Redundant,
+        Cdd_boolean,
+        (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}),
+        matrix,
+        i,
+        certificateGMPRat,
+    )
     certificate = Array{Rational{BigInt}}(certificateGMPRat)
     # myfree(certificateGMPRat)  # disabled due to https://github.com/JuliaPolyhedra/CDDLib.jl/issues/13
     (found, certificate)
@@ -85,16 +103,20 @@ end
 
 # Redundant rows
 function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    err = Ref{Cdd_ErrorType}(0)
-    redundant_list = (@ddf_ccall RedundantRows Ptr{Culong} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    redundant_list
+    return @ddf_ccall_pointer_error(
+        RedundantRows,
+        Ptr{Culong},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    err = Ref{Cdd_ErrorType}(0)
-    redundant_list = (@dd_ccall RedundantRows Ptr{Culong} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    redundant_list
+    return @dd_ccall_pointer_error(
+        RedundantRows,
+        Ptr{Culong},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function redundantrows(matrix::CDDMatrix)
     Base.convert(BitSet, CDDSet(dd_redundantrows(matrix.matrix), length(matrix)))
@@ -105,17 +127,27 @@ end
 
 # Strongly redundant
 function dd_sredundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
-    err = Ref{Cdd_ErrorType}(0)
     certificate = Vector{Cdouble1}(undef, len)
-    found = (@ddf_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}) matrix  i certificate err)
-    myerror(err[])
+    found = @ddf_ccall_error(
+        SRedundant,
+        Cdd_boolean,
+        (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_rowrange, Ptr{Cdouble}, Ref{Cdd_ErrorType}),
+        matrix,
+        i,
+        certificate,
+    )
     (found, certificate)
 end
 function dd_sredundant(matrix::Ptr{Cdd_MatrixData{GMPRational}}, i::Cdd_rowrange, len::Int)
-    err = Ref{Cdd_ErrorType}(0)
     certificateGMPRat = zeros(GMPRational, len)
-    found = (@dd_ccall SRedundant Cdd_boolean (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}) matrix i certificateGMPRat err)
-    myerror(err[])
+    found = @dd_ccall_error(
+        SRedundant,
+        Cdd_boolean,
+        (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_rowrange, Ptr{GMPRational}, Ref{Cdd_ErrorType}),
+        matrix,
+        i,
+        certificateGMPRat,
+    )
     certificate = Array{Rational{BigInt}}(certificateGMPRat)
     # myfree(certificateGMPRat)  # disabled due to https://github.com/JuliaPolyhedra/CDDLib.jl/issues/13
     (found, certificate)
@@ -137,9 +169,15 @@ function dd_matrixcanonicalize(matrix::Ptr{Cdd_MatrixData{Cdouble}})
     impl_linset = Ref{Cdd_rowset}(0)
     redset = Ref{Cdd_rowset}(0)
     newpos = Ref{Cdd_rowindex}(0)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@ddf_ccall MatrixCanonicalize Cdd_boolean (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset redset newpos err)
-    myerror(err[])
+    found = @ddf_ccall_error(
+        MatrixCanonicalize,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}),
+        matptr,
+        impl_linset,
+        redset,
+        newpos,
+    )
     (found, matptr[], impl_linset[], redset[], newpos[])
 end
 function dd_matrixcanonicalize(matrix::Ptr{Cdd_MatrixData{GMPRational}})
@@ -147,9 +185,15 @@ function dd_matrixcanonicalize(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     impl_linset = Ref{Cdd_rowset}(0)
     redset = Ref{Cdd_rowset}(0)
     newpos = Ref{Cdd_rowindex}(0)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@dd_ccall MatrixCanonicalize Cdd_boolean (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset redset newpos err)
-    myerror(err[])
+    found = @dd_ccall_error(
+        MatrixCanonicalize,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}),
+        matptr,
+        impl_linset,
+        redset,
+        newpos,
+    )
     (found, matptr[], impl_linset[], redset[], newpos[])
 end
 function canonicalize!(matrix::CDDMatrix)
@@ -166,9 +210,14 @@ function dd_matrixcanonicalizelinearity(matrix::Ptr{Cdd_MatrixData{Cdouble}})
     impl_linset = Ref{Cdd_rowset}(0)
     redset = Ref{Cdd_rowset}(0)
     newpos = Ref{Cdd_rowindex}(0)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@ddf_ccall MatrixCanonicalizeLinearity Cdd_boolean (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset newpos err)
-    myerror(err[])
+    found = @ddf_ccall_error(
+        MatrixCanonicalizeLinearity,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}),
+        matptr,
+        impl_linset,
+        newpos,
+    )
     (found, matptr[], impl_linset[], newpos[])
 end
 function dd_matrixcanonicalizelinearity(matrix::Ptr{Cdd_MatrixData{GMPRational}})
@@ -176,9 +225,14 @@ function dd_matrixcanonicalizelinearity(matrix::Ptr{Cdd_MatrixData{GMPRational}}
     impl_linset = Ref{Cdd_rowset}(0)
     redset = Ref{Cdd_rowset}(0)
     newpos = Ref{Cdd_rowindex}(0)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@dd_ccall MatrixCanonicalizeLinearity Cdd_boolean (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr impl_linset newpos err)
-    myerror(err[])
+    found = @dd_ccall_error(
+        MatrixCanonicalizeLinearity,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}),
+        matptr,
+        impl_linset,
+        newpos,
+    )
     (found, matptr[], impl_linset[], newpos[])
 end
 function canonicalizelinearity!(matrix::CDDMatrix)
@@ -193,18 +247,28 @@ function dd_matrixredundancyremove(matrix::Ptr{Cdd_MatrixData{Cdouble}})
     matptr = Ref{Ptr{Cdd_MatrixData{Cdouble}}}(matrix)
     redset = Ref{Cdd_rowset}(0)
     newpos = Ref{Cdd_rowindex}(0)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@ddf_ccall MatrixRedundancyRemove Cdd_boolean (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr redset newpos err)
-    myerror(err[])
+    found = @ddf_ccall_error(
+        MatrixRedundancyRemove,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_MatrixData{Cdouble}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}),
+        matptr,
+        redset,
+        newpos,
+    )
     (found, matptr[], redset[], newpos[])
 end
 function dd_matrixredundancyremove(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     matptr = Ref{Ptr{Cdd_MatrixData{GMPRational}}}(matrix)
     redset = Ref{Cdd_rowset}(0)
     newpos = Ref{Cdd_rowindex}(0)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@dd_ccall MatrixRedundancyRemove Cdd_boolean (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}) matptr redset newpos err)
-    myerror(err[])
+    found = @dd_ccall_error(
+        MatrixRedundancyRemove,
+        Cdd_boolean,
+        (Ref{Ptr{Cdd_MatrixData{GMPRational}}}, Ref{Cdd_rowset}, Ref{Cdd_rowindex}, Ref{Cdd_ErrorType}),
+        matptr,
+        redset,
+        newpos,
+    )
     (found, matptr[], redset[], newpos[])
 end
 function redundancyremove!(matrix::CDDMatrix)
@@ -218,15 +282,20 @@ end
 # Fourier Elimination
 
 function dd_fourierelimination(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    err = Ref{Cdd_ErrorType}(0)
-    newmatrix = (@ddf_ccall FourierElimination Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    newmatrix
+    return @ddf_ccall_pointer_error(
+        FourierElimination,
+        Ptr{Cdd_MatrixData{Cdouble}},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function dd_fourierelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    err = Ref{Cdd_ErrorType}(0)
-    newmatrix = (@dd_ccall FourierElimination Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
+    return @dd_ccall_pointer_error(
+        FourierElimination,
+        Ptr{Cdd_MatrixData{GMPRational}},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
     newmatrix
 end
 function fourierelimination(matrix::CDDInequalityMatrix{T, S}) where {T, S}
@@ -239,16 +308,22 @@ end
 # Block Elimination
 
 function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{Cdouble}}, delset::Cdd_colset)
-    err = Ref{Cdd_ErrorType}(0)
-    newmatrix = (@ddf_ccall BlockElimination Ptr{Cdd_MatrixData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_colset, Ref{Cdd_ErrorType}) matrix delset err)
-    myerror(err[])
-    newmatrix
+    return @ddf_ccall_pointer_error(
+        BlockElimination,
+        Ptr{Cdd_MatrixData{Cdouble}},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Cdd_colset, Ref{Cdd_ErrorType}),
+        matrix,
+        delset,
+    )
 end
 function dd_blockelimination(matrix::Ptr{Cdd_MatrixData{GMPRational}}, delset::Cdd_colset)
-    err = Ref{Cdd_ErrorType}(0)
-    newmatrix = (@dd_ccall BlockElimination Ptr{Cdd_MatrixData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_colset, Ref{Cdd_ErrorType}) matrix delset err)
-    myerror(err[])
-    newmatrix
+    return @dd_ccall_pointer_error(
+        BlockElimination,
+        Ptr{Cdd_MatrixData{GMPRational}},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Cdd_colset, Ref{Cdd_ErrorType}),
+        matrix,
+        delset,
+    )
 end
 function blockelimination(matrix::CDDInequalityMatrix{T, S}, delset=BitSet([fulldim(matrix)])) where {T, S}
     if last(delset) > fulldim(matrix)

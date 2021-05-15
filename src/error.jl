@@ -18,10 +18,16 @@ const error_message = [
   "Numerically inconsistent",
 ]
 
-function myerror(err::Cdd_ErrorType)
+function myerror(func_name::String, err::Cdd_ErrorType)
     if err < 0 || err > 17
-        error("This should not happen, please report this bug")
+        error("$func_name gave an error code of $err which is out of the range of known error code. Pleasre report this by opening an issue at https://github.com/JuliaPolyhedra/CDDLib.jl.")
     elseif err < 17 # 17 means no error
-        error(error_message[err+1])
+        error(func_name, " : ", error_message[err+1])
+    end
+end
+function myerror(func_name::String, ptr::Ptr, err::Cdd_ErrorType)
+    myerror(func_name, err)
+    if ptr == C_NULL
+        error("$func_name returned a NULL pointer but did not provide any error. Please report this by opening an issue at https://github.com/JuliaPolyhedra/CDDLib.jl.")
     end
 end

@@ -48,16 +48,20 @@ mutable struct Cdd_PolyhedraData{T<:MyType}
 end
 
 function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    err = Ref{Cdd_ErrorType}(0)
-    poly = @ddf_ccall DDMatrix2Poly Ptr{Cdd_PolyhedraData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err
-    myerror(err[])
-    poly
+    return @ddf_ccall_pointer_error(
+        DDMatrix2Poly,
+        Ptr{Cdd_PolyhedraData{Cdouble}},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function dd_matrix2poly(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    err = Ref{Cdd_ErrorType}(0)
-    poly = @dd_ccall DDMatrix2Poly Ptr{Cdd_PolyhedraData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err
-    myerror(err[])
-    poly
+    return @dd_ccall_pointer_error(
+        DDMatrix2Poly,
+        Ptr{Cdd_PolyhedraData{GMPRational}},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 
 mutable struct CDDPolyhedra{T<:PolyType, S}
