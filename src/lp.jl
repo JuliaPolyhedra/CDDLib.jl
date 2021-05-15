@@ -183,48 +183,62 @@ function myfree(lp::CDDLP)
 end
 
 function dd_matrix2feasibility(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    err = Ref{Cdd_ErrorType}(0)
-    lp = (@ddf_ccall Matrix2Feasibility Ptr{Cdd_LPData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    lp
+    return @ddf_ccall_pointer_error(
+        Matrix2Feasibility,
+        Ptr{Cdd_LPData{Cdouble}},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function dd_matrix2feasibility(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    err = Ref{Cdd_ErrorType}(0)
-    lp = (@dd_ccall Matrix2Feasibility Ptr{Cdd_LPData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    lp
+    return @dd_ccall_pointer_error(
+        Matrix2Feasibility,
+        Ptr{Cdd_LPData{GMPRational}},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function matrix2feasibility(matrix::CDDInequalityMatrix)
     CDDLP(dd_matrix2feasibility(matrix.matrix))
 end
 
 function dd_matrix2lp(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    err = Ref{Cdd_ErrorType}(0)
-    lp = (@ddf_ccall Matrix2LP Ptr{Cdd_LPData{Cdouble}} (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    lp
+    return @ddf_ccall_pointer_error(
+        Matrix2LP,
+        Ptr{Cdd_LPData{Cdouble}},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function dd_matrix2lp(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    err = Ref{Cdd_ErrorType}(0)
-    lp = (@dd_ccall Matrix2LP Ptr{Cdd_LPData{GMPRational}} (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}) matrix err)
-    myerror(err[])
-    lp
+    return @dd_ccall_pointer_error(
+        Matrix2LP,
+        Ptr{Cdd_LPData{GMPRational}},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
 end
 function matrix2lp(matrix::CDDInequalityMatrix)
     CDDLP(dd_matrix2lp(matrix.matrix))
 end
 
 function dd_lpsolve(lp::Ptr{Cdd_LPData{Cdouble}}, solver::Cdd_LPSolverType)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@ddf_ccall LPSolve Cdd_ErrorType (Ptr{Cdd_LPData{Cdouble}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
-    myerror(err[])
-    found
+    return @ddf_ccall_error(
+        LPSolve,
+        Cdd_ErrorType,
+        (Ptr{Cdd_LPData{Cdouble}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}),
+        lp,
+        solver,
+    )
 end
 function dd_lpsolve(lp::Ptr{Cdd_LPData{GMPRational}}, solver::Cdd_LPSolverType)
-    err = Ref{Cdd_ErrorType}(0)
-    found = (@dd_ccall LPSolve Cdd_ErrorType (Ptr{Cdd_LPData{GMPRational}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}) lp solver err)
-    myerror(err[])
-    found
+    return @dd_ccall_error(
+        LPSolve,
+        Cdd_ErrorType,
+        (Ptr{Cdd_LPData{GMPRational}}, Cdd_LPSolverType, Ref{Cdd_ErrorType}),
+        lp,
+        solver,
+    )
 end
 function lpsolve(lp::CDDLP, solver::Symbol=:DualSimplex)
     found = dd_lpsolve(lp.lp, solver == :DualSimplex ? dd_DualSimplex : dd_CrissCross)
