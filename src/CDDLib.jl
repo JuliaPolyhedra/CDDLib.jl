@@ -2,10 +2,14 @@ module CDDLib
 
 using LinearAlgebra
 
-if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
-    include("../deps/deps.jl")
+if VERSION < v"1.3"
+    if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
+        include("../deps/deps.jl")
+    else
+        error("CDDLib not properly installed. Please run Pkg.build(\"CDDLib\")")
+    end
 else
-    error("CDDLib not properly installed. Please run Pkg.build(\"CDDLib\")")
+    import cddlib_jll: libcddgmp
 end
 
 using Polyhedra
@@ -68,9 +72,15 @@ macro cdd_ccall(f, args...)
     end
 end
 
-function __init__()
-    check_deps()
-    @dd_ccall set_global_constants Nothing ()
+@static if VERSION < v"1.3"
+    function __init__()
+        check_deps()
+        @dd_ccall set_global_constants Nothing ()
+    end
+else
+    function __init__()
+        @dd_ccall set_global_constants Nothing ()
+    end
 end
 
 import Base.convert, Base.push!, Base.eltype, Base.copy
