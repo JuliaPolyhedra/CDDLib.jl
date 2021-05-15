@@ -2,6 +2,7 @@ using Test
 using Polyhedra
 using CDDLib
 
+include("debug_log.jl")
 include("polyhedral_function.jl")
 
 using JuMP

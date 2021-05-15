@@ -60,6 +60,12 @@ using MathOptInterface, CDDLib
 model = CDDLib.Optimizer{Rational{BigInt}}()
 ```
 
+## Debugging
+
+CDD uses two global boolean to enable debugging outputs: `debug` and `log`.
+You can query the value of `debug` (resp. `log`) with `get_debug` (resp. `get_log`)
+and set its value with `set_debug` (resp. `set_log`).
+
 [build-img]: https://github.com/JuliaPolyhedra/CDDLib.jl/workflows/CI/badge.svg?branch=master
 [build-url]: https://github.com/JuliaPolyhedra/CDDLib.jl/actions?query=workflow%3ACI
 [codecov-img]: http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master
