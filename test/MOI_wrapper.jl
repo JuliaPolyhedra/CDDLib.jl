@@ -7,8 +7,7 @@ const MOIB = MOI.Bridges
 using Polyhedra
 using CDDLib
 
-#@testset "MOI wrapper with $T" for T in [Rational{BigInt}, Float64]
-@testset "MOI wrapper with $T" for T in [Float64]
+@testset "MOI wrapper with $T" for T in [Rational{BigInt}, Float64]
     @testset "coefficient_type" begin
         @test Polyhedra.coefficient_type(CDDLib.Optimizer{T}()) == T
     end
