@@ -1,5 +1,8 @@
 using SparseArrays
 
+import MathOptInterface
+const MOI = MathOptInterface
+
 """
     CDDLib.Optimizer{T} <: AbstractPolyhedraOptimizer{T}
 
@@ -68,7 +71,6 @@ function MOI.optimize!(lpm::Optimizer{T}) where T
     end
     prob = convert(CDDInequalityMatrix{T, mytype(T)}, lpm.feasible_set)
     if lpm.objective_sense == MOI.FEASIBILITY_SENSE
-        @assert lpm.objective_func === nothing
         # Otherwise CDD throws the error "No LP objective"
         setobjective(prob, zeros(T, fulldim(lpm.feasible_set)), true)
     else
@@ -112,6 +114,7 @@ function MOI.get(sol::CDDLPSolution{Cdouble}, ::MOI.ObjectiveValue)
     unsafe_load(sol.sol).optvalue
 end
 function MOI.get(lpm::Optimizer, attr::MOI.ObjectiveValue)
+    MOI.check_result_index_bounds(lpm, attr)
     return MOI.get(lpm.sol, attr) + lpm.objective_constant
 end
 
@@ -124,7 +127,10 @@ function MOI.get(lpm::Optimizer, ::MOI.ResultCount)
     end
 end
 
-function MOI.get(lpm::Optimizer, ::MOI.PrimalStatus)
+function MOI.get(lpm::Optimizer, attr::MOI.PrimalStatus)
+    if attr.result_index > MOI.get(lpm, MOI.ResultCount())
+        return MOI.NO_SOLUTION
+    end
     term = MOI.get(lpm, MOI.TerminationStatus())
     if term == MOI.OPTIMAL
         return MOI.FEASIBLE_POINT
@@ -134,14 +140,18 @@ function MOI.get(lpm::Optimizer, ::MOI.PrimalStatus)
         return MOI.NO_SOLUTION
     end
 end
-function MOI.get(lpm::Optimizer, ::MOI.VariablePrimal, vi::MOI.VariableIndex)
+function MOI.get(lpm::Optimizer, attr::MOI.VariablePrimal, vi::MOI.VariableIndex)
+    MOI.check_result_index_bounds(lpm, attr)
     return lpm.solution[vi.value]
 end
 function MOI.get(lpm::Optimizer{T}, attr::MOI.ConstraintPrimal,
                  ci::MOI.ConstraintIndex{MOI.ScalarAffineFunction{T},
                                          <:Union{MOI.EqualTo{T},
                                                  MOI.LessThan{T}}}) where T
+    # TODO remove once https://github.com/jump-dev/MathOptInterface.jl/pull/1684 is merged
+    MOI.check_result_index_bounds(lpm, attr)
     return MOI.Utilities.get_fallback(lpm, attr, ci)
 end
 
 # TODO dual
+MOI.get(::Optimizer, ::MOI.DualStatus) = MOI.NO_SOLUTION
