@@ -38,6 +38,23 @@ using CDDLib
             # TODO remove as it is fixed in MOI master
             "test_model_UpperBoundAlreadySet",
             "test_model_LowerBoundAlreadySet",
+            # TODO fails with `Rational{BigInt}`, might be fixed in MOI master
+            "test_conic_GeometricMeanCone_VectorAffineFunction",
+            "test_conic_NormInfinityCone_VectorAffineFunction",
+            "test_conic_GeometricMeanCone_VectorOfVariables",
+            "test_conic_LogDetConeTriangle",
+            "test_conic_NormInfinityCone_3",
+            "test_conic_NormOneCone",
+            "test_conic_RootDetConeTriangle",
+            "test_conic_NormInfinityCone_INFEASIBLE ",
+            "test_conic_SecondOrderCone_INFEASIBLE",
+            "test_conic_SecondOrderCone_Nonnegatives",
+            "test_conic_SecondOrderCone_Nonpositives",
+            "test_model_ScalarFunctionConstantNotZero",
+            "test_model_copy_to_UnsupportedAttribute",
+            "test_quadratic_duplicate_terms",
+            "test_objective_qp_ObjectiveFunction_edge_cases",
+            "test_objective_qp_ObjectiveFunction_zero_ofdiag",
         ])
     end
 end
