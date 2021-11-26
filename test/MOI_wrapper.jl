@@ -47,6 +47,14 @@ using CDDLib
                 config,
                 # Other tests do not support non-`Float64`
                 include = String["test_linear"],
+                exclude = String[
+                    "test_linear_Indicator",
+                    "test_linear_SOS1",
+                    "test_linear_SOS2",
+                    "test_linear_Semicontinuous",
+                    "test_linear_Semiinteger",
+                    "test_linear_integer",
+                ]
             )
         end
     end
