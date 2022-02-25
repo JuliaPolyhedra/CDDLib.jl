@@ -19,7 +19,48 @@ using CDDLib
         cache = MOIU.UniversalFallback(Polyhedra._MOIModel{T}())
         cached = MOIU.CachingOptimizer(cache, optimizer)
         bridged = MOIB.full_bridge_optimizer(cached, T)
-        config = MOIT.TestConfig{T}(duals=false)
-        MOIT.contlineartest(bridged, config, ["partial_start"])
+        config = MOIT.Config(
+            T,
+            exclude = Any[
+                MOI.ObjectiveBound,
+                MOI.DualObjectiveValue,
+                MOI.ConstraintDual,
+                MOI.SolveTimeSec,
+                MOI.SolverVersion,
+                MOI.VariableBasisStatus,
+                MOI.ConstraintBasisStatus,
+            ]
+        )
+        if T == Float64
+            MOIT.runtests(
+                bridged,
+                config,
+                exclude = String[
+                    # TODO investigate
+                    "test_unbounded_MAX_SENSE",
+                    "test_unbounded_MAX_SENSE_offset",
+                    "test_unbounded_MIN_SENSE",
+                    "test_unbounded_MIN_SENSE_offset",
+                    # TODO Should be fixed in MOI master
+                    "test_model_LowerBoundAlreadySet",
+                    "test_model_UpperBoundAlreadySet",
+                ],
+            )
+        else
+            MOIT.runtests(
+                bridged,
+                config,
+                # Other tests do not support non-`Float64`
+                include = String["test_linear"],
+                exclude = String[
+                    "test_linear_Indicator",
+                    "test_linear_SOS1",
+                    "test_linear_SOS2",
+                    "test_linear_Semicontinuous",
+                    "test_linear_Semiinteger",
+                    "test_linear_integer",
+                ]
+            )
+        end
     end
 end

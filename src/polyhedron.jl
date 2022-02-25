@@ -34,7 +34,8 @@ Polyhedra.FullDim(p::Polyhedron{T}) where {T} = Polyhedra.FullDim_rep(p.ine, p.e
 Polyhedra.library(p::Polyhedron{T}) where {T} = Polyhedra.similar_library(Library(), Polyhedra.FullDim(p), T)
 Polyhedra.hvectortype(::Union{Polyhedron{T}, Type{<:Polyhedron{T}}}) where {T} = Polyhedra.hvectortype(CDDInequalityMatrix{T})
 Polyhedra.vvectortype(::Union{Polyhedron{T}, Type{<:Polyhedron{T}}}) where {T} = Polyhedra.vvectortype(CDDGenerator{T})
-Polyhedra.similar_type(::Type{<:Polyhedron}, ::Polyhedra.FullDim, ::Type{T}) where {T} = Polyhedron{T}
+Polyhedra.similar_type(::Type{<:Polyhedron}, d::Polyhedra.FullDim, ::Type{T}) where {T} = Polyhedra.default_type(d, T)
+Polyhedra.similar_type(::Type{<:Polyhedron}, ::Polyhedra.FullDim, ::Type{T}) where {T<:PolyType} = Polyhedron{T}
 
 Polyhedron(matrix::CDDMatrix{T}) where {T} = Polyhedron{T}(matrix)
 Base.convert(::Type{Polyhedron{T}}, rep::Representation{T}) where {T} = Polyhedron{T}(cddmatrix(T, rep))

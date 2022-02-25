@@ -40,7 +40,6 @@ include("polyhedra.jl")
 include("operations.jl")
 include("lp.jl")
 
-using JuMP
 include("MOI_wrapper.jl")
 include("polyhedron.jl")
 
