@@ -36,9 +36,14 @@ using CDDLib
                 bridged,
                 config,
                 exclude = String[
-                    # TODO remove as it is fixed in MOI master
-                    "test_model_UpperBoundAlreadySet",
+                    # TODO investigate
+                    "test_unbounded_MAX_SENSE",
+                    "test_unbounded_MAX_SENSE_offset",
+                    "test_unbounded_MIN_SENSE",
+                    "test_unbounded_MIN_SENSE_offset",
+                    # TODO Should be fixed in MOI master
                     "test_model_LowerBoundAlreadySet",
+                    "test_model_UpperBoundAlreadySet",
                 ],
             )
         else

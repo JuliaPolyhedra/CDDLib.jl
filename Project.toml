@@ -14,10 +14,10 @@ cddlib_jll = "f07e07eb-5685-515a-97c8-3014f6152feb"
 
 [compat]
 BinaryProvider = "0.3, 0.4, 0.5"
-MathOptInterface = "0.10"
-Polyhedra = "0.6.8"
+MathOptInterface = "1"
+Polyhedra = "0.7"
 cddlib_jll = "=0.94.10"
-julia = "1"
+julia = "1.6"
 
 [extras]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
