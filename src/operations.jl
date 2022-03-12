@@ -62,6 +62,26 @@ function matrixappend(matrix::CDDMatrix{T}, repr::Representation{S}) where {S, T
     matrixappend(matrix, cddmatrix(T, repr))
 end
 
+function dd_matrix2adjacency(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+    return @ddf_ccall_pointer_error(
+        Matrix2Adjacency,
+        Ptr{SetFamily},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
+end
+function dd_matrix2adjacency(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+    return @dd_ccall_pointer_error(
+        Matrix2Adjacency,
+        Ptr{SetFamily},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
+end
+function matrix2adjacency(matrix::CDDMatrix)
+    return convert_free(Vector{BitSet}, dd_matrix2adjacency(matrix.matrix))
+end
+
 # Redundant
 function dd_redundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
     certificate = Vector{Cdouble}(undef, len)
@@ -139,7 +159,7 @@ function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}}; via_shooting
 end
 
 function redundantrows(matrix::CDDMatrix; kws...)
-    Base.convert(BitSet, CDDSet(dd_redundantrows(matrix.matrix; kws...), length(matrix)))
+    convert_free(BitSet, CDDSet(dd_redundantrows(matrix.matrix; kws...), length(matrix)))
 end
 
 function redundantrows(repr::Representation; kws...)
