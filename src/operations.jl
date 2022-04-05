@@ -378,4 +378,4 @@ function blockelimination(ine::HRepresentation, delset=BitSet([fulldim(ine)]))
     blockelimination(Base.convert(CDDInequalityMatrix, ine), delset)
 end
 
-export redundant, redundantrows, sredundant, fourierelimination, blockelimination, canonicalize!, redundancyremove!
+export redundant, redundantrows, sredundant, matrix2adjacency, fourierelimination, blockelimination, canonicalize!, redundancyremove!
