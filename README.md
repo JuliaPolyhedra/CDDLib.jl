@@ -5,9 +5,9 @@
 | [![Build Status][build-img]][build-url] | [![DOI][zenodo-img]][zenodo-url] |
 | [![Codecov branch][codecov-img]][codecov-url] | |
 
-CDDLib is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/). 
+CDDLib is a wrapper for [cdd](https://www.inf.ethz.ch/personal/fukudak/cdd_home/).
 
-This package can either be used in a "lower level" using the API of cdd or using the 
+This package can either be used in a "lower level" using the API of cdd or using the
 higher level interface of [Polyhedra](https://github.com/JuliaPolyhedra/Polyhedra.jl).
 
 ## Problem description
@@ -40,7 +40,7 @@ Pkg.add("CDDLib")
 ```
 
 Building the package will download binaries of [`cddlib`](https://github.com/cddlib/cddlib)
-that are compiled by [cddlibBuilder](https://github.com/JuliaPolyhedra/cddlibBuilder/).
+that are provided by [cddlib_jll.jl](https://github.com/JuliaBinaryWrappers/cddlib_jll.jl).
 
 ## Use with JuMP
 
@@ -52,7 +52,7 @@ model = Model(CDDLib.Optimizer{Float64})
 
 ## Use with MathOptInterface
 
-CDD can also solve problems using `Rational{BigInt}` arithmetic. 
+CDD can also solve problems using `Rational{BigInt}` arithmetic.
 
 Use `CDDLib.Optimizer{Rational{BigInt}}` to use CDDLib with [MathOptInterface](https://github.com/jump-dev/MathOptInterface.jl):
 ```julia
