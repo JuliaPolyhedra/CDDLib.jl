@@ -27,19 +27,19 @@ jobs:
           - version: '1'
             os: windows-latest
             arch: x86
-          - version: 'nightly'
+          - version: '1.6'
             os: ubuntu-latest
             arch: x64
-          - version: 'nightly'
+          - version: '1.6'
             os: macOS-latest
             arch: x64
-          - version: 'nightly'
+          - version: '1.6'
             os: windows-latest
             arch: x64
-          - version: 'nightly'
+          - version: '1.6'
             os: ubuntu-latest
             arch: x86
-          - version: 'nightly'
+          - version: '1.6'
             os: windows-latest
             arch: x86
     steps:
