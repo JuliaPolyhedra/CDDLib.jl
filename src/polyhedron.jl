@@ -202,7 +202,7 @@ end
 # FIXME `hchebyshevcenter` needs a floating point solver so it may give
 # `Optimizer{Cdouble}` here for `Polyhedron{Rational{BigInt}}` but we are just
 # going to use `Optimizer{Rational{BigInt}}` instead.
-function Polyhedra.detecthlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}) where T
+function Polyhedra.detecthlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}; kws...) where T
     if !p.hlinearitydetected
         canonicalizelinearity!(getine(p))
         p.hlinearitydetected = true
@@ -214,7 +214,7 @@ function Polyhedra.detecthlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}
         p.poly = nothing
     end
 end
-function Polyhedra.detectvlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}) where T
+function Polyhedra.detectvlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}; kws...) where T
     if !p.vlinearitydetected
         canonicalizelinearity!(getext(p))
         p.vlinearitydetected = true
@@ -228,7 +228,7 @@ function Polyhedra.detectvlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}
 end
 
 
-function Polyhedra.removehredundancy!(p::Polyhedron)
+function Polyhedra.removehredundancy!(p::Polyhedron; kws...)
     if !p.noredundantinequality
         if !p.hlinearitydetected
             canonicalize!(getine(p))
@@ -242,7 +242,7 @@ function Polyhedra.removehredundancy!(p::Polyhedron)
     end
 end
 
-function Polyhedra.removevredundancy!(p::Polyhedron)
+function Polyhedra.removevredundancy!(p::Polyhedron; kws...)
     if !p.noredundantgenerator
         canonicalize!(getext(p))
         p.noredundantgenerator = true
