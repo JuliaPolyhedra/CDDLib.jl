@@ -1,6 +1,5 @@
 using Test
-import MathOptInterface
-const MOI = MathOptInterface
+import MathOptInterface as MOI
 const MOIT = MOI.Test
 const MOIU = MOI.Utilities
 const MOIB = MOI.Bridges

@@ -1,7 +1,6 @@
 using SparseArrays
 
-import MathOptInterface
-const MOI = MathOptInterface
+import MathOptInterface as MOI
 
 """
     CDDLib.Optimizer{T} <: AbstractPolyhedraOptimizer{T}
