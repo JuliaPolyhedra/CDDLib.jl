@@ -72,6 +72,11 @@ function fillmatrix(inequality::Bool, matrix::Ptr{Ptr{T}}, itr, linset::BitSet, 
         end
         # CDD is expected <a, x> >= 0 but Polyhedra uses <a, x> <= 0
         a = vec(coord(lift(item)))
+        for i in eachindex(a)
+            if !isfinite(a[i])
+                error("Invalid coefficient : `$(a[i])` is not finite.")
+            end
+        end
         dd_copyArow(row, inequality ? -a : a)
     end
 end
