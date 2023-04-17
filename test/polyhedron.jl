@@ -1,6 +1,4 @@
 import Polyhedra
-using SparseArrays
-
 const polyhedra_test = joinpath(dirname(dirname(pathof(Polyhedra))), "test")
 
 include(joinpath(polyhedra_test, "utils.jl"))
