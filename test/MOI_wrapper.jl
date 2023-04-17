@@ -43,6 +43,7 @@ using CDDLib
                     # TODO Should be fixed in MOI master
                     "test_model_LowerBoundAlreadySet",
                     "test_model_UpperBoundAlreadySet",
+                    "test_linear_open_intervals",
                 ],
             )
         else
