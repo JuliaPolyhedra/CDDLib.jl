@@ -41,7 +41,7 @@ also licensed under the [GPL v2 license](https://github.com/cddlib/cddlib/blob/m
 
 ## Installation
 
-Install CDDLib.jl using the Julia package mangager:
+Install CDDLib.jl using the Julia package manager:
 
 ```julia
 import Pkg
