@@ -269,7 +269,7 @@ function Polyhedra.default_solver(p::Polyhedron{S}; T=S) where {S}
 end
 _getrepfor(p::Polyhedron, ::Polyhedra.HIndex) = getine(p)
 _getrepfor(p::Polyhedron, ::Polyhedra.VIndex) = getext(p)
-function Polyhedra.isredundant(p::Polyhedron, idx::Polyhedra.HIndex; strongly=false, cert=false, solver=nothing)
+function Polyhedra.isredundant(p::Polyhedron, idx::Polyhedra.Index; strongly=false, cert=false, solver=nothing)
     f = strongly ? sredundant : redundant
     ans = f(_getrepfor(p, idx), idx.value)
     if cert
