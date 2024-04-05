@@ -11,7 +11,9 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 cddlib_jll = "f07e07eb-5685-515a-97c8-3014f6152feb"
 
 [compat]
+LinearAlgebra = "<0.0.1, 1.6"
 MathOptInterface = "1"
 Polyhedra = "0.7"
-cddlib_jll = "=0.94.13"
+SparseArrays = "<0.0.1, 1.6"
+cddlib_jll = "=0.94.14"
 julia = "1.6"
