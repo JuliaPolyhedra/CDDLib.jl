@@ -1,7 +1,7 @@
 name = "CDDLib"
 uuid = "3391f64e-dcde-5f30-b752-e11513730f60"
 repo = "https://github.com/JuliaPolyhedra/CDDLib.jl.git"
-version = "0.9.4"
+version = "0.10.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -13,7 +13,7 @@ cddlib_jll = "f07e07eb-5685-515a-97c8-3014f6152feb"
 [compat]
 LinearAlgebra = "<0.0.1, 1.6"
 MathOptInterface = "1"
-Polyhedra = "0.7"
+Polyhedra = "0.8"
 SparseArrays = "<0.0.1, 1.6"
 cddlib_jll = "=0.94.14"
-julia = "1.6"
+julia = "1.10"
