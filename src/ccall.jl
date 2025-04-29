@@ -1,6 +1,8 @@
 macro dd_ccall_pointer_error(f, args...)
     quote
-        err = Ref{Cdd_ErrorType}(0)
+        # RedundantRowsViaShooting don't modify the error code so
+        # we need to set it with an initial value that means no error
+        err = Ref{Cdd_ErrorType}(length(error_message))
         ptr = ccall(($"dd_$f", libcddgmp), $(map(esc,args)...), err)
         myerror($"dd_$f", ptr, err[])
         ptr
@@ -9,7 +11,9 @@ end
 
 macro dd_ccall_error(f, args...)
     quote
-        err = Ref{Cdd_ErrorType}(0)
+        # RedundantRowsViaShooting don't modify the error code so
+        # we need to set it with an initial value that means no error
+        err = Ref{Cdd_ErrorType}(length(error_message))
         ret = ccall(($"dd_$f", libcddgmp), $(map(esc,args)...), err)
         myerror($"dd_$f", err[])
         ret
@@ -25,7 +29,9 @@ end
 
 macro ddf_ccall_pointer_error(f, args...)
     quote
-        err = Ref{Cdd_ErrorType}(0)
+        # RedundantRowsViaShooting don't modify the error code so
+        # we need to set it with an initial value that means no error
+        err = Ref{Cdd_ErrorType}(length(error_message))
         ptr = ccall(($"ddf_$f", libcddgmp), $(map(esc,args)...), err)
         myerror($"ddf_$f", ptr, err[])
         ptr
@@ -34,7 +40,9 @@ end
 
 macro ddf_ccall_error(f, args...)
     quote
-        err = Ref{Cdd_ErrorType}(0)
+        # RedundantRowsViaShooting don't modify the error code so
+        # we need to set it with an initial value that means no error
+        err = Ref{Cdd_ErrorType}(length(error_message))
         ret = ccall(($"ddf_$f", libcddgmp), $(map(esc,args)...), err)
         myerror($"ddf_$f", err[])
         ret
