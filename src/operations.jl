@@ -125,6 +125,27 @@ function redundantrows(repr::Representation)
     redundantrows(CDDMatrix(repr))
 end
 
+function dd_redundant_rows_via_shooting(matrix::Ptr{Cdd_MatrixData{Cdouble}})
+    return @ddf_ccall_pointer_error(
+        RedundantRowsViaShooting,
+        Ptr{Culong},
+        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
+end
+function dd_redundant_rows_via_shooting(matrix::Ptr{Cdd_MatrixData{GMPRational}})
+    return @dd_ccall_pointer_error(
+        RedundantRowsViaShooting,
+        Ptr{Culong},
+        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+        matrix,
+    )
+end
+function redundant_rows_via_shooting(matrix::CDDMatrix)
+    Base.convert(BitSet, CDDSet(dd_redundant_rows_via_shooting(matrix.matrix), length(matrix)))
+end
+
+
 # Strongly redundant
 function dd_sredundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)
     certificate = Vector{Cdouble1}(undef, len)
