@@ -10,8 +10,8 @@ using CDDLib
         @test collect(CDDLib.getvredundantindices(p; via_shooting)) == [2]
 
         A = [1 0; 1 1; 0 1; -1 0; 0 -1]
-        b = [1, 2, 1, -1, -1]
+        b = [1, 2, 1, 1, 1]
         p = polyhedron(hrep(A, b), lib)
-        @test collect(CDDLib.gethredundantindices(p; via_shooting)) == [1, 3]
+        @test collect(CDDLib.gethredundantindices(p; via_shooting)) == [2]
     end
 end
