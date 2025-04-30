@@ -102,49 +102,49 @@ function redundant(repr::Representation, i::Integer)
 end
 
 # Redundant rows
-function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    return @ddf_ccall_pointer_error(
-        RedundantRows,
-        Ptr{Culong},
-        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
-        matrix,
-    )
-end
-function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    return @dd_ccall_pointer_error(
-        RedundantRows,
-        Ptr{Culong},
-        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
-        matrix,
-    )
-end
-function redundantrows(matrix::CDDMatrix)
-    Base.convert(BitSet, CDDSet(dd_redundantrows(matrix.matrix), length(matrix)))
-end
-function redundantrows(repr::Representation)
-    redundantrows(CDDMatrix(repr))
+function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{Cdouble}}; via_shooting::Bool = false)
+    if via_shooting
+        return @ddf_ccall_pointer_error(
+            RedundantRowsViaShooting,
+            Ptr{Culong},
+            (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+            matrix,
+        )
+    else
+        return @ddf_ccall_pointer_error(
+            RedundantRows,
+            Ptr{Culong},
+            (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
+            matrix,
+        )
+    end
 end
 
-function dd_redundant_rows_via_shooting(matrix::Ptr{Cdd_MatrixData{Cdouble}})
-    return @ddf_ccall_pointer_error(
-        RedundantRowsViaShooting,
-        Ptr{Culong},
-        (Ptr{Cdd_MatrixData{Cdouble}}, Ref{Cdd_ErrorType}),
-        matrix,
-    )
-end
-function dd_redundant_rows_via_shooting(matrix::Ptr{Cdd_MatrixData{GMPRational}})
-    return @dd_ccall_pointer_error(
-        RedundantRowsViaShooting,
-        Ptr{Culong},
-        (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
-        matrix,
-    )
-end
-function redundant_rows_via_shooting(matrix::CDDMatrix)
-    Base.convert(BitSet, CDDSet(dd_redundant_rows_via_shooting(matrix.matrix), length(matrix)))
+function dd_redundantrows(matrix::Ptr{Cdd_MatrixData{GMPRational}}; via_shooting::Bool = false)
+    if via_shooting
+        return @dd_ccall_pointer_error(
+            RedundantRowsViaShooting,
+            Ptr{Culong},
+            (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+            matrix,
+        )
+    else
+        return @dd_ccall_pointer_error(
+            RedundantRows,
+            Ptr{Culong},
+            (Ptr{Cdd_MatrixData{GMPRational}}, Ref{Cdd_ErrorType}),
+            matrix,
+        )
+    end
 end
 
+function redundantrows(matrix::CDDMatrix; kws...)
+    Base.convert(BitSet, CDDSet(dd_redundantrows(matrix.matrix; kws...), length(matrix)))
+end
+
+function redundantrows(repr::Representation; kws...)
+    redundantrows(CDDMatrix(repr); kws...)
+end
 
 # Strongly redundant
 function dd_sredundant(matrix::Ptr{Cdd_MatrixData{Cdouble}}, i::Cdd_rowrange, len::Int)

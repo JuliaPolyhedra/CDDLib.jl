@@ -290,19 +290,11 @@ function Base.isempty(p::Polyhedron)
     return MOI.get(copylpsolution(lp), MOI.TerminationStatus()) != MOI.OPTIMAL
 end
 
-function gethredundantindices(p::Polyhedron; via_shooting::Bool = false)
-    if via_shooting
-        redundantrows(getine(p))
-    else
-        redundant_rows_via_shooting(getine(p))
-    end
+function gethredundantindices(p::Polyhedron; kws...)
+    redundantrows(getine(p); kws...)
 end
-function getvredundantindices(p::Polyhedron; via_shooting::Bool = false)
-    if via_shooting
-        redundantrows(getext(p))
-    else
-        redundant_rows_via_shooting(getext(p))
-    end
+function getvredundantindices(p::Polyhedron; kws...)
+    redundantrows(getext(p); kws...)
 end
 
 # type CDDLPPolyhedron{T} <: LPPolyhedron{T}
