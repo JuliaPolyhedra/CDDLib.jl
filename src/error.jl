@@ -19,10 +19,11 @@ const error_message = [
 ]
 
 function myerror(func_name::String, err::Cdd_ErrorType)
-    if err < 0 || err > 17
-        error("$func_name gave an error code of $err which is out of the range of known error code. Pleasre report this by opening an issue at https://github.com/JuliaPolyhedra/CDDLib.jl.")
-    elseif err < 17 # 17 means no error
+    idx = err + 1
+    if idx in eachindex(error_message)
         error(func_name, " : ", error_message[err+1])
+    elseif err != length(error_message) # 17 means no error
+        error("$func_name gave an error code of $err which is out of the range of known error code. Pleasre report this by opening an issue at https://github.com/JuliaPolyhedra/CDDLib.jl.")
     end
 end
 function myerror(func_name::String, ptr::Ptr, err::Cdd_ErrorType)

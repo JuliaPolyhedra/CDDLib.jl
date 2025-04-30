@@ -10,6 +10,7 @@ using JuMP
 lpsolver = tuple()
 
 include("utils.jl")
+include("redundant.jl")
 include("simplex.jl")
 include("permutahedron.jl")
 include("board.jl")
