@@ -37,6 +37,10 @@ function CDDSet(s, maxel::Clong, offset::Integer)
 end
 CDDSet(s, maxel, offset::Integer) = CDDSet(s, Clong(maxel), offset)
 
+function dd_free(set::CDDSet)
+    @cdd_ccall(set_free, Cvoid, (Cset_type,), set.s)
+end
+
 function Base.convert(::Type{BitSet}, st::CDDSet)
     s = BitSet()
     for i = 1:st.maxel
@@ -57,6 +61,28 @@ function myconvert(::Type{BitSet}, a::Matrix)
         end
     end
     s
+end
+
+mutable struct SetFamily
+    famsize::Cdd_bigrange
+    setsize::Cdd_bigrange
+    set::Cdd_SetVector
+end
+
+function dd_free(set::Ptr{SetFamily})
+    @dd_ccall(FreeSetFamily, Cvoid, (Ptr{SetFamily},), set)
+end
+
+function Base.convert(::Type{Vector{BitSet}}, set_familty_ptr::Ptr{SetFamily})
+    set_family = unsafe_load(set_familty_ptr)
+    sets = unsafe_wrap(Array, set_family.set, set_family.famsize)
+    return BitSet[convert(BitSet, CDDSet(set, set_family.setsize)) for set in sets]
+end
+
+function convert_free(::Type{T}, x) where {T}
+    t = convert(T, x)
+    dd_free(x)
+    return t
 end
 
 export CDDSet

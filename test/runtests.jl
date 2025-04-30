@@ -11,6 +11,7 @@ lpsolver = tuple()
 
 include("utils.jl")
 include("redundant.jl")
+include("adjacency.jl")
 include("simplex.jl")
 include("permutahedron.jl")
 include("board.jl")
