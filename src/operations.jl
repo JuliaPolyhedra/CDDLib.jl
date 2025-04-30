@@ -70,6 +70,7 @@ function dd_matrix2adjacency(matrix::Ptr{Cdd_MatrixData{Cdouble}})
         matrix,
     )
 end
+
 function dd_matrix2adjacency(matrix::Ptr{Cdd_MatrixData{GMPRational}})
     return @dd_ccall_pointer_error(
         Matrix2Adjacency,
@@ -78,6 +79,11 @@ function dd_matrix2adjacency(matrix::Ptr{Cdd_MatrixData{GMPRational}})
         matrix,
     )
 end
+
+# Note that this to computes the adjacency of input without doing representation conversion.
+# If representation conversion was done, the adjacency and incidence of both input and output
+# are in the `dd_PolyhedraPtr` data structure.
+# https://github.com/JuliaPolyhedra/CDDLib.jl/issues/71#issuecomment-1166257174
 function matrix2adjacency(matrix::CDDMatrix)
     return convert_free(Vector{BitSet}, dd_matrix2adjacency(matrix.matrix))
 end
