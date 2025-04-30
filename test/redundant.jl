@@ -7,11 +7,13 @@ using CDDLib
         lib = CDDLib.Library(precision)
         V = [3 0; 1 1; 0 3; 0 0]
         p = polyhedron(vrep(V), lib)
+        @test p isa CDDLib.Polyhedron{precision == :float ? Float64 : Rational{BigInt}}
         @test collect(CDDLib.getvredundantindices(p; via_shooting)) == [2]
 
         A = [1 0; 1 1; 0 1; -1 0; 0 -1]
         b = [1, 2, 1, 1, 1]
         p = polyhedron(hrep(A, b), lib)
+        @test p isa CDDLib.Polyhedron{precision == :float ? Float64 : Rational{BigInt}}
         @test collect(CDDLib.gethredundantindices(p; via_shooting)) == [2]
     end
 end
