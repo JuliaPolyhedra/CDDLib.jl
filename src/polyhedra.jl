@@ -113,6 +113,86 @@ function copygenerators(poly::CDDPolyhedra)
     CDDGeneratorMatrix(dd_copygenerators(poly.poly))
 end
 
+# Incidence information
+function dd_copyincidence(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
+    @ddf_ccall CopyIncidence Ptr{SetFamily} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
+end
+function dd_copyincidence(poly::Ptr{Cdd_PolyhedraData{GMPRational}})
+    @dd_ccall CopyIncidence Ptr{SetFamily} (Ptr{Cdd_PolyhedraData{GMPRational}},) poly
+end
+
+"""
+    copyincidence(poly)
+
+Return the incidence representation of the computed representation in `poly`.
+
+# Arguments
+
+- `poly::CDDPolyhedra`
+
+# Returns
+
+- `::Vector{BitSet}`
+
+#Examples
+
+```julia
+julia> using CDDLib, Polyhedra
+
+julia> A = [1 1; 1 -1; -1 0]; b = [1, 0, 0];
+
+julia> p = polyhedron(hrep(A, b), CDDLib.Library(:exact))
+Polyhedron CDDLib.Polyhedron{Rational{BigInt}}:
+3-element iterator of HalfSpace{Rational{BigInt}, Vector{Rational{BigInt}}}:
+ HalfSpace(Rational{BigInt}[1, 1], 1//1)
+ HalfSpace(Rational{BigInt}[1, -1], 0//1)
+ HalfSpace(Rational{BigInt}[-1, 0], 0//1)
+
+julia> vrep(p)
+V-representation CDDGeneratorMatrix{Rational{BigInt}, GMPRational}:
+3-element iterator of Vector{Rational{BigInt}}:
+ Rational{BigInt}[1//2, 1//2]
+ Rational{BigInt}[0, 1]
+ Rational{BigInt}[0, 0]
+
+julia> copyincidence(p.poly)
+3-element Vector{BitSet}:
+ BitSet([1, 2])
+ BitSet([1, 3])
+ BitSet([2, 3])
+```
+
+Degenerate case:
+
+```julia
+julia> A = [1 1; 1 -1; -1 0; 1 0]; b = [1, 0, 0, 1//2];
+
+julia> p = polyhedron(hrep(A, b), CDDLib.Library(:exact))
+Polyhedron CDDLib.Polyhedron{Rational{BigInt}}:
+4-element iterator of HalfSpace{Rational{BigInt}, Vector{Rational{BigInt}}}:
+ HalfSpace(Rational{BigInt}[1, 1], 1//1)
+ HalfSpace(Rational{BigInt}[1, -1], 0//1)
+ HalfSpace(Rational{BigInt}[-1, 0], 0//1)
+ HalfSpace(Rational{BigInt}[1, 0], 1//2)
+
+julia> vrep(p)
+V-representation CDDGeneratorMatrix{Rational{BigInt}, GMPRational}:
+3-element iterator of Vector{Rational{BigInt}}:
+ Rational{BigInt}[0, 0]
+ Rational{BigInt}[0, 1]
+ Rational{BigInt}[1//2, 1//2]
+
+julia> copyincidence(p.poly)
+3-element Vector{BitSet}:
+ BitSet([2, 3])
+ BitSet([1, 3])
+ BitSet([1, 2, 4])
+```
+"""
+function copyincidence(poly::CDDPolyhedra)
+    return convert_free(Vector{BitSet}, dd_copyincidence(poly.poly))
+end
+
 function switchinputtype!(poly::CDDPolyhedra)
     if poly.inequality
         ext = copygenerators(poly)
@@ -126,4 +206,4 @@ function switchinputtype!(poly::CDDPolyhedra)
     poly.inequality = ~poly.inequality
 end
 
-export CDDPolyhedra, copyinequalities, copygenerators, switchinputtype!
+export CDDPolyhedra, copyinequalities, copygenerators, copyincidence, switchinputtype!
