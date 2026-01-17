@@ -114,11 +114,22 @@ function copygenerators(poly::CDDPolyhedra)
 end
 
 # Incidence information
-function dd_copyincidence(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
-    @ddf_ccall CopyIncidence Ptr{SetFamily} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
-end
-function dd_copyincidence(poly::Ptr{Cdd_PolyhedraData{GMPRational}})
-    @dd_ccall CopyIncidence Ptr{SetFamily} (Ptr{Cdd_PolyhedraData{GMPRational}},) poly
+for c_fun in (:CopyIncidence, :CopyInputIncidence)
+    jl_fun = Symbol(lowercase(String(c_fun)))
+    dd_fun = Symbol(:dd_, jl_fun)
+
+    @eval begin
+        function $(dd_fun)(poly::Ptr{Cdd_PolyhedraData{Cdouble}})
+            @ddf_ccall $c_fun Ptr{SetFamily} (Ptr{Cdd_PolyhedraData{Cdouble}},) poly
+        end
+        function $(dd_fun)(poly::Ptr{Cdd_PolyhedraData{GMPRational}})
+            @dd_ccall $c_fun Ptr{SetFamily} (Ptr{Cdd_PolyhedraData{GMPRational}},) poly
+        end
+
+        function $(jl_fun)(poly::CDDPolyhedra)
+            return convert_free(Vector{BitSet}, $(dd_fun)(poly.poly))
+        end
+    end
 end
 
 """
@@ -189,9 +200,50 @@ julia> copyincidence(p.poly)
  BitSet([1, 2, 4])
 ```
 """
-function copyincidence(poly::CDDPolyhedra)
-    return convert_free(Vector{BitSet}, dd_copyincidence(poly.poly))
-end
+copyincidence
+
+"""
+    copyinputincidence(poly)
+
+Return the incidence representation of the input representation in `poly`.
+
+# Arguments
+
+- `poly::CDDPolyhedra`
+
+# Returns
+
+- `::Vector{BitSet}`
+
+#Examples
+
+```julia
+julia> using CDDLib, Polyhedra
+
+julia> V = [[1//2, 1//2], [0, 1], [0, 0]];
+
+julia> p = polyhedron(vrep(V), CDDLib.Library(:exact))
+Polyhedron CDDLib.Polyhedron{Rational{BigInt}}:
+3-element iterator of Vector{Rational{BigInt}}:
+ Rational{BigInt}[1//2, 1//2]
+ Rational{BigInt}[0, 1]
+ Rational{BigInt}[0, 0]
+
+julia> hrep(p)
+H-representation CDDInequalityMatrix{Rational{BigInt}, GMPRational}:
+3-element iterator of HalfSpace{Rational{BigInt}, Vector{Rational{BigInt}}}:
+ HalfSpace(Rational{BigInt}[1, 1], 1//1)
+ HalfSpace(Rational{BigInt}[-1, 0], 0//1)
+ HalfSpace(Rational{BigInt}[1, -1], 0//1)
+
+julia> copyinputincidence(p.poly)
+3-element Vector{BitSet}:
+ BitSet([1, 3])
+ BitSet([1, 2])
+ BitSet([2, 3])
+```
+"""
+copyinputincidence
 
 function switchinputtype!(poly::CDDPolyhedra)
     if poly.inequality
@@ -206,4 +258,4 @@ function switchinputtype!(poly::CDDPolyhedra)
     poly.inequality = ~poly.inequality
 end
 
-export CDDPolyhedra, copyinequalities, copygenerators, copyincidence, switchinputtype!
+export CDDPolyhedra, copyinequalities, copygenerators, copyincidence, copyinputincidence, switchinputtype!
