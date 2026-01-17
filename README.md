@@ -1,6 +1,6 @@
 # CDDLib
 
-[![](https://github.com/JuliaPolyhedra/CDDLib.jl/workflows/CI/badge.svg?branch=master)](https://github.com/JuliaPolyhedra/CDDLib.jl/actions?query=workflow%3ACI)
+[![](https://github.com/JuliaPolyhedra/CDDLib.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaPolyhedra/CDDLib.jl/actions/workflows/ci.yml)
 [![](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl?branch=master)
 [![](https://zenodo.org/badge/DOI/10.5281/zenodo.1214581.svg)](https://doi.org/10.5281/zenodo.1214581)
 
