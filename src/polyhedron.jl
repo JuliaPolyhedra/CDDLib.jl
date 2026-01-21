@@ -15,16 +15,17 @@ mutable struct Polyhedron{T<:PolyType} <: Polyhedra.Polyhedron{T}
     ine::Union{Nothing, CDDInequalityMatrix{T}}
     ext::Union{Nothing, CDDGeneratorMatrix{T}}
     poly::Union{Nothing, CDDPolyhedra{T}}
+    incidence::Union{Nothing, Vector{BitSet}}
     hlinearitydetected::Bool
     vlinearitydetected::Bool
     noredundantinequality::Bool
     noredundantgenerator::Bool
 
     function Polyhedron{T}(ine::CDDInequalityMatrix) where {T <: PolyType}
-        new{T}(ine, nothing, nothing, false, false, false, false)
+        new{T}(ine, nothing, nothing, nothing, false, false, false, false)
     end
     function Polyhedron{T}(ext::CDDGeneratorMatrix) where {T <: PolyType}
-        new{T}(nothing, ext, nothing, false, false, false, false)
+        new{T}(nothing, ext, nothing, nothing, false, false, false, false)
     end
     # function Polyhedron(poly::CDDPolyhedra{T})
     #   new(nothing, nothing, poly)
@@ -67,11 +68,21 @@ function getpoly(p::Polyhedron, inepriority=true)
     end
     p.poly
 end
+function getincidence(p::Polyhedron)
+    inc = p.incidence
+    if inc === nothing
+        poly = getpoly(p)
+        inc = poly.inequality ? copyincidence(poly) : copyinputincidence(poly)
+        p.incidence = inc
+    end
+    return inc
+end
 
 function clearfield!(p::Polyhedron)
     p.ine = nothing
     p.ext = nothing
     p.poly = nothing
+    p.incidence = nothing
     p.hlinearitydetected = false
     p.vlinearitydetected = false
     p.noredundantinequality = false
@@ -88,6 +99,10 @@ end
 function updatepoly!(p::Polyhedron, poly::CDDPolyhedra)
     clearfield!(p)
     p.poly = poly
+end
+function clearpoly!(p::Polyhedron)
+    p.incidence = nothing
+    p.poly = nothing
 end
 
 function Base.copy(p::Polyhedron{T}) where {T}
@@ -211,7 +226,7 @@ function Polyhedra.detecthlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}
         # and if he asks the inequalities he will be surprised that the
         # linearity are not detected properly
         # However, the generators can be kept
-        p.poly = nothing
+        clearpoly!(p)
     end
 end
 function Polyhedra.detectvlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}=Optimizer{T}; kws...) where T
@@ -223,7 +238,7 @@ function Polyhedra.detectvlinearity!(p::Polyhedron{T}, solver::Type{<:Optimizer}
         # and if he asks the generators he will be surprised that the
         # linearity are not detected properly
         # However, the inequalities can be kept
-        p.poly = nothing
+        clearpoly!(p)
     end
 end
 
@@ -238,7 +253,7 @@ function Polyhedra.removehredundancy!(p::Polyhedron; kws...)
         end
         p.noredundantinequality = true
         # See detectlinearity! for a discussion about the following line
-        p.poly = nothing
+        clearpoly!(p)
     end
 end
 
@@ -247,7 +262,7 @@ function Polyhedra.removevredundancy!(p::Polyhedron; kws...)
         canonicalize!(getext(p))
         p.noredundantgenerator = true
         # See detecthlinearity! for a discussion about the following line
-        p.poly = nothing
+        clearpoly!(p)
     end
 end
 

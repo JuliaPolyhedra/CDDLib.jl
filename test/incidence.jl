@@ -19,13 +19,34 @@ using CDDLib
     @testset "Input incidence $precision" for precision in [:float, :exact]
         V = [[1//2, 1//2], [0, 1], [0, 0]]
         p = polyhedron(vrep(V), CDDLib.Library(precision))
-        T = Polyhedra.coefficient_type(p)
         hrep(p)
+        hs = collect(halfspaces(p))
+
         incidence_computed = copyinputincidence(p.poly)
-        for v in eachindex(points(p))
-            for i in incidence_computed[v.value]
-                h = Polyhedra.Index{T, HalfSpace{T, Vector{T}}}(i)
-                @test Polyhedra.isincident(p, v, h; tol=0)
+        for (vidx, v) in enumerate(points(p))
+            for i in incidence_computed[vidx]
+                @test Polyhedra.isincident(v, hs[i], tol=0)
+            end
+        end
+    end
+
+    @testset "getincidence $precision" for precision in [:float, :exact]
+        A = [1 1; 1 -1; -1 0]; b = [1, 0, 0]
+        p_H = polyhedron(hrep(A, b), CDDLib.Library(precision))
+        vrep(p_H)
+
+        V = [[1//2, 1//2], [0, 1], [0, 0]]
+        p_V = polyhedron(vrep(V), CDDLib.Library(precision))
+        hrep(p_V)
+
+        for p in [p_H, p_V]
+            @inferred CDDLib.getincidence(p)
+
+            hs = collect(halfspaces(p))
+            for (vidx, v) in enumerate(points(p))
+                for i in p.incidence[vidx]
+                    @test Polyhedra.isincident(v, hs[i], tol=0)
+                end
             end
         end
     end
