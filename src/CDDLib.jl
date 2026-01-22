@@ -25,5 +25,6 @@ include("lp.jl")
 
 include("MOI_wrapper.jl")
 include("polyhedron.jl")
+include("incidence.jl")
 
 end # module
