@@ -15,17 +15,18 @@ mutable struct Polyhedron{T<:PolyType} <: Polyhedra.Polyhedron{T}
     ine::Union{Nothing, CDDInequalityMatrix{T}}
     ext::Union{Nothing, CDDGeneratorMatrix{T}}
     poly::Union{Nothing, CDDPolyhedra{T}}
-    incidence::Union{Nothing, Vector{BitSet}}
+    incidenceh::Union{Nothing, Vector{BitSet}}
+    incidencev::Union{Nothing, Vector{BitSet}}
     hlinearitydetected::Bool
     vlinearitydetected::Bool
     noredundantinequality::Bool
     noredundantgenerator::Bool
 
     function Polyhedron{T}(ine::CDDInequalityMatrix) where {T <: PolyType}
-        new{T}(ine, nothing, nothing, nothing, false, false, false, false)
+        new{T}(ine, nothing, nothing, nothing, nothing, false, false, false, false)
     end
     function Polyhedron{T}(ext::CDDGeneratorMatrix) where {T <: PolyType}
-        new{T}(nothing, ext, nothing, nothing, false, false, false, false)
+        new{T}(nothing, ext, nothing, nothing, nothing, false, false, false, false)
     end
     # function Polyhedron(poly::CDDPolyhedra{T})
     #   new(nothing, nothing, poly)
@@ -68,12 +69,21 @@ function getpoly(p::Polyhedron, inepriority=true)
     end
     p.poly
 end
-function getincidence(p::Polyhedron)
-    inc = p.incidence
+function getincidenceh(p::Polyhedron)
+    inc = p.incidenceh
     if inc === nothing
         poly = getpoly(p)
         inc = poly.inequality ? copyincidence(poly) : copyinputincidence(poly)
-        p.incidence = inc
+        p.incidenceh = inc
+    end
+    return inc
+end
+function getincidencev(p::Polyhedron)
+    inc = p.incidencev
+    if inc === nothing
+        poly = getpoly(p)
+        inc = poly.inequality ? copyinputincidence(poly) : copyincidence(poly)
+        p.incidencev = inc
     end
     return inc
 end
@@ -82,7 +92,8 @@ function clearfield!(p::Polyhedron)
     p.ine = nothing
     p.ext = nothing
     p.poly = nothing
-    p.incidence = nothing
+    p.incidenceh = nothing
+    p.incidencev = nothing
     p.hlinearitydetected = false
     p.vlinearitydetected = false
     p.noredundantinequality = false
@@ -101,7 +112,8 @@ function updatepoly!(p::Polyhedron, poly::CDDPolyhedra)
     p.poly = poly
 end
 function clearpoly!(p::Polyhedron)
-    p.incidence = nothing
+    p.incidenceh = nothing
+    p.incidencev = nothing
     p.poly = nothing
 end
 
