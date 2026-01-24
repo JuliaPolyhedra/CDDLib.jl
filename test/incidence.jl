@@ -30,7 +30,7 @@ using CDDLib
         end
     end
 
-    @testset "gethincidence $precision" for precision in [:float, :exact]
+    @testset "get[hv]incidence $precision" for precision in [:float, :exact]
         A = [1 1; 1 -1; -1 0]; b = [1, 0, 0]
         p_H = polyhedron(hrep(A, b), CDDLib.Library(precision))
         vrep(p_H)
@@ -41,11 +41,20 @@ using CDDLib
 
         for p in [p_H, p_V]
             @inferred CDDLib.gethincidence(p)
+            @inferred CDDLib.getvincidence(p)
 
             hs = collect(halfspaces(p))
-            for (vidx, v) in enumerate(points(p))
+            vs = collect(points(p))
+
+            for (vidx, v) in enumerate(vs)
                 for i in p.hincidence[vidx]
                     @test Polyhedra.isincident(v, hs[i], tol=0)
+                end
+            end
+
+            for (hidx, h) in enumerate(hs)
+                for i in p.vincidence[hidx]
+                    @test Polyhedra.isincident(vs[i], h, tol=0)
                 end
             end
         end
