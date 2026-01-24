@@ -15,8 +15,8 @@ mutable struct Polyhedron{T<:PolyType} <: Polyhedra.Polyhedron{T}
     ine::Union{Nothing, CDDInequalityMatrix{T}}
     ext::Union{Nothing, CDDGeneratorMatrix{T}}
     poly::Union{Nothing, CDDPolyhedra{T}}
-    incidenceh::Union{Nothing, Vector{BitSet}}
-    incidencev::Union{Nothing, Vector{BitSet}}
+    hincidence::Union{Nothing, Vector{BitSet}}
+    vincidence::Union{Nothing, Vector{BitSet}}
     hlinearitydetected::Bool
     vlinearitydetected::Bool
     noredundantinequality::Bool
@@ -69,21 +69,21 @@ function getpoly(p::Polyhedron, inepriority=true)
     end
     p.poly
 end
-function getincidenceh(p::Polyhedron)
-    inc = p.incidenceh
+function gethincidence(p::Polyhedron)
+    inc = p.hincidence
     if inc === nothing
         poly = getpoly(p)
         inc = poly.inequality ? copyincidence(poly) : copyinputincidence(poly)
-        p.incidenceh = inc
+        p.hincidence = inc
     end
     return inc
 end
-function getincidencev(p::Polyhedron)
-    inc = p.incidencev
+function getvincidence(p::Polyhedron)
+    inc = p.vincidence
     if inc === nothing
         poly = getpoly(p)
         inc = poly.inequality ? copyinputincidence(poly) : copyincidence(poly)
-        p.incidencev = inc
+        p.vincidence = inc
     end
     return inc
 end
@@ -92,8 +92,8 @@ function clearfield!(p::Polyhedron)
     p.ine = nothing
     p.ext = nothing
     p.poly = nothing
-    p.incidenceh = nothing
-    p.incidencev = nothing
+    p.hincidence = nothing
+    p.vincidence = nothing
     p.hlinearitydetected = false
     p.vlinearitydetected = false
     p.noredundantinequality = false
@@ -112,8 +112,8 @@ function updatepoly!(p::Polyhedron, poly::CDDPolyhedra)
     p.poly = poly
 end
 function clearpoly!(p::Polyhedron)
-    p.incidenceh = nothing
-    p.incidencev = nothing
+    p.hincidence = nothing
+    p.vincidence = nothing
     p.poly = nothing
 end
 
