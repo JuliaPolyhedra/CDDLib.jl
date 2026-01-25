@@ -73,7 +73,15 @@ function gethincidence(p::Polyhedron)
     inc = p.hincidence
     if inc === nothing
         poly = getpoly(p)
+        nh = nhreps(getine(p))
         inc = poly.inequality ? copyincidence(poly) : copyinputincidence(poly)
+        if (getext(p)).cone
+            push!(inc, BitSet(1:nh))  # Add incidence for the origin
+        else
+            for bs in inc
+                delete!(bs, nh+1)  # Remove the extra hyperplane
+            end
+        end
         p.hincidence = inc
     end
     return inc
@@ -82,7 +90,16 @@ function getvincidence(p::Polyhedron)
     inc = p.vincidence
     if inc === nothing
         poly = getpoly(p)
+        nv = nvreps(getext(p))
         inc = poly.inequality ? copyinputincidence(poly) : copyincidence(poly)
+        if (getext(p)).cone
+            for bs in inc
+                push!(bs, nv)  # Add the origin
+            end
+        else
+            nh = nhreps(getine(p))
+            length(inc) == nh || pop!(inc)  # Remove the incidence of the extra hyperplane
+        end
         p.vincidence = inc
     end
     return inc

@@ -39,22 +39,33 @@ using CDDLib
         p_V = polyhedron(vrep(V), CDDLib.Library(precision))
         hrep(p_V)
 
-        for p in [p_H, p_V]
+        # Homogeneous cone
+        A = [-1 0; 0 -1]; b0 = [0, 0]
+        p_hc = polyhedron(hrep(A, b0), CDDLib.Library(precision))
+
+        # Non-homogeneous cone
+        A = [-1 0; 0 -1]; b1 = [-1, -1]
+        p_nhc = polyhedron(hrep(A, b1), CDDLib.Library(precision))
+
+        for p in [p_H, p_V, p_hc, p_nhc]
             @inferred CDDLib.gethincidence(p)
             @inferred CDDLib.getvincidence(p)
 
             hs = collect(halfspaces(p))
-            vs = collect(points(p))
+            vs = [collect(rays(p))..., collect(points(p))...]
+
+            T = Polyhedra.coefficient_type(p)
+            tol = Polyhedra._default_tol(T)
 
             for (vidx, v) in enumerate(vs)
                 for i in p.hincidence[vidx]
-                    @test Polyhedra.isincident(v, hs[i], tol=0)
+                    @test Polyhedra.isincident(v, hs[i], tol=tol)
                 end
             end
 
             for (hidx, h) in enumerate(hs)
                 for i in p.vincidence[hidx]
-                    @test Polyhedra.isincident(vs[i], h, tol=0)
+                    @test Polyhedra.isincident(vs[i], h, tol=tol)
                 end
             end
         end
