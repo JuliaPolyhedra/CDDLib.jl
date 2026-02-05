@@ -75,6 +75,7 @@ function gethincidence(p::Polyhedron)
         poly = getpoly(p)
         nh = nhreps(getine(p))
         inc = poly.inequality ? copyincidence(poly) : copyinputincidence(poly)
+        # See https://github.com/JuliaPolyhedra/CDDLib.jl/pull/101#issuecomment-3830990456
         if (getext(p)).cone
             push!(inc, BitSet(1:nh))  # Add incidence for the origin
         else
@@ -92,6 +93,7 @@ function getvincidence(p::Polyhedron)
         poly = getpoly(p)
         nv = nvreps(getext(p))
         inc = poly.inequality ? copyinputincidence(poly) : copyincidence(poly)
+        # See https://github.com/JuliaPolyhedra/CDDLib.jl/pull/101#issuecomment-3830990456
         if (getext(p)).cone
             for bs in inc
                 push!(bs, nv)  # Add the origin
