@@ -17,7 +17,7 @@ jobs:
             arch: x64
           - version: '1'
             os: macOS-latest
-            arch: x64
+            arch: default
           - version: '1'
             os: windows-latest
             arch: x64
@@ -32,7 +32,7 @@ jobs:
             arch: x64
           - version: '1.10'
             os: macOS-latest
-            arch: x64
+            arch: default
           - version: '1.10'
             os: windows-latest
             arch: x64
