@@ -8,8 +8,12 @@ _incel(p::Polyhedron{T}, inc::Polyhedra.IncidentIndices{T}, idx) where {T} = idx
 function Base.get(p::Polyhedron{T}, inc::Polyhedra.Incident{T, ElemT}) where {T, ElemT}
     rep = _getrepfor(p, inc)
     incidence = _getincidence(p, inc)
+    row = incidence[inc.idx.value]
+
     incT = Polyhedra._inctype(inc)
     incs = incT[]
+    sizehint!(incs, length(row))
+
     for i in incidence[inc.idx.value]
         idx = Polyhedra.Index{T, ElemT}(i)
         isvalid(rep, idx) && push!(incs, _incel(p, inc, idx))
