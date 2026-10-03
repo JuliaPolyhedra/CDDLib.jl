@@ -20,24 +20,3 @@ function Base.get(p::Polyhedron{T}, inc::Polyhedra.Incident{T, ElemT}) where {T,
     end
     return incs
 end
-
-
-for loop_singular in (:point, :line, :ray, :hyperplane, :halfspace)
-    singularstr = string(loop_singular)
-    elemtype = Symbol(singularstr * "type")
-    pluralstr = singularstr * "s"
-    inc = Symbol("incident" * pluralstr)
-    incidx = Symbol("incident" * singularstr * "indices")
-
-    @eval begin
-        # incidentpoints, incidentlines, incidentrays,
-        # incidenthyperplanes, incidenthalfspaces
-        Polyhedra.$inc(p::Polyhedron{T}, idx) where {T} =
-            get(p, Polyhedra.IncidentElements{T, $elemtype(p)}(p, idx))
-
-        # incidentpointindices, incidentlineindices, incidentrayindices,
-        # incidenthyperplaneindices, incidenthalfspaceindices
-        Polyhedra.$incidx(p::Polyhedron{T}, idx) where {T} =
-            get(p, Polyhedra.IncidentIndices{T, $elemtype(p)}(p, idx))
-    end
-end

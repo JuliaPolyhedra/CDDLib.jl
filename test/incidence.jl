@@ -257,4 +257,42 @@ end
         @test isvalid(extc, Polyhedra.Index{T, PTc}(nv))
         @test !isvalid(extc, Polyhedra.Index{T, PTc}(nv + 1))
     end
+
+    # Guard that `incident*` without `tol` really takes the cddlib path, rather
+    # than merely agreeing with the generic implementation: the generic `get`
+    # never touches the incidence caches, while CDDLib's `get` fills them.
+    # Passing `tol` opts into the generic numerical check and must leave the
+    # caches untouched. This is what would silently break if Polyhedra stopped
+    # forwarding keyword arguments to `get` (see JuliaPolyhedra/Polyhedra.jl#362).
+    @testset "incident* uses cddlib incidence $precision" for precision in [:float, :exact]
+        lib = CDDLib.Library(precision)
+        p = polyhedron(hrep([1 1; 1 -1; -1 0], [1, 0, 0]), lib)
+        vrep(p)
+        T = Polyhedra.coefficient_type(p)
+        tol = Polyhedra._default_tol(T)
+        hidx = first(eachindex(halfspaces(p)))
+        pidx = first(eachindex(points(p)))
+
+        # With `tol`: generic path, the caches stay empty.
+        @test p.vincidence === nothing && p.hincidence === nothing
+        incidentpoints(p, hidx; tol)
+        incidenthalfspaces(p, pidx; tol)
+        incidentpointindices(p, hidx; tol)
+        incidenthalfspaceindices(p, pidx; tol)
+        @test p.vincidence === nothing && p.hincidence === nothing
+
+        # Without `tol`: cddlib path, the caches get filled.
+        incidentpoints(p, hidx)
+        @test p.vincidence !== nothing
+        incidenthalfspaces(p, pidx)
+        @test p.hincidence !== nothing
+
+        # The index variants take the cddlib path too.
+        CDDLib.clearpoly!(p)  # resets both caches
+        @test p.vincidence === nothing && p.hincidence === nothing
+        incidentpointindices(p, hidx)
+        @test p.vincidence !== nothing
+        incidenthalfspaceindices(p, pidx)
+        @test p.hincidence !== nothing
+    end
 end
