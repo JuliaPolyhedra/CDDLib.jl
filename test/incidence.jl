@@ -220,4 +220,41 @@ end
             end
         end
     end
+
+    # `isvalid` is used as a filter in `get(p, inc)` (src/incidence.jl) to split
+    # one incidence set into points/rays/lines, so it must be a total predicate:
+    # `false` for an index that is not a valid element of that kind, never an
+    # error. The V-side used to evaluate `isrowpoint`/`islin` before the bounds
+    # check and threw an `AssertionError` for an out-of-range index.
+    @testset "isvalid out of range $precision" for precision in [:float, :exact]
+        lib = CDDLib.Library(precision)
+
+        p = polyhedron(hrep([1 1; 1 -1; -1 0], [1, 0, 0]), lib)
+        vrep(p)
+        T = Polyhedra.coefficient_type(p)
+        ine, ext = CDDLib.getine(p), CDDLib.getext(p)
+        HT = Polyhedra.halfspacetype(p)
+        PT = Polyhedra.pointtype(p)
+        RT = Polyhedra.raytype(p)
+        for i in (0, length(ext) + 1, 99)
+            @test !isvalid(ext, Polyhedra.Index{T, PT}(i))
+            @test !isvalid(ext, Polyhedra.Index{T, RT}(i))
+        end
+        for i in (0, length(ine) + 1, 99)
+            @test !isvalid(ine, Polyhedra.Index{T, HT}(i))
+        end
+        # In-range behaviour is unchanged.
+        @test all(isvalid(ext, idx) for idx in eachindex(points(p)))
+
+        # Homogeneous cone: the origin is a virtual last generator and must
+        # still be a valid point index, while one past it is not.
+        pc = polyhedron(conichull([1, 0], [0, 1]), lib)
+        hrep(pc)
+        extc = CDDLib.getext(pc)
+        PTc = Polyhedra.pointtype(pc)
+        nv = CDDLib.nvreps(extc)
+        @test extc.cone
+        @test isvalid(extc, Polyhedra.Index{T, PTc}(nv))
+        @test !isvalid(extc, Polyhedra.Index{T, PTc}(nv + 1))
+    end
 end

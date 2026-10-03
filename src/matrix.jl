@@ -295,10 +295,13 @@ function Base.length(idxs::Polyhedra.PointIndices{T, <:CDDGeneratorMatrix{T}}) w
 end
 
 function Base.isvalid(vrep::CDDGeneratorMatrix{T}, idx::Polyhedra.VIndex{T}) where {T}
+    # Bounds check first, as on the H-side: `isrowpoint` and `islin` read the
+    # matrix at `idx.value` and must not be evaluated for an out-of-range index.
+    0 < idx.value <= length(vrep) || return false
     isp = isrowpoint(vrep, idx.value)
     isl = Polyhedra.islin(vrep, idx)
     @assert !isp || !isl # if isp && isl, it is a symmetric point but it is not allowed to mix symmetric points and points
-    0 < idx.value <= length(vrep) && isl == islin(idx) && isp == ispoint(idx)
+    isl == islin(idx) && isp == ispoint(idx)
 end
 
 isaninequalityrepresentation(matrix::CDDGeneratorMatrix) = false
