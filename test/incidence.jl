@@ -180,4 +180,44 @@ end
             end
         end
     end
+
+    # A canonicalizer rewrites one representation in place and drops the poly
+    # (see `clearpoly!`), but keeps the other cached representation. Incidence
+    # sets are index-based cross-references between the two representations,
+    # so they must be numbered against representations derived from the same
+    # poly. Each case below has redundant input so that canonicalization
+    # actually changes the representation.
+    @testset "incident* after canonicalization $precision" for precision in [:float, :exact]
+        lib = CDDLib.Library(precision)
+
+        # H-input with redundant inequalities (rows 4-6);
+        # `removehredundancy!` rewrites `ine`, the cached `ext` is kept.
+        p_h = polyhedron(hrep([1 1; 1 -1; -1 0; 1 0; 0 -1; 1 1],
+                              [1, 0, 0, 2, 1//2, 1]), lib)
+        vrep(p_h)
+        removehredundancy!(p_h)
+
+        # V-input with redundant generators (an interior point and a duplicate);
+        # `removevredundancy!` rewrites `ext`, the cached `ine` is kept.
+        p_v = polyhedron(vrep([[1//2, 1//2], [0, 1], [0, 0], [1//4, 1//2], [0, 1]]), lib)
+        hrep(p_v)
+        removevredundancy!(p_v)
+
+        # H-input with an implicit equality (x <= 0 and -x <= 0);
+        # `detecthlinearity!` rewrites `ine`, the cached `ext` is kept.
+        p_lin = polyhedron(hrep([1 0; -1 0; 0 1; 0 -1], [0, 0, 1, 0]), lib)
+        vrep(p_lin)
+        detecthlinearity!(p_lin)
+
+        ps = (p_h, p_v, p_lin)
+
+        for (src_plural, src_idx, src_var, tgt_plural, inc_fun, incidx_fun) in patterns
+            fname = Symbol("test_", src_plural, "_", inc_fun)
+            @testset "$(src_plural) -> $(tgt_plural)" begin
+                for p in ps
+                    getfield(@__MODULE__, fname)(p)
+                end
+            end
+        end
+    end
 end
