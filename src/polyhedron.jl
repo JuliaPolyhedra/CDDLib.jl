@@ -69,10 +69,31 @@ function getpoly(p::Polyhedron, inepriority=true)
     end
     p.poly
 end
+# Make the cached representations consistent with `poly`.
+#
+# A canonicalizer (`removehredundancy!`, `detecthlinearity!`, ...) rewrites one
+# representation in place and drops the poly via `clearpoly!`, but keeps the
+# other cached representation: as a *set* it still describes the same
+# polyhedron, so recomputing it would be wasted work. Incidence sets, however,
+# are index-based cross-references between the two representations and are
+# only meaningful if both are numbered against the same poly. So before
+# reading incidence off `poly`, re-derive the representation that `poly` was
+# not built from (the one that may be stale) from `poly` itself. A
+# representation that is not cached yet needs no work: it will be derived
+# lazily from this same `poly`.
+function _syncreps!(p::Polyhedron, poly::CDDPolyhedra)
+    if poly.inequality
+        p.ext === nothing || (p.ext = copygenerators(poly))
+    else
+        p.ine === nothing || (p.ine = copyinequalities(poly))
+    end
+    return nothing
+end
 function gethincidence(p::Polyhedron)
     inc = p.hincidence
     if inc === nothing
         poly = getpoly(p)
+        _syncreps!(p, poly)
         nh = nhreps(getine(p))
         inc = poly.inequality ? copyincidence(poly) : copyinputincidence(poly)
         # See https://github.com/JuliaPolyhedra/CDDLib.jl/pull/101#issuecomment-3830990456
@@ -91,6 +112,7 @@ function getvincidence(p::Polyhedron)
     inc = p.vincidence
     if inc === nothing
         poly = getpoly(p)
+        _syncreps!(p, poly)
         nv = nvreps(getext(p))
         inc = poly.inequality ? copyinputincidence(poly) : copyincidence(poly)
         # See https://github.com/JuliaPolyhedra/CDDLib.jl/pull/101#issuecomment-3830990456
