@@ -14,7 +14,7 @@ mutable struct GMPRationalMut
 
     function GMPRationalMut()
         m = new()
-        ccall((:__gmpq_init, :libgmp), Nothing, (Ptr{GMPRationalMut},), Ref(m))
+        ccall((:__gmpq_init, Base.GMP.libgmp), Nothing, (Ptr{GMPRationalMut},), Ref(m))
         # No need to clear anything since the num and den are used by
         # the GMPRational that is created
         #finalizer(_mpq_clear_fn, m)
@@ -24,9 +24,9 @@ end
 
 function Base.convert(::Type{GMPRationalMut}, a::Rational{BigInt})
     m = GMPRationalMut()
-    ccall((:__gmpq_set_num, :libgmp), Nothing,
+    ccall((:__gmpq_set_num, Base.GMP.libgmp), Nothing,
           (Ptr{GMPRationalMut}, Ptr{BigInt}), Ref(m), Ref(a.num))
-    ccall((:__gmpq_set_den, :libgmp), Nothing,
+    ccall((:__gmpq_set_den, Base.GMP.libgmp), Nothing,
           (Ptr{GMPRationalMut}, Ptr{BigInt}), Ref(m), Ref(a.den))
     m
 end
@@ -40,7 +40,7 @@ function GMPRationalMut(a::Int, b::Int)
         b = -b
     end
     m = GMPRationalMut()
-    ccall((:__gmpq_set_si, :libgmp), Nothing,
+    ccall((:__gmpq_set_si, Base.GMP.libgmp), Nothing,
           (Ptr{GMPRationalMut}, Clong, Culong), Ref(m), a, b)
     m
 end
@@ -65,7 +65,7 @@ function myfree(a::Array{Cdouble})
 end
 function myfree(a::Array{GMPRational})
     for el in a
-        ccall((:__gmpq_clear, :libgmp), Nothing, (Ptr{GMPRational},), Ref(el))
+        ccall((:__gmpq_clear, Base.GMP.libgmp), Nothing, (Ptr{GMPRational},), Ref(el))
     end
 end
 
@@ -92,19 +92,19 @@ end
 
 function -(a::GMPRational)
     m = GMPRationalMut()
-    ccall((:__gmpq_neg, :libgmp), Nothing,
+    ccall((:__gmpq_neg, Base.GMP.libgmp), Nothing,
           (Ptr{GMPRationalMut}, Ptr{GMPRational}), Ref(m), Ref(a))
     GMPRational(m)
 end
 function *(a::GMPRational, b::GMPRational)
     m = GMPRationalMut()
-    ccall((:__gmpq_mul, :libgmp), Nothing,
+    ccall((:__gmpq_mul, Base.GMP.libgmp), Nothing,
           (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), Ref(m), Ref(a), Ref(b))
     GMPRational(m)
 end
 function +(a::GMPRational, b::GMPRational)
     m = GMPRationalMut()
-    ccall((:__gmpq_add, :libgmp), Nothing,
+    ccall((:__gmpq_add, Base.GMP.libgmp), Nothing,
           (Ptr{GMPRationalMut}, Ptr{GMPRational}, Ptr{GMPRational}), Ref(m), Ref(a), Ref(b))
     GMPRational(m)
 end
@@ -120,10 +120,10 @@ end
 
 function Base.convert(::Type{Rational{BigInt}}, r::GMPRational)
     a = BigInt()
-    ccall((:__gmpq_get_num, :libgmp), Nothing,
+    ccall((:__gmpq_get_num, Base.GMP.libgmp), Nothing,
           (Ptr{BigInt}, Ptr{GMPRational}), Ref(a), Ref(r))
     b = BigInt()
-    ccall((:__gmpq_get_den, :libgmp), Nothing,
+    ccall((:__gmpq_get_den, Base.GMP.libgmp), Nothing,
           (Ptr{BigInt}, Ptr{GMPRational}), Ref(b), Ref(r))
     a // b
 end
@@ -160,7 +160,7 @@ function myconvert(::Type{Array}, x::Ptr{GMPRational}, n)
     y = Vector{GMPRationalMut}(undef, n)
     for i = 1:n
         y[i] = GMPRationalMut()
-        ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
+        ccall((:__gmpq_set, Base.GMP.libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(y[i]), x+((i-1)*sizeof(GMPRational)))
     end
     Vector{GMPRational}(y)
 end

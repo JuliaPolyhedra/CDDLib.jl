@@ -209,7 +209,7 @@ function extractrow(mat::Cdd_MatrixData{GMPRational}, i)
     row = unsafe_load(mat.matrix, i)
     for j = 1:n
         b[j] = GMPRationalMut()
-        ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(b[j]), row + ((j-1)*sizeof(GMPRational)))
+        ccall((:__gmpq_set, Base.GMP.libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(b[j]), row + ((j-1)*sizeof(GMPRational)))
     end
     Array{Rational{BigInt}}(Array{GMPRational}(b))
 end
@@ -327,7 +327,7 @@ function extractA(mat::Cdd_MatrixData{GMPRational})
         row = unsafe_load(mat.matrix, i)
         for j = 1:n
             A[i, j] = GMPRationalMut()
-            ccall((:__gmpq_set, :libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(A[i,j]), row + ((j-1)*sizeof(GMPRational)))
+            ccall((:__gmpq_set, Base.GMP.libgmp), Nothing, (Ptr{GMPRationalMut}, Ptr{GMPRational}), pointer_from_objref(A[i,j]), row + ((j-1)*sizeof(GMPRational)))
         end
     end
     Array{GMPRational}(A)
