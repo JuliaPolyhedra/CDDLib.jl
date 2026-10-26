@@ -71,3 +71,15 @@ end
     @test issubset(p, h)
     @test !issubset(p, HalfSpace(h.a, h.β - 1//big(10)^30))
 end
+
+@testset "GMPRational conversion" begin
+    r = CDDLib.GMPRational(CDDLib.GMPRationalMut(-3, 4))
+    @test convert(Rational{Int}, r) === -3//4
+    @test convert(Rational{BigInt}, r) == -3//4
+    CDDLib.myfree([r])
+    big_r = big(2)^70 // 3
+    r = CDDLib.GMPRational(convert(CDDLib.GMPRationalMut, big_r))
+    @test convert(Rational{BigInt}, r) == big_r
+    @test_throws InexactError convert(Rational{Int}, r)
+    CDDLib.myfree([r])
+end
