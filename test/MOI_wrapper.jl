@@ -63,3 +63,11 @@ using CDDLib
         end
     end
 end
+
+# See https://github.com/JuliaPolyhedra/Polyhedra.jl/issues/368
+@testset "ObjectiveValue does not fit in Rational{Int}" begin
+    h = HalfSpace(Rational{BigInt}[20352345337492724220522025//302231454903657293676544, 1090665916241//549755813888, 1], 161978887517520897401467073//604462909807314587353088)
+    p = polyhedron(HyperPlane(Rational{BigInt}[-1, 0, 0], 1//1) ∩ HalfSpace(Rational{BigInt}[0, 0, -1], 14672114485715137431441321//151115727451828646838272) ∩ HalfSpace(Rational{BigInt}[0, -1, 0], 10473763386577//549755813888) ∩ HalfSpace(Rational{BigInt}[0, 0, 1], 203854673273754593942319787//604462909807314587353088) ∩ HalfSpace(Rational{BigInt}[0, 1, 0], 0//1) ∩ h, CDDLib.Library(:exact))
+    @test issubset(p, h)
+    @test !issubset(p, HalfSpace(h.a, h.β - 1//big(10)^30))
+end

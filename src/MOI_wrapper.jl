@@ -97,7 +97,7 @@ function MOI.get(sol::CDDLPSolution, ::MOI.TerminationStatus)
      MOI.DUAL_INFEASIBLE, MOI.INFEASIBLE][unsafe_load(sol.sol).LPS+1]
 end
 function MOI.get(sol::CDDLPSolution{GMPRational}, ::MOI.ObjectiveValue)
-    convert(Rational{Int}, unsafe_load(sol.sol).optvalue)
+    convert(Rational{BigInt}, unsafe_load(sol.sol).optvalue)
 end
 function MOI.get(lpm::Optimizer,
                  attr::Union{MOI.RawStatusString,
