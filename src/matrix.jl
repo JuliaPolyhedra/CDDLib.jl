@@ -132,7 +132,7 @@ end
 
 const CDDMatrix{T, S} = Union{CDDInequalityMatrix{T, S}, CDDGeneratorMatrix{T, S}}
 CDDMatrix{T}(rep) where {T} = CDDMatrix{T, mytype(T)}(rep)
-Polyhedra.FullDim(rep::CDDMatrix) = Int(unsafe_load(rep.matrix).colsize) - 1
+Polyhedra.typed_fulldim(rep::CDDMatrix) = Int(unsafe_load(rep.matrix).colsize) - 1
 Polyhedra.hvectortype(::Union{CDDInequalityMatrix{T}, Type{<:CDDInequalityMatrix{T}}}) where {T} = Vector{T}
 Polyhedra.vvectortype(::Union{CDDGeneratorMatrix{T}, Type{<:CDDGeneratorMatrix{T}}}) where {T} = Vector{T}
 Polyhedra.similar_type(::Type{<:CDDInequalityMatrix}, ::Polyhedra.FullDim, ::Type{T}) where {T} = CDDInequalityMatrix{T, mytype(T)}

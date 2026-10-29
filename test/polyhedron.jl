@@ -1,4 +1,6 @@
-import Polyhedra
+using Test
+using Polyhedra
+using CDDLib
 const polyhedra_test = joinpath(dirname(dirname(pathof(Polyhedra))), "test")
 
 include(joinpath(polyhedra_test, "utils.jl"))
@@ -31,4 +33,10 @@ end
         ErrorException,
         eliminate(poly_in, collect(1:4), BlockElimination()),
     )
+end
+
+@testset "library $arith" for arith in [:float, :exact]
+    p = polyhedron(convexhull([0, 0], [1, 0], [0, 1]), CDDLib.Library(arith))
+    @test Polyhedra.typed_fulldim(p) == 2
+    @test library(p) == CDDLib.Library(arith)
 end
