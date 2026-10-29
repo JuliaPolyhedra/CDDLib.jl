@@ -1,7 +1,7 @@
 # CDDLib
 
 [![](https://github.com/JuliaPolyhedra/CDDLib.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaPolyhedra/CDDLib.jl/actions/workflows/ci.yml)
-[![](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=master)](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl?branch=master)
+[![](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl/coverage.svg?branch=main)](http://codecov.io/github/JuliaPolyhedra/CDDLib.jl?branch=main)
 [![](https://zenodo.org/badge/DOI/10.5281/zenodo.1214581.svg)](https://doi.org/10.5281/zenodo.1214581)
 
 [CDDLib.jl](https://github.com/JuliaPolyhedra/CDDLib.jl) is a wrapper for
@@ -34,7 +34,7 @@ As written in the [README of cddlib](https://github.com/cddlib/cddlib):
 
 ## License
 
-CDDLib.jl is licensed under the [GPL v2 license](https://github.com/JuliaPolyhedra/CDDLib.jl/blob/master/LICENSE.md).
+CDDLib.jl is licensed under the [GPL v2 license](https://github.com/JuliaPolyhedra/CDDLib.jl/blob/main/LICENSE.md).
 
 The underlying solver, [cddlib/cddlib](https://github.com/cddlib/cddlib) is
 also licensed under the [GPL v2 license](https://github.com/cddlib/cddlib/blob/master/COPYING).
