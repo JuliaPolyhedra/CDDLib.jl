@@ -49,6 +49,11 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v3
+      - name: Polyhedra#main
+        shell: julia --project=. --color=yes {0}
+        run: |
+          using Pkg
+          Pkg.add(PackageSpec(name = "Polyhedra", rev = "main"))
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         with:
