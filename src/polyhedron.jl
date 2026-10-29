@@ -32,8 +32,8 @@ mutable struct Polyhedron{T<:PolyType} <: Polyhedra.Polyhedron{T}
     #   new(nothing, nothing, poly)
     # end
 end
-Polyhedra.FullDim(p::Polyhedron{T}) where {T} = Polyhedra.FullDim_rep(p.ine, p.ext)
-Polyhedra.library(p::Polyhedron{T}) where {T} = Polyhedra.similar_library(Library(), Polyhedra.FullDim(p), T)
+Polyhedra.typed_fulldim(p::Polyhedron{T}) where {T} = Polyhedra.FullDim_rep(p.ine, p.ext)
+Polyhedra.library(p::Polyhedron{T}) where {T} = Polyhedra.similar_library(Library(), Polyhedra.typed_fulldim(p), T)
 Polyhedra.hvectortype(::Union{Polyhedron{T}, Type{<:Polyhedron{T}}}) where {T} = Polyhedra.hvectortype(CDDInequalityMatrix{T})
 Polyhedra.vvectortype(::Union{Polyhedron{T}, Type{<:Polyhedron{T}}}) where {T} = Polyhedra.vvectortype(CDDGenerator{T})
 Polyhedra.similar_type(::Type{<:Polyhedron}, d::Polyhedra.FullDim, ::Type{T}) where {T} = Polyhedra.default_type(d, T)
